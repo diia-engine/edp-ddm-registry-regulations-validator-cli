@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "supportEmail": {
+      "type": "string",
+      "format": "email"
+    },
+    "themeFile": {
+      "type": "string",
+      "enum": [
+        "white-theme.js",
+        "dark-theme.js"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

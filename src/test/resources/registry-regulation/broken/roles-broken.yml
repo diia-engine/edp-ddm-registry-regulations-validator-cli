@@ -1,0 +1,5 @@
+roles:
+  - name: officer
+    description: Officer role
+  - name: Task-dispatcher
+    description: Dispatcher role
