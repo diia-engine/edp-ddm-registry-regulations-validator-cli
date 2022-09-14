@@ -29,7 +29,7 @@
     <mockito.version>3.4.3</mockito.version>
     <spring.cloud.version>2021.0.0</spring.cloud.version>
     <rulebook.version>0.12</rulebook.version>
-    <liquibase.ext.version>1.8.0.3</liquibase.ext.version>
+    <liquibase.ext.version>1.8.0.4</liquibase.ext.version>
 
     <start-class>com.epam.digital.data.platform.registry.regulation.validation.cli.RegulationValidatorCliApplication</start-class>
 
