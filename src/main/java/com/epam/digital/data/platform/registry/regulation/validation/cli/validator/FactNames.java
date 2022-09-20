@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.epam.digital.data.platform.registry.regulation.validation.cli.validator.settings;
+package com.epam.digital.data.platform.registry.regulation.validation.cli.validator;
 
 public final class FactNames {
 
     public static final String DATABASE_ALL_CHANGES = "database-all-changes";
-    public static final String SETTINGS_YAML = "settings-yaml";
+    public static final String DATAFACTORY_SETTINGS_YAML = "datafactory-settings-yaml";
     public static final String REGULATION_FILE_TYPE = "regulation-file-type";
 
     public static final String REGULATION_FILE = "regulation-file";

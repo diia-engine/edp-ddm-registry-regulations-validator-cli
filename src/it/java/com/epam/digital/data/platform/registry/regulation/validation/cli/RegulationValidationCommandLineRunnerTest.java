@@ -187,11 +187,21 @@ class RegulationValidationCommandLineRunnerTest {
   }
 
   @Test
-  void shouldFailSettingYamlFileDueToInvalidParams() {
+  void shouldFailDatafactorySettingYamlFileDueToInvalidParams() {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
             new CommandLineOptionsConverter(), systemExit);
-    validationRunner.run(argOf(CommandLineArg.SETTINGS,
+    validationRunner.run(argOf(CommandLineArg.DATAFACTORY_SETTINGS,
             testResourcePathOf("registry-regulation/broken/settings.yaml")));
+
+    Mockito.verify(systemExit, times(1)).validationFailure();
+  }
+
+  @Test
+  void shouldFailRegistrySettingsYamlFileDueToInvalidParams() {
+    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
+            new CommandLineOptionsConverter(), systemExit);
+    validationRunner.run(argOf(CommandLineArg.REGISTRY_SETTINGS,
+            testResourcePathOf("registry-regulation/broken/registry-settings-long-title.yaml")));
 
     Mockito.verify(systemExit, times(1)).validationFailure();
   }
@@ -219,7 +229,7 @@ class RegulationValidationCommandLineRunnerTest {
 
   private RuleBook<Set<ValidationError>> settingsYamlRuleBook() {
     return getRuleBookRunner(
-            "com.epam.digital.data.platform.registry.regulation.validation.cli.validator.settings.rules");
+            "com.epam.digital.data.platform.registry.regulation.validation.cli.validator.datasettings.rules");
   }
 
   private RuleBook<Set<ValidationError>> mainLiquibaseRuleBook() {
@@ -246,7 +256,7 @@ class RegulationValidationCommandLineRunnerTest {
                 testResourcePathOf("registry-regulation/correct/trembita-process.bpmn")),
         argOf(CommandLineArg.DMN, testResourcePathOf("registry-regulation/correct/rule.dmn")),
         argOf(CommandLineArg.FORMS, testResourcePathOf("registry-regulation/correct/ui-form.json")),
-        argOf(CommandLineArg.SETTINGS, testResourcePathOf("registry-regulation/correct/settings.yaml")),
+        argOf(CommandLineArg.DATAFACTORY_SETTINGS, testResourcePathOf("registry-regulation/correct/settings.yaml")),
         argOf(CommandLineArg.LIQUIBASE, testResourcePathOf("registry-regulation/correct/test-main-liquibase.xml"))
     };
   }

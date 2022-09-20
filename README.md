@@ -12,7 +12,8 @@ Example: java -jar registry-regulations-validator-cli.jar
          [--bp-auth-files=<arg>] [--bp-trembita-files=<arg>]
          [--bpmn-files=<arg>] [--dmn-files=<arg>] [--form-files=<arg>]
          [--global-vars-files=<arg>] [--roles-files=<arg>] 
-         [--settings-files=<arg>] [--liquibase-files=<arg>]
+         [--datafactory-settings-files=<arg>] [--registry-settings-files=<arg>]
+         [--liquibase-files=<arg>]
 Options:
     --help                     Help on utility usage
     --bp-auth-files=<arg>      BP authorization regulation files (accepts
@@ -28,7 +29,8 @@ Options:
     --global-vars-files=<arg>   Global variables regulation files (accepts multiple values separated by ',')
     --roles-files=<arg>        Authorization roles regulation files
                                (accepts multiple values separated by ',')
-    --settings-files=<arg>     Settings regulation files with yml, yaml extensions
+    --datafactory-settings-files=<arg>     Datafactory Settings regulation files with yml, yaml extensions
+    --registry-settings-files=<arg>     Registry Settings regulation files with yml, yaml extensions
     --liquibase-files=<arg>    Liquibase regulation files introduce Database change set with xml extensions
 Exit codes: 0 (success), 1 (system error), 10 (validation failure)
 ```

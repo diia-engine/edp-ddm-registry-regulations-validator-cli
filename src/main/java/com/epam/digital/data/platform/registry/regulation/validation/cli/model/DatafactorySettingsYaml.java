@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 
-public class SettingsYaml {
+public class DatafactorySettingsYaml {
 
   private Settings settings;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.epam.digital.data.platform.registry.regulation.validation.cli.validator.settings.rules;
+package com.epam.digital.data.platform.registry.regulation.validation.cli.validator.datasettings.rules;
 
 import com.deliveredtechnologies.rulebook.RuleState;
 import com.deliveredtechnologies.rulebook.annotation.Rule;
@@ -22,7 +22,7 @@ import com.deliveredtechnologies.rulebook.annotation.Then;
 import com.deliveredtechnologies.rulebook.annotation.When;
 import com.deliveredtechnologies.rulebook.spring.RuleBean;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.ValidationError;
-import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.settings.RulesOrder;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.datasettings.RulesOrder;
 
 @RuleBean
 @Rule(order = RulesOrder.DATABASE_NAME_DOES_NOT_MATCH_PATTERN_RULE)
@@ -32,7 +32,7 @@ public class DatabaseNameDoesNotMatchPatternRule extends AbstractSettingsValidat
 
     @When
     public boolean isDatabaseNameIncorrect() {
-        return !settingsYaml
+        return !datafactorySettingsYaml
                 .getSettings()
                 .getGeneral()
                 .getRegister()

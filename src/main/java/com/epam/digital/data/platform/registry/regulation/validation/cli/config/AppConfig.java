@@ -49,7 +49,7 @@ public class AppConfig {
   @Autowired
   public RegulationValidatorFactory registryRegulationValidatorFactory(ResourceLoader resourceLoader) {
     return new RegulationValidatorFactory(resourceLoader, yamlObjectMapper(), jsonObjectMapper(),
-            settingsYamlRuleBook(), mainLiquibaseRuleBook());
+            datafactorySettingsYamlRuleBook(), mainLiquibaseRuleBook());
   }
 
   @Bean
@@ -67,9 +67,9 @@ public class AppConfig {
   }
 
   @Bean
-  public RuleBook<Set<ValidationError>> settingsYamlRuleBook() {
+  public RuleBook<Set<ValidationError>> datafactorySettingsYamlRuleBook() {
     return getRuleBookRunner(
-            "com.epam.digital.data.platform.registry.regulation.validation.cli.validator.settings.rules");
+            "com.epam.digital.data.platform.registry.regulation.validation.cli.validator.datasettings.rules");
   }
 
   @Bean

@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package com.epam.digital.data.platform.registry.regulation.validation.cli.validator.settings.rules;
+package com.epam.digital.data.platform.registry.regulation.validation.cli.validator.datasettings.rules;
 
 import com.deliveredtechnologies.rulebook.annotation.Given;
 import com.deliveredtechnologies.rulebook.annotation.Result;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.RegulationFileType;
-import com.epam.digital.data.platform.registry.regulation.validation.cli.model.SettingsYaml;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.model.DatafactorySettingsYaml;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.ValidationError;
-import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.settings.FactNames;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.FactNames;
 
 import java.io.File;
 import java.util.Set;
 
 public abstract class AbstractSettingsValidationRule {
 
-    @Given(FactNames.SETTINGS_YAML)
-    protected SettingsYaml settingsYaml;
+    @Given(FactNames.DATAFACTORY_SETTINGS_YAML)
+    protected DatafactorySettingsYaml datafactorySettingsYaml;
 
     @Given(FactNames.REGULATION_FILE_TYPE)
     protected RegulationFileType regulationFileType;

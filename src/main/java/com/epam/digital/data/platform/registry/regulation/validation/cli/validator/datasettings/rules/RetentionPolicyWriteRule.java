@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.epam.digital.data.platform.registry.regulation.validation.cli.validator.settings.rules;
+package com.epam.digital.data.platform.registry.regulation.validation.cli.validator.datasettings.rules;
 
 import com.deliveredtechnologies.rulebook.RuleState;
 import com.deliveredtechnologies.rulebook.annotation.Rule;
 import com.deliveredtechnologies.rulebook.annotation.Then;
 import com.deliveredtechnologies.rulebook.annotation.When;
 import com.deliveredtechnologies.rulebook.spring.RuleBean;
-import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.settings.RulesOrder;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.datasettings.RulesOrder;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -33,7 +33,7 @@ public class RetentionPolicyWriteRule extends AbstractSettingsValidationRule {
 
     @When
     public boolean isRetentionPolicyLessThenN() {
-        return settingsYaml
+        return datafactorySettingsYaml
                 .getSettings()
                 .getKafka()
                 .getRetentionPolicyInDays()

@@ -26,7 +26,8 @@ public enum CommandLineArg {
   BPMN("bpmn-files"),
   DMN("dmn-files"),
   FORMS("form-files"),
-  SETTINGS("settings-files"),
+  DATAFACTORY_SETTINGS("datafactory-settings-files"),
+  REGISTRY_SETTINGS("registry-settings-files"),
   LIQUIBASE("liquibase-files"),
   EXCERPTS("excerpt-folders");
 

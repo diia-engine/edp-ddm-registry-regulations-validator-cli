@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.epam.digital.data.platform.registry.regulation.validation.cli.validator.settings;
+package com.epam.digital.data.platform.registry.regulation.validation.cli.validator.datasettings;
 
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.RegulationFileType;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.AbstractRulesValidatorTest;
@@ -31,22 +31,22 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 
-class SettingsYamlRulesValidatorTest extends AbstractRulesValidatorTest {
+class DatafactoryDatafactorySettingsYamlRulesValidatorTest extends AbstractRulesValidatorTest {
 
     private RegulationValidator<File> validator;
 
     @BeforeEach
     public void setUp() {
-        this.validator = new SettingsYamlRulesValidator(new YAMLMapper(),
+        this.validator = new DatafactorySettingsYamlRulesValidator(new YAMLMapper(),
                 getRuleBookRunner(
-                        "com.epam.digital.data.platform.registry.regulation.validation.cli.validator.settings.rules"));
+                        "com.epam.digital.data.platform.registry.regulation.validation.cli.validator.datasettings.rules"));
     }
 
     @Test
     void shouldPassSettingsYamlValidation() {
         var processFile = getFileFromClasspath("registry-regulation/correct/settings.yaml");
 
-        var errors = validator.validate(processFile, ValidationContext.of(RegulationFileType.SETTINGS));
+        var errors = validator.validate(processFile, ValidationContext.of(RegulationFileType.DATAFACTORY_SETTINGS));
 
         assertThat(errors, is(empty()));
     }
@@ -55,7 +55,7 @@ class SettingsYamlRulesValidatorTest extends AbstractRulesValidatorTest {
     void shouldFailSettingsYamlValidation() {
         var processFile = getFileFromClasspath("registry-regulation/broken/settings.yaml");
 
-        var errors = validator.validate(processFile, ValidationContext.of(RegulationFileType.SETTINGS));
+        var errors = validator.validate(processFile, ValidationContext.of(RegulationFileType.DATAFACTORY_SETTINGS));
 
         assertThat(errors, is(not(empty())));
     }

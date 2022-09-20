@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.epam.digital.data.platform.registry.regulation.validation.cli.validator.settings;
+package com.epam.digital.data.platform.registry.regulation.validation.cli.validator.datasettings;
 
 import com.deliveredtechnologies.rulebook.Fact;
 import com.deliveredtechnologies.rulebook.FactMap;
 import com.deliveredtechnologies.rulebook.NameValueReferableMap;
 import com.deliveredtechnologies.rulebook.model.RuleBook;
-import com.epam.digital.data.platform.registry.regulation.validation.cli.model.SettingsYaml;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.model.DatafactorySettingsYaml;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.FactNames;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.RegulationValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.ValidationContext;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.ValidationError;
@@ -32,11 +33,11 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
 
-public class SettingsYamlRulesValidator implements RegulationValidator<File> {
+public class DatafactorySettingsYamlRulesValidator implements RegulationValidator<File> {
     private final RuleBook<Set<ValidationError>> settingsYamlRuleBook;
     private final ObjectMapper yamlObjectMapper;
 
-    public SettingsYamlRulesValidator(ObjectMapper yamlObjectMapper, RuleBook<Set<ValidationError>> settingsYamlRuleBook) {
+    public DatafactorySettingsYamlRulesValidator(ObjectMapper yamlObjectMapper, RuleBook<Set<ValidationError>> settingsYamlRuleBook) {
         this.yamlObjectMapper = yamlObjectMapper;
         this.settingsYamlRuleBook = settingsYamlRuleBook;
     }
@@ -55,14 +56,14 @@ public class SettingsYamlRulesValidator implements RegulationValidator<File> {
 
     private NameValueReferableMap<Object> getSettingsYamlFacts(File regulationFile, ValidationContext context) throws IOException {
         NameValueReferableMap<Object> settingsYamlFacts = new FactMap<>();
-        settingsYamlFacts.put(new Fact<>(FactNames.SETTINGS_YAML, readSettingsYaml(regulationFile)));
+        settingsYamlFacts.put(new Fact<>(FactNames.DATAFACTORY_SETTINGS_YAML, readSettingsYaml(regulationFile)));
         settingsYamlFacts.put(new Fact<>(FactNames.REGULATION_FILE, regulationFile));
         settingsYamlFacts.put(new Fact<>(FactNames.REGULATION_FILE_TYPE, context.getRegulationFileType()));
 
         return settingsYamlFacts;
     }
 
-    private SettingsYaml readSettingsYaml(File regulationFile) throws IOException {
-        return yamlObjectMapper.readValue(new FileInputStream(regulationFile), SettingsYaml.class);
+    private DatafactorySettingsYaml readSettingsYaml(File regulationFile) throws IOException {
+        return yamlObjectMapper.readValue(new FileInputStream(regulationFile), DatafactorySettingsYaml.class);
     }
 }

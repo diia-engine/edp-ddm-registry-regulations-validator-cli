@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.epam.digital.data.platform.registry.regulation.validation.cli.validator.settings;
+package com.epam.digital.data.platform.registry.regulation.validation.cli.validator.datasettings;
 
 public final class RulesOrder {
 

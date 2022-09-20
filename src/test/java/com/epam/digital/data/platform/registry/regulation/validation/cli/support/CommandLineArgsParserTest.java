@@ -109,10 +109,17 @@ public class CommandLineArgsParserTest {
   }
 
   @Test
-  void shouldSupportSettingsYamlOption() throws ParseException {
-    var options = commandLineArgsParser.parse("--settings-files=settings.yaml");
+  void shouldSupportDatafactorySettingsYamlOption() throws ParseException {
+    var options = commandLineArgsParser.parse("--datafactory-settings-files=settings.yaml");
 
-    assertTrue(options.hasOption("settings-files"));
+    assertTrue(options.hasOption("datafactory-settings-files"));
+  }
+
+  @Test
+  void shouldSupportRegistrySettingsYamlOption() throws ParseException {
+    var options = commandLineArgsParser.parse("--registry-settings-files=registry-settings.yaml");
+
+    assertTrue(options.hasOption("registry-settings-files"));
   }
 
   @Test

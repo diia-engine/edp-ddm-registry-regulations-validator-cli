@@ -117,11 +117,18 @@ public class CommandLineArgsParser {
         .build());
 
     options.addOption(Option.builder()
-        .longOpt(CommandLineArg.SETTINGS.getArgOptionName())
+        .longOpt(CommandLineArg.DATAFACTORY_SETTINGS.getArgOptionName())
         .hasArgs()
         .numberOfArgs(1)
-        .desc("Settings regulation files with yml, yaml extensions")
+        .desc("Datafactory Settings regulation files with yml, yaml extensions")
         .build());
+
+    options.addOption(Option.builder()
+            .longOpt(CommandLineArg.REGISTRY_SETTINGS.getArgOptionName())
+            .hasArgs()
+            .numberOfArgs(1)
+            .desc("Registry Settings regulation files with yml, yaml extensions")
+            .build());
 
     options.addOption(Option.builder()
         .longOpt(CommandLineArg.LIQUIBASE.getArgOptionName())

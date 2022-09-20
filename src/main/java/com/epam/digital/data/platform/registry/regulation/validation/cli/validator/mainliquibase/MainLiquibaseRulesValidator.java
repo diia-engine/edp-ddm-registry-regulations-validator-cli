@@ -24,7 +24,7 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.utils.C
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.RegulationValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.ValidationContext;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.ValidationError;
-import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.settings.FactNames;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.FactNames;
 import liquibase.change.Change;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.LiquibaseException;

@@ -20,7 +20,7 @@ import com.deliveredtechnologies.rulebook.annotation.Given;
 import com.deliveredtechnologies.rulebook.annotation.Result;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.RegulationFileType;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.ValidationError;
-import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.settings.FactNames;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.FactNames;
 import liquibase.change.Change;
 
 import java.io.File;

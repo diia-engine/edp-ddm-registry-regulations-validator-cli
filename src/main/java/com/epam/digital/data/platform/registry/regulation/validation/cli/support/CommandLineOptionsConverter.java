@@ -37,7 +37,8 @@ public class CommandLineOptionsConverter {
         .bpmnFiles(getFilesIfAny(CommandLineArg.BPMN, options))
         .dmnFiles(getFilesIfAny(CommandLineArg.DMN, options))
         .formFiles(getFilesIfAny(CommandLineArg.FORMS, options))
-        .settingsFiles(getFilesIfAny(CommandLineArg.SETTINGS, options))
+        .datafactorySettingsFiles(getFilesIfAny(CommandLineArg.DATAFACTORY_SETTINGS, options))
+        .registrySettingsFiles(getFilesIfAny(CommandLineArg.REGISTRY_SETTINGS, options))
         .liquibaseFiles(getFilesIfAny(CommandLineArg.LIQUIBASE, options))
         .excerptFiles(getFilesIfAny(CommandLineArg.EXCERPTS, options))
         .build();

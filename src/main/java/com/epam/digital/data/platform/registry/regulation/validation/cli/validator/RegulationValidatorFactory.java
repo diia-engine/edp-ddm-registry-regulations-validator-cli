@@ -35,7 +35,7 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.validat
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.file.*;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.json.JsonSchemaFileValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.mainliquibase.MainLiquibaseRulesValidator;
-import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.settings.SettingsYamlRulesValidator;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.datasettings.DatafactorySettingsYamlRulesValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpTrembitaToBpmnProcessExistenceValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.typed.BpAuthProcessUniquenessValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.typed.BpTrembitaProcessUniquenessValidator;
@@ -43,6 +43,7 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.validat
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.core.io.ResourceLoader;
@@ -55,6 +56,7 @@ public class RegulationValidatorFactory {
   private static final String ROLES_JSON_SCHEMA = "classpath:schema/roles-schema.json";
   private static final String GLOBAL_VARS_JSON_SCHEMA = "classpath:schema/global-vars-schema.json";
   private static final String FORMS_JSON_SCHEMA = "classpath:schema/forms-schema.json";
+  private static final String REGISTRY_SETTINGS_JSON_SCHEMA = "classpath:schema/registry-settings-schema.json";
 
   private final Map<RegulationFileType, RegulationValidator<File>> regulationTypeValidators;
   private final Map<RegulationFileType, RegulationValidator<Collection<File>>> groupRegulationTypeValidators;
@@ -75,19 +77,19 @@ public class RegulationValidatorFactory {
   private Map<RegulationFileType, RegulationValidator<File>> regulationTypeValidators(ResourceLoader resourceLoader, ObjectMapper yamlObjectMapper,
       ObjectMapper jsonObjectMapper, RuleBook<Set<ValidationError>> settingsYamlRuleBook,
       RuleBook<Set<ValidationError>> mainLiquibaseRuleBook) {
-    return Map.of(
-        RegulationFileType.BP_AUTH, newBpAuthFileValidator(resourceLoader, yamlObjectMapper),
-        RegulationFileType.BP_TREMBITA, newBpTrembitaFileValidator(resourceLoader, yamlObjectMapper),
-        RegulationFileType.BP_TREMBITA_CONFIG, newBpTrembitaConfigFileValidator(resourceLoader, yamlObjectMapper),
-        RegulationFileType.ROLES, newRolesFileValidator(resourceLoader, yamlObjectMapper),
-        RegulationFileType.GLOBAL_VARS, newGlobalVarsFileValidator(resourceLoader, yamlObjectMapper),
-        RegulationFileType.FORMS, newFormsFileValidator(resourceLoader, jsonObjectMapper),
-        RegulationFileType.BPMN, newBpmnFileValidator(),
-        RegulationFileType.DMN, newDmnFileValidator(),
-        RegulationFileType.SETTINGS, newSettingsFileValidator(yamlObjectMapper, settingsYamlRuleBook),
-        RegulationFileType.LIQUIBASE, newMainLiquibaseFileValidator(mainLiquibaseRuleBook)
-
-    );
+    Map<RegulationFileType, RegulationValidator<File>> validators = new EnumMap<>(RegulationFileType.class);
+    validators.put(RegulationFileType.BP_AUTH, newBpAuthFileValidator(resourceLoader, yamlObjectMapper));
+    validators.put(RegulationFileType.BP_TREMBITA, newBpTrembitaFileValidator(resourceLoader, yamlObjectMapper));
+    validators.put(RegulationFileType.BP_TREMBITA_CONFIG, newBpTrembitaConfigFileValidator(resourceLoader, yamlObjectMapper));
+    validators.put(RegulationFileType.ROLES, newRolesFileValidator(resourceLoader, yamlObjectMapper));
+    validators.put(RegulationFileType.GLOBAL_VARS, newGlobalVarsFileValidator(resourceLoader, yamlObjectMapper));
+    validators.put(RegulationFileType.FORMS, newFormsFileValidator(resourceLoader, jsonObjectMapper));
+    validators.put(RegulationFileType.BPMN, newBpmnFileValidator());
+    validators.put(RegulationFileType.DMN, newDmnFileValidator());
+    validators.put(RegulationFileType.DATAFACTORY_SETTINGS, newDataFactorySettingsFileValidator(yamlObjectMapper, settingsYamlRuleBook));
+    validators.put(RegulationFileType.REGISTRY_SETTINGS, newRegistrySettingsFileValidator(resourceLoader, yamlObjectMapper));
+    validators.put(RegulationFileType.LIQUIBASE, newMainLiquibaseFileValidator(mainLiquibaseRuleBook));
+    return validators;
   }
 
   private Map<RegulationFileType, RegulationValidator<Collection<File>>> regulationTypeGroupValidators() {
@@ -246,15 +248,28 @@ public class RegulationValidatorFactory {
     return GlobalFileValidatorLoggingDecorator.wrap(validator);
   }
 
-  private RegulationValidator<File> newSettingsFileValidator(ObjectMapper jsonObjectMapper,
-                                                             RuleBook<Set<ValidationError>> settingsYamlRuleBook) {
+  private RegulationValidator<File> newDataFactorySettingsFileValidator(ObjectMapper jsonObjectMapper,
+                                                                        RuleBook<Set<ValidationError>> settingsYamlRuleBook) {
     return decorate(
             CompositeFileValidator.builder()
                     .validator(new FileExistenceValidator())
                     .validator(new FileExtensionValidator())
-                    .validator(new SettingsYamlRulesValidator(jsonObjectMapper, settingsYamlRuleBook))
+                    .validator(new DatafactorySettingsYamlRulesValidator(jsonObjectMapper, settingsYamlRuleBook))
                     .build()
     );
+  }
+
+  private RegulationValidator<File> newRegistrySettingsFileValidator(
+      ResourceLoader resourceLoader, ObjectMapper yamlObjectMapper) {
+    return decorate(
+        CompositeFileValidator.builder()
+            .validator(new FileExistenceValidator())
+            .validator(new FileExtensionValidator())
+            .validator(new EmptyFileValidator())
+            .validator(
+                new JsonSchemaFileValidator(
+                    REGISTRY_SETTINGS_JSON_SCHEMA, resourceLoader, yamlObjectMapper))
+            .build());
   }
 
   private RegulationValidator<File> newMainLiquibaseFileValidator(RuleBook<Set<ValidationError>> mainLiquibaseRuleBook) {

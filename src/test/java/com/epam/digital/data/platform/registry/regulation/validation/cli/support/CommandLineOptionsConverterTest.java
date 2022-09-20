@@ -47,7 +47,7 @@ public class CommandLineOptionsConverterTest {
     assertThat(regulationFiles.getBpmnFiles(), is(not(empty())));
     assertThat(regulationFiles.getDmnFiles(), is(not(empty())));
     assertThat(regulationFiles.getFormFiles(), is(not(empty())));
-    assertThat(regulationFiles.getSettingsFiles(), is(not(empty())));
+    assertThat(regulationFiles.getDatafactorySettingsFiles(), is(not(empty())));
     assertThat(regulationFiles.getLiquibaseFiles(), is(not(empty())));
   }
 
@@ -66,7 +66,8 @@ public class CommandLineOptionsConverterTest {
         argOf(CommandLineArg.DMN, "rule.dmn"),
         argOf(CommandLineArg.FORMS, "ui-form.json"),
         argOf(CommandLineArg.LIQUIBASE, "test-main-liquibase.xml"),
-        argOf(CommandLineArg.SETTINGS, "settings.yaml")
+        argOf(CommandLineArg.DATAFACTORY_SETTINGS, "settings.yaml"),
+        argOf(CommandLineArg.REGISTRY_SETTINGS, "registry-settings.yaml")
     };
   }
 

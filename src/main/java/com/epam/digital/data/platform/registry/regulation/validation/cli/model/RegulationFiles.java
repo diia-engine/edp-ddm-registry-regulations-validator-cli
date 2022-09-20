@@ -44,7 +44,9 @@ public class RegulationFiles {
   @Default
   private Collection<File> formFiles = new ArrayList<>();
   @Default
-  private Collection<File> settingsFiles = new ArrayList<>();
+  private Collection<File> datafactorySettingsFiles = new ArrayList<>();
+  @Default
+  private Collection<File> registrySettingsFiles = new ArrayList<>();
   @Default
   private Collection<File> liquibaseFiles = new ArrayList<>();
   @Default
@@ -59,7 +61,8 @@ public class RegulationFiles {
         && bpmnFiles.isEmpty()
         && dmnFiles.isEmpty()
         && formFiles.isEmpty()
-        && settingsFiles.isEmpty()
+        && datafactorySettingsFiles.isEmpty()
+        && registrySettingsFiles.isEmpty()
         && liquibaseFiles.isEmpty()
         && excerptFiles.isEmpty();
   }

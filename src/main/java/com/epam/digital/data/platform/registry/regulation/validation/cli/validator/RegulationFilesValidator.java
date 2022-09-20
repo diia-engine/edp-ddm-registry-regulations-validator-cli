@@ -60,7 +60,9 @@ public class RegulationFilesValidator implements RegulationValidator<RegulationF
 
     regulationFiles.getFormFiles().forEach(file -> errors.addAll(validate(file, RegulationFileType.FORMS)));
 
-    regulationFiles.getSettingsFiles().forEach(file -> errors.addAll(validate(file, RegulationFileType.SETTINGS)));
+    regulationFiles.getDatafactorySettingsFiles().forEach(file -> errors.addAll(validate(file, RegulationFileType.DATAFACTORY_SETTINGS)));
+
+    regulationFiles.getRegistrySettingsFiles().forEach(file -> errors.addAll(validate(file, RegulationFileType.REGISTRY_SETTINGS)));
 
     regulationFiles.getLiquibaseFiles().forEach(file -> errors.addAll(validate(file, RegulationFileType.LIQUIBASE)));
     
