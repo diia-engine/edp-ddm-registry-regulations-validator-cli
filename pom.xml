@@ -22,12 +22,13 @@
     <java.version>11</java.version>
     <log4j.version>2.17.0</log4j.version>
     <camunda.version>7.13.0</camunda.version>
-    <ddm-starter-logger.version>1.6.0.1</ddm-starter-logger.version>
+    <ddm-starter-logger.version>1.6.0.6</ddm-starter-logger.version>
     <json-schema-validator.version>1.0.57</json-schema-validator.version>
     <guava.version>29.0-jre</guava.version>
     <commons-cli.version>1.4</commons-cli.version>
     <mockito.version>3.4.3</mockito.version>
     <spring.cloud.version>2021.0.0</spring.cloud.version>
+    <jackson.version>2.13.4</jackson.version>
     <rulebook.version>0.12</rulebook.version>
     <liquibase.ext.version>1.8.0.6</liquibase.ext.version>
 
@@ -58,16 +59,31 @@
         <scope>import</scope>
         <type>pom</type>
       </dependency>
-	    <dependency>
-		    <groupId>org.apache.logging.log4j</groupId>
-		    <artifactId>log4j-api</artifactId>
-		    <version>${log4j.version}</version>
-		  </dependency>
-		  <dependency>
-		    <groupId>org.apache.logging.log4j</groupId>
-		    <artifactId>log4j-core</artifactId>
-		    <version>${log4j.version}</version>
-		  </dependency>
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-api</artifactId>
+        <version>${log4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-core</artifactId>
+        <version>${log4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-yaml</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.yaml</groupId>
+        <artifactId>snakeyaml</artifactId>
+        <version>${snakeyaml.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
