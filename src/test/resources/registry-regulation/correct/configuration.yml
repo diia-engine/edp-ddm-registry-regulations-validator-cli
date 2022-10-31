@@ -4,7 +4,7 @@ trembita-exchange-gateway:
       user-id: 'DDM'
       protocol-version: '4.0'
       trembita-url: 'https://url'
-      authorization-token: 'token'
+      secret-name: 'token'
       client:
         x-road-instance: 'SEVDEIR-TEST'
         member-class: 'GOV'

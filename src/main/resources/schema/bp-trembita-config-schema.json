@@ -25,7 +25,7 @@
                   "type": "string",
                   "minLength": 1
                 },
-                "authorization-token": {
+                "secret-name": {
                   "type": "string",
                   "minLength": 1
                 },
@@ -91,7 +91,7 @@
                 "trembita-url",
                 "user-id",
                 "protocol-version",
-                "authorization-token",
+                "secret-name",
                 "service",
                 "client"
               ]
