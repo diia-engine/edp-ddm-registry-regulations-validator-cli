@@ -216,6 +216,36 @@ class RegulationValidationCommandLineRunnerTest {
     Mockito.verify(systemExit, times(1)).validationFailure();
   }
 
+  @Test
+  void shouldFailDiiaNotificationDueToInvalidParams() {
+    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
+        new CommandLineOptionsConverter(), systemExit);
+    validationRunner.run(argOf(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE,
+        testResourcePathOf("registry-regulation/broken/diia")));
+
+    Mockito.verify(systemExit, times(1)).validationFailure();
+  }
+
+  @Test
+  void shouldFailDiiaNotificationDueToTemplateFolderIsNotDirectory() {
+    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
+        new CommandLineOptionsConverter(), systemExit);
+    validationRunner.run(argOf(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE,
+        testResourcePathOf("registry-regulation/correct/global-vars.yml")));
+
+    Mockito.verify(systemExit, times(1)).validationFailure();
+  }
+
+  @Test
+  void shouldPassIfDirectoryIsNotExists() {
+    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
+        new CommandLineOptionsConverter(), systemExit);
+    validationRunner.run(argOf(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE,
+        "registry-regulation/correct/absent_directory"));
+
+    Mockito.verify(systemExit, times(1)).complete();
+  }
+
   private RegulationValidationCommandLineRunner newValidationRunner(ResourceLoader resourceLoader,
       CommandLineArgsParser commandLineArgsParser,
       CommandLineOptionsConverter commandLineOptionsConverter,
@@ -257,7 +287,8 @@ class RegulationValidationCommandLineRunnerTest {
         argOf(CommandLineArg.DMN, testResourcePathOf("registry-regulation/correct/rule.dmn")),
         argOf(CommandLineArg.FORMS, testResourcePathOf("registry-regulation/correct/ui-form.json")),
         argOf(CommandLineArg.DATAFACTORY_SETTINGS, testResourcePathOf("registry-regulation/correct/settings.yaml")),
-        argOf(CommandLineArg.LIQUIBASE, testResourcePathOf("registry-regulation/correct/test-main-liquibase.xml"))
+        argOf(CommandLineArg.LIQUIBASE, testResourcePathOf("registry-regulation/correct/test-main-liquibase.xml")),
+        argOf(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE, testResourcePathOf("registry-regulation/correct/diia"))
     };
   }
 
@@ -273,6 +304,12 @@ class RegulationValidationCommandLineRunnerTest {
     return String.format("--%s=%s",
         arg.getArgOptionName(),
         Arrays.stream(resourcePath).map(Path::toString).collect(Collectors.joining(",")));
+  }
+
+  private String argOf(CommandLineArg arg, String... resourcePath) {
+    return String.format("--%s=%s",
+        arg.getArgOptionName(),
+        String.join(",", resourcePath));
   }
 
   @SneakyThrows

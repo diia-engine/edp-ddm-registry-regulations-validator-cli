@@ -33,7 +33,8 @@ public enum RegulationFileType {
   LIQUIBASE("xml"),
   BP_TREMBITA_TO_BPMN("yml", "yaml", "bpmn"),
   BP_AUTH_TO_BPMN("yml", "yaml", "bpmn"),
-  EXCERPTS();
+  EXCERPTS(),
+  DIIA_NOTIFICATION_TEMPLATE();
 
   private final String[] fileExtensions;
 

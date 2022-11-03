@@ -104,10 +104,13 @@ public class CommandLineArgsParserTest {
   }
 
   @Test
-  public void shouldFailWithUnrecognizedOption() {
-    assertThrows(ParseException.class, () -> commandLineArgsParser.parse("--unrecognized"));
-  }
+  void shouldIgnoreUnrecognizedOption() throws ParseException {
+    var options = commandLineArgsParser.parse("--liquibase-files=main-liquibase.xml",
+        "--unknown-option", "--diia-notification-template-folder=path/to/template");
 
+    assertTrue(options.hasOption("liquibase-files"));
+    assertTrue(options.hasOption("diia-notification-template-folder"));
+  }
   @Test
   void shouldSupportDatafactorySettingsYamlOption() throws ParseException {
     var options = commandLineArgsParser.parse("--datafactory-settings-files=settings.yaml");
@@ -127,5 +130,12 @@ public class CommandLineArgsParserTest {
     var options = commandLineArgsParser.parse("--liquibase-files=main-liquibase.xml");
 
     assertTrue(options.hasOption("liquibase-files"));
+  }
+
+  @Test
+  void shouldSupportDiiaTemplateOption() throws ParseException {
+    var options = commandLineArgsParser.parse("--diia-notification-template-folder=path/to/template");
+
+    assertTrue(options.hasOption("diia-notification-template-folder"));
   }
 }

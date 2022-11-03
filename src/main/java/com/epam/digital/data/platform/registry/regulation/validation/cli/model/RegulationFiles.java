@@ -51,6 +51,8 @@ public class RegulationFiles {
   private Collection<File> liquibaseFiles = new ArrayList<>();
   @Default
   private Collection<File> excerptFiles = new ArrayList<>();
+  @Default
+  private Collection<File> diiaNotificationTemplateDirectory = new ArrayList<>();
 
   public boolean isEmpty() {
     return bpTrembitaFiles.isEmpty()
@@ -64,6 +66,7 @@ public class RegulationFiles {
         && datafactorySettingsFiles.isEmpty()
         && registrySettingsFiles.isEmpty()
         && liquibaseFiles.isEmpty()
-        && excerptFiles.isEmpty();
+        && excerptFiles.isEmpty()
+        && diiaNotificationTemplateDirectory.isEmpty();
   }
 }

@@ -25,6 +25,8 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.support
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpAuthToBpmnProcessExistenceValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpmnFileValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpmnFileGroupUniqueProcessIdValidator;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.diia.DiiaNotificationTemplateDirectoryValidator;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.diia.DiiaNotificationTemplateValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.dmn.DmnFileValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.excerpt.ExcerptTemplateUniqueNameValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.file.EmptyFileValidator;
@@ -57,6 +59,7 @@ public class RegulationValidatorFactory {
   private static final String GLOBAL_VARS_JSON_SCHEMA = "classpath:schema/global-vars-schema.json";
   private static final String FORMS_JSON_SCHEMA = "classpath:schema/forms-schema.json";
   private static final String REGISTRY_SETTINGS_JSON_SCHEMA = "classpath:schema/registry-settings-schema.json";
+  private static final String DIIA_NOTIFICATION_ARGUMENTS_JSON_SCHEMA = "classpath:schema/diia-notification-arguments-schema.json";
 
   private final Map<RegulationFileType, RegulationValidator<File>> regulationTypeValidators;
   private final Map<RegulationFileType, RegulationValidator<Collection<File>>> groupRegulationTypeValidators;
@@ -89,6 +92,7 @@ public class RegulationValidatorFactory {
     validators.put(RegulationFileType.DATAFACTORY_SETTINGS, newDataFactorySettingsFileValidator(yamlObjectMapper, settingsYamlRuleBook));
     validators.put(RegulationFileType.REGISTRY_SETTINGS, newRegistrySettingsFileValidator(resourceLoader, yamlObjectMapper));
     validators.put(RegulationFileType.LIQUIBASE, newMainLiquibaseFileValidator(mainLiquibaseRuleBook));
+    validators.put(RegulationFileType.DIIA_NOTIFICATION_TEMPLATE, newDiiaNotificationTemplateValidator(resourceLoader, yamlObjectMapper));
     return validators;
   }
 
@@ -232,6 +236,30 @@ public class RegulationValidatorFactory {
             .validator(new DmnFileValidator())
             .build()
     );
+  }
+
+  private RegulationValidator<File> newDiiaNotificationTemplateValidator(ResourceLoader resourceLoader,
+                                                                         ObjectMapper yamlObjectMapper) {
+    var notificationTemplateValidator = CompositeFileValidator.builder()
+        .validator(new FileExistenceValidator())
+        .validator(new IsNotDirectoryFileValidator())
+        .validator(new EmptyFileValidator())
+        .build();
+    var notificationArgumentsValidator = CompositeFileValidator.builder()
+        .validator(new FileExistenceValidator())
+        .validator(new IsNotDirectoryFileValidator())
+        .validator(new EmptyFileValidator())
+        .validator(new FormsFileValidator(DIIA_NOTIFICATION_ARGUMENTS_JSON_SCHEMA, resourceLoader, yamlObjectMapper))
+        .build();
+    var diiaNotificationTemplateValidator = new DiiaNotificationTemplateValidator(notificationTemplateValidator,
+        notificationArgumentsValidator);
+    var diiaNotificationTemplateDirectoryValidator = new DiiaNotificationTemplateDirectoryValidator(
+        CompositeFileValidator.builder()
+            .validator(new FileExistenceValidator())
+            .validator(diiaNotificationTemplateValidator)
+            .build()
+    );
+    return decorate(diiaNotificationTemplateDirectoryValidator);
   }
 
   private RegulationValidator<File> decorate(RegulationValidator<File> validator) {

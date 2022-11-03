@@ -29,7 +29,8 @@ public enum CommandLineArg {
   DATAFACTORY_SETTINGS("datafactory-settings-files"),
   REGISTRY_SETTINGS("registry-settings-files"),
   LIQUIBASE("liquibase-files"),
-  EXCERPTS("excerpt-folders");
+  EXCERPTS("excerpt-folders"),
+  DIIA_NOTIFICATION_TEMPLATE("diia-notification-template-folder");
 
   private final String argOptionName;
 

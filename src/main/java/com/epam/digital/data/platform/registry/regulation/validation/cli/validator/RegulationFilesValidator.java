@@ -65,6 +65,8 @@ public class RegulationFilesValidator implements RegulationValidator<RegulationF
     regulationFiles.getRegistrySettingsFiles().forEach(file -> errors.addAll(validate(file, RegulationFileType.REGISTRY_SETTINGS)));
 
     regulationFiles.getLiquibaseFiles().forEach(file -> errors.addAll(validate(file, RegulationFileType.LIQUIBASE)));
+
+    regulationFiles.getDiiaNotificationTemplateDirectory().forEach(file -> errors.addAll(validate(file, RegulationFileType.DIIA_NOTIFICATION_TEMPLATE)));
     
     errors.addAll(validateExcerptFiles(regulationFiles.getExcerptFiles()));
 

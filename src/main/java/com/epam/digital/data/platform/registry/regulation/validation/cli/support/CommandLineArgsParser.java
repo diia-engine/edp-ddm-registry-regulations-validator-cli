@@ -37,9 +37,18 @@ public class CommandLineArgsParser {
   }
 
   public Options parse(String... args) throws ParseException {
-    var commandLine = parser.parse(commandLineOptions(), args);
     var options = new Options();
-    Arrays.stream(commandLine.getOptions()).forEach(options::addOption);
+    var restArgs = Arrays.asList(args);
+    while (restArgs.size() > 0) {
+      var argArray = new String[restArgs.size()];
+      restArgs.toArray(argArray);
+      var commandLine = parser.parse(commandLineOptions(), argArray, true);
+      Arrays.stream(commandLine.getOptions()).forEach(options::addOption);
+      restArgs = commandLine.getArgList();
+      if (restArgs.size() > 0) {
+        restArgs.remove(0);
+      }
+    }
     return options;
   }
 
@@ -142,6 +151,13 @@ public class CommandLineArgsParser {
         .hasArgs()
         .valueSeparator(',')
         .desc("Folders that contain excerpts in different formats")
+        .build());
+
+    options.addOption(Option.builder()
+        .longOpt(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE.getArgOptionName())
+        .hasArgs()
+        .numberOfArgs(1)
+        .desc("Diia notification template directory")
         .build());
 
     options.addOption(Option.builder()

@@ -41,6 +41,7 @@ public class CommandLineOptionsConverter {
         .registrySettingsFiles(getFilesIfAny(CommandLineArg.REGISTRY_SETTINGS, options))
         .liquibaseFiles(getFilesIfAny(CommandLineArg.LIQUIBASE, options))
         .excerptFiles(getFilesIfAny(CommandLineArg.EXCERPTS, options))
+        .diiaNotificationTemplateDirectory(getFilesIfAny(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE, options))
         .build();
   }
 
