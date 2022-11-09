@@ -31,6 +31,7 @@
     <jackson.version>2.13.4</jackson.version>
     <rulebook.version>0.12</rulebook.version>
     <liquibase.ext.version>1.8.0.6</liquibase.ext.version>
+    <snakeyaml.version>1.33</snakeyaml.version>
 
     <start-class>com.epam.digital.data.platform.registry.regulation.validation.cli.RegulationValidatorCliApplication</start-class>
 
