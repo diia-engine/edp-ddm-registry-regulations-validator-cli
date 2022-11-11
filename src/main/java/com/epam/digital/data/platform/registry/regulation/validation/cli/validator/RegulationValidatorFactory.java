@@ -39,6 +39,7 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.validat
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.mainliquibase.MainLiquibaseRulesValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.datasettings.DatafactorySettingsYamlRulesValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpTrembitaToBpmnProcessExistenceValidator;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.registrysettings.RegistrySettingsFileValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.typed.BpAuthProcessUniquenessValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.typed.BpTrembitaProcessUniquenessValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.var.GlobalVarsFileValidator;
@@ -295,7 +296,7 @@ public class RegulationValidatorFactory {
             .validator(new FileExtensionValidator())
             .validator(new EmptyFileValidator())
             .validator(
-                new JsonSchemaFileValidator(
+                new RegistrySettingsFileValidator(
                     REGISTRY_SETTINGS_JSON_SCHEMA, resourceLoader, yamlObjectMapper))
             .build());
   }

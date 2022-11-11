@@ -207,6 +207,16 @@ class RegulationValidationCommandLineRunnerTest {
   }
 
   @Test
+  void shouldFailRegistrySettingsYamlFileDueToEmptyTitleOrTitleFull() {
+    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
+        new CommandLineOptionsConverter(), systemExit);
+    validationRunner.run(argOf(CommandLineArg.REGISTRY_SETTINGS,
+        testResourcePathOf("registry-regulation/broken/registry-settings-empty-title.yaml")));
+
+    Mockito.verify(systemExit, times(1)).validationFailure();
+  }
+
+  @Test
   void shouldFailMainLiquibaseFileDueToInvalidParams() {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
             new CommandLineOptionsConverter(), systemExit);
