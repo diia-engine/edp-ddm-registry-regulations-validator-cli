@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.epam.digital.data.platform.registry.regulation.validation.cli.validator.datasettings.rules;
+package com.epam.digital.data.platform.registry.regulation.validation.cli.validator.mainliquibase.rules;
 
 import com.deliveredtechnologies.rulebook.RuleState;
 import com.deliveredtechnologies.rulebook.annotation.Rule;
@@ -22,29 +22,30 @@ import com.deliveredtechnologies.rulebook.annotation.Then;
 import com.deliveredtechnologies.rulebook.annotation.When;
 import com.deliveredtechnologies.rulebook.spring.RuleBean;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.ValidationError;
-import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.datasettings.RulesOrder;
-
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.mainliquibase.RulesOrder;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.lang.model.SourceVersion;
 
 @RuleBean
-@Rule(order = RulesOrder.SUBPACKAGE_IS_JAVA_RESERVED_WORD_RULE)
-public class SubpackageIsJavaReservedWordRule extends AbstractSettingsValidationRule {
+@Rule(order = RulesOrder.COLUMN_NAME_IS_RESERVED_JAVA_WORD_RULE)
+public class ColumnNameIsReservedJavaWordRule extends AbstractColumnNamesRule {
 
-    @When
-    public boolean isSubpackageEqJavaReservedWord() {
-        String pkg = datafactorySettingsYaml.getSettings().getGeneral().getBasePackageName();
-        for (String subPackage : pkg.split("\\.")) {
-            if (SourceVersion.isKeyword(subPackage)) {
-                return true;
-            }
-        }
-        return false;
-    }
+  private List<String> columnIdentifiers;
 
-    @Then
-    public RuleState then() {
-        errors.add(ValidationError.of(regulationFileType, regulationFile,
-                "The sub-package name must not match the words reserved in Java."));
-        return RuleState.NEXT;
-    }
+  @When
+  public boolean checkColumnNames() {
+    columnIdentifiers = getCreatedColumnIdentifiers().stream()
+        .filter(SourceVersion::isKeyword)
+        .collect(Collectors.toList());
+
+    return !columnIdentifiers.isEmpty();
+  }
+
+  @Then
+  public RuleState then() {
+    errors.add(ValidationError.of(regulationFileType, regulationFile,
+        "The following column names are equal to Java reserved words, which is not allowed: " + columnIdentifiers));
+    return RuleState.NEXT;
+  }
 }

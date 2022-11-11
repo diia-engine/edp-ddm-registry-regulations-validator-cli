@@ -22,6 +22,8 @@ public final class RulesOrder {
     public static final int COLUMN_NAME_HAS_CYRILLIC_SYMBOL_RULE = 2;
     public static final int COLUMN_NAME_IS_TOO_LONG_RULE = 3;
     public static final int FOREIGN_KEY_HAS_CAPITAL_LETTER_RULE = 4;
+    public static final int TABLE_NAME_IS_RESERVED_JAVA_WORD_RULE = 5;
+    public static final int COLUMN_NAME_IS_RESERVED_JAVA_WORD_RULE = 6;
 
     private RulesOrder() {
     }

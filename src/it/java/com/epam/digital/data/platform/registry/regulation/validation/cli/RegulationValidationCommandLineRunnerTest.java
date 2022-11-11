@@ -211,7 +211,7 @@ class RegulationValidationCommandLineRunnerTest {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
             new CommandLineOptionsConverter(), systemExit);
     validationRunner.run(argOf(CommandLineArg.LIQUIBASE,
-            testResourcePathOf("registry-regulation/broken/test-main-liquibase.xml")));
+            testResourcePathOf("registry-regulation/broken/main-liquibase/test-main-liquibase.xml")));
 
     Mockito.verify(systemExit, times(1)).validationFailure();
   }
