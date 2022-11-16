@@ -66,6 +66,8 @@ public class RegulationFilesValidator implements RegulationValidator<RegulationF
 
     regulationFiles.getLiquibaseFiles().forEach(file -> errors.addAll(validate(file, RegulationFileType.LIQUIBASE)));
 
+    regulationFiles.getEmailNotificationTemplateDirectory().forEach(file -> errors.addAll(validate(file, RegulationFileType.EMAIL_NOTIFICATION_TEMPLATE)));
+    regulationFiles.getInboxNotificationTemplateDirectory().forEach(file -> errors.addAll(validate(file, RegulationFileType.INBOX_NOTIFICATION_TEMPLATE)));
     regulationFiles.getDiiaNotificationTemplateDirectory().forEach(file -> errors.addAll(validate(file, RegulationFileType.DIIA_NOTIFICATION_TEMPLATE)));
     
     errors.addAll(validateExcerptFiles(regulationFiles.getExcerptFiles()));

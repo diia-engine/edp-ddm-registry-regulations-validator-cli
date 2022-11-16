@@ -34,6 +34,8 @@ public enum RegulationFileType {
   BP_TREMBITA_TO_BPMN("yml", "yaml", "bpmn"),
   BP_AUTH_TO_BPMN("yml", "yaml", "bpmn"),
   EXCERPTS(),
+  EMAIL_NOTIFICATION_TEMPLATE(),
+  INBOX_NOTIFICATION_TEMPLATE(),
   DIIA_NOTIFICATION_TEMPLATE();
 
   private final String[] fileExtensions;

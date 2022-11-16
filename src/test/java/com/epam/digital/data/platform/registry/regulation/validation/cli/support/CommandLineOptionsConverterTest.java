@@ -49,6 +49,8 @@ public class CommandLineOptionsConverterTest {
     assertThat(regulationFiles.getFormFiles(), is(not(empty())));
     assertThat(regulationFiles.getDatafactorySettingsFiles(), is(not(empty())));
     assertThat(regulationFiles.getLiquibaseFiles(), is(not(empty())));
+    assertThat(regulationFiles.getEmailNotificationTemplateDirectory(), is(not(empty())));
+    assertThat(regulationFiles.getInboxNotificationTemplateDirectory(), is(not(empty())));
     assertThat(regulationFiles.getDiiaNotificationTemplateDirectory(), is(not(empty())));
   }
 
@@ -69,6 +71,8 @@ public class CommandLineOptionsConverterTest {
         argOf(CommandLineArg.LIQUIBASE, "test-main-liquibase.xml"),
         argOf(CommandLineArg.DATAFACTORY_SETTINGS, "settings.yaml"),
         argOf(CommandLineArg.REGISTRY_SETTINGS, "registry-settings.yaml"),
+        argOf(CommandLineArg.EMAIL_NOTIFICATION_TEMPLATE, "email-notification-template"),
+        argOf(CommandLineArg.INBOX_NOTIFICATION_TEMPLATE, "inbox-notification-template"),
         argOf(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE, "diia-notification-template")
     };
   }

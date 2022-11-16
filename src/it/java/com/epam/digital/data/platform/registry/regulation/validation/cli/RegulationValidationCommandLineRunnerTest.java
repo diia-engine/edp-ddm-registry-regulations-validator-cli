@@ -18,6 +18,7 @@ package com.epam.digital.data.platform.registry.regulation.validation.cli;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.deliveredtechnologies.rulebook.model.RuleBook;
@@ -45,7 +46,6 @@ import org.apache.commons.cli.ParseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -79,8 +79,8 @@ class RegulationValidationCommandLineRunnerTest {
 
     validationRunner.run("--help");
 
-    Mockito.verify(commandLineArgsParser, times(1)).printHelp();
-    Mockito.verify(systemExit, times(1)).complete();
+    verify(commandLineArgsParser, times(1)).printHelp();
+    verify(systemExit, times(1)).complete();
   }
 
   @Test
@@ -90,7 +90,7 @@ class RegulationValidationCommandLineRunnerTest {
 
     validationRunner.run("--bp-auth=");
 
-    Mockito.verify(systemExit, times(1)).complete();
+    verify(systemExit, times(1)).complete();
   }
 
   @Test
@@ -104,7 +104,7 @@ class RegulationValidationCommandLineRunnerTest {
 
     validationRunner.run();
 
-    Mockito.verify(systemExit, times(1)).complete();
+    verify(systemExit, times(1)).complete();
   }
 
   @Test
@@ -116,8 +116,8 @@ class RegulationValidationCommandLineRunnerTest {
 
     validationRunner.run("-unrecognized");
 
-    Mockito.verify(commandLineArgsParser, times(1)).printHelp();
-    Mockito.verify(systemExit, times(1)).systemError();
+    verify(commandLineArgsParser, times(1)).printHelp();
+    verify(systemExit, times(1)).systemError();
   }
 
   @Test
@@ -127,7 +127,7 @@ class RegulationValidationCommandLineRunnerTest {
 
     validationRunner.run(correctRegistryRegulations());
 
-    Mockito.verify(systemExit, times(1)).complete();
+    verify(systemExit, times(1)).complete();
   }
 
   @Test
@@ -137,7 +137,7 @@ class RegulationValidationCommandLineRunnerTest {
 
     validationRunner.run(emptyRegistryRegulations());
 
-    Mockito.verify(systemExit, times(1)).complete();
+    verify(systemExit, times(1)).complete();
   }
 
   @Test
@@ -150,7 +150,7 @@ class RegulationValidationCommandLineRunnerTest {
         testResourcePathOf("registry-regulation/broken/test-duplicated-process-id-bp-2.bpmn"))
     );
 
-    Mockito.verify(systemExit, times(1)).validationFailure();
+    verify(systemExit, times(1)).validationFailure();
   }
 
   @Test
@@ -161,7 +161,7 @@ class RegulationValidationCommandLineRunnerTest {
     validationRunner.run(argOf(CommandLineArg.BP_AUTH,
         testResourcePathOf("registry-regulation/broken/bp-auth-duplicates.yml")));
 
-    Mockito.verify(systemExit, times(1)).validationFailure();
+    verify(systemExit, times(1)).validationFailure();
   }
 
   @Test
@@ -172,7 +172,7 @@ class RegulationValidationCommandLineRunnerTest {
     validationRunner.run(argOf(CommandLineArg.BP_TREMBITA,
         testResourcePathOf("registry-regulation/broken/bp-trembita-duplicates.yml")));
 
-    Mockito.verify(systemExit, times(1)).validationFailure();
+    verify(systemExit, times(1)).validationFailure();
   }
 
   @Test
@@ -183,7 +183,7 @@ class RegulationValidationCommandLineRunnerTest {
     validationRunner.run(argOf(CommandLineArg.GLOBAL_VARS,
         testResourcePathOf("registry-regulation/broken/global-vars-themeFile-broken.yml")));
 
-    Mockito.verify(systemExit, times(1)).validationFailure();
+    verify(systemExit, times(1)).validationFailure();
   }
 
   @Test
@@ -193,7 +193,7 @@ class RegulationValidationCommandLineRunnerTest {
     validationRunner.run(argOf(CommandLineArg.DATAFACTORY_SETTINGS,
             testResourcePathOf("registry-regulation/broken/settings.yaml")));
 
-    Mockito.verify(systemExit, times(1)).validationFailure();
+    verify(systemExit, times(1)).validationFailure();
   }
 
   @Test
@@ -203,7 +203,7 @@ class RegulationValidationCommandLineRunnerTest {
     validationRunner.run(argOf(CommandLineArg.REGISTRY_SETTINGS,
             testResourcePathOf("registry-regulation/broken/registry-settings-long-title.yaml")));
 
-    Mockito.verify(systemExit, times(1)).validationFailure();
+    verify(systemExit, times(1)).validationFailure();
   }
 
   @Test
@@ -213,7 +213,7 @@ class RegulationValidationCommandLineRunnerTest {
     validationRunner.run(argOf(CommandLineArg.REGISTRY_SETTINGS,
         testResourcePathOf("registry-regulation/broken/registry-settings-empty-title.yaml")));
 
-    Mockito.verify(systemExit, times(1)).validationFailure();
+    verify(systemExit, times(1)).validationFailure();
   }
 
   @Test
@@ -223,7 +223,47 @@ class RegulationValidationCommandLineRunnerTest {
     validationRunner.run(argOf(CommandLineArg.LIQUIBASE,
             testResourcePathOf("registry-regulation/broken/main-liquibase/test-main-liquibase.xml")));
 
-    Mockito.verify(systemExit, times(1)).validationFailure();
+    verify(systemExit, times(1)).validationFailure();
+  }
+
+  @Test
+  void shouldFailEmailNotificationDueToInvalidMetadata() {
+    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
+            new CommandLineOptionsConverter(), systemExit);
+    validationRunner.run(argOf(CommandLineArg.EMAIL_NOTIFICATION_TEMPLATE,
+            testResourcePathOf("registry-regulation/broken/email")));
+
+    verify(systemExit).validationFailure();
+  }
+
+  @Test
+  void shouldFailEmailNotificationDueToNoTemplateFile() {
+    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
+            new CommandLineOptionsConverter(), systemExit);
+    validationRunner.run(argOf(CommandLineArg.EMAIL_NOTIFICATION_TEMPLATE,
+            testResourcePathOf("registry-regulation/broken/email2")));
+
+    verify(systemExit, times(1)).validationFailure();
+  }
+
+  @Test
+  void shouldFailInboxNotificationEmptyMetadata() {
+    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
+            new CommandLineOptionsConverter(), systemExit);
+    validationRunner.run(argOf(CommandLineArg.INBOX_NOTIFICATION_TEMPLATE,
+            testResourcePathOf("registry-regulation/broken/inbox")));
+
+    verify(systemExit).validationFailure();
+  }
+
+  @Test
+  void shouldFailInboxNotificationDueToNoMetadataFile() {
+    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
+            new CommandLineOptionsConverter(), systemExit);
+    validationRunner.run(argOf(CommandLineArg.INBOX_NOTIFICATION_TEMPLATE,
+            testResourcePathOf("registry-regulation/broken/inbox2")));
+
+    verify(systemExit, times(1)).validationFailure();
   }
 
   @Test
@@ -233,7 +273,7 @@ class RegulationValidationCommandLineRunnerTest {
     validationRunner.run(argOf(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE,
         testResourcePathOf("registry-regulation/broken/diia")));
 
-    Mockito.verify(systemExit, times(1)).validationFailure();
+    verify(systemExit, times(1)).validationFailure();
   }
 
   @Test
@@ -243,7 +283,7 @@ class RegulationValidationCommandLineRunnerTest {
     validationRunner.run(argOf(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE,
         testResourcePathOf("registry-regulation/correct/global-vars.yml")));
 
-    Mockito.verify(systemExit, times(1)).validationFailure();
+    verify(systemExit, times(1)).validationFailure();
   }
 
   @Test
@@ -253,7 +293,7 @@ class RegulationValidationCommandLineRunnerTest {
     validationRunner.run(argOf(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE,
         "registry-regulation/correct/absent_directory"));
 
-    Mockito.verify(systemExit, times(1)).complete();
+    verify(systemExit, times(1)).complete();
   }
 
   private RegulationValidationCommandLineRunner newValidationRunner(ResourceLoader resourceLoader,
@@ -298,6 +338,8 @@ class RegulationValidationCommandLineRunnerTest {
         argOf(CommandLineArg.FORMS, testResourcePathOf("registry-regulation/correct/ui-form.json")),
         argOf(CommandLineArg.DATAFACTORY_SETTINGS, testResourcePathOf("registry-regulation/correct/settings.yaml")),
         argOf(CommandLineArg.LIQUIBASE, testResourcePathOf("registry-regulation/correct/test-main-liquibase.xml")),
+        argOf(CommandLineArg.EMAIL_NOTIFICATION_TEMPLATE, testResourcePathOf("registry-regulation/correct/email")),
+        argOf(CommandLineArg.INBOX_NOTIFICATION_TEMPLATE, testResourcePathOf("registry-regulation/correct/inbox")),
         argOf(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE, testResourcePathOf("registry-regulation/correct/diia"))
     };
   }

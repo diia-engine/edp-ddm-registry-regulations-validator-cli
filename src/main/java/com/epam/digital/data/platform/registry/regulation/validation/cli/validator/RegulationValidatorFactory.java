@@ -23,10 +23,12 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.model.R
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.RegulationFiles;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.support.RegulationConfigurationLoader;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpAuthToBpmnProcessExistenceValidator;
-import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpmnFileValidator;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpTrembitaToBpmnProcessExistenceValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpmnFileGroupUniqueProcessIdValidator;
-import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.diia.DiiaNotificationTemplateDirectoryValidator;
-import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.diia.DiiaNotificationTemplateValidator;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpmnFileValidator;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.channel.NotificationTemplateDirectoryValidator;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.channel.NotificationTemplateValidator;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.datasettings.DatafactorySettingsYamlRulesValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.dmn.DmnFileValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.excerpt.ExcerptTemplateUniqueNameValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.file.EmptyFileValidator;
@@ -34,22 +36,23 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.validat
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.file.FileExtensionValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.file.FileGroupValidatorLoggingDecorator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.file.FileValidatorLoggingDecorator;
-import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.file.*;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.file.GlobalFileValidatorLoggingDecorator;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.file.IsNotDirectoryFileValidator;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.file.ValidationSkipOnDependentDecorator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.json.JsonSchemaFileValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.mainliquibase.MainLiquibaseRulesValidator;
-import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.datasettings.DatafactorySettingsYamlRulesValidator;
-import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpTrembitaToBpmnProcessExistenceValidator;
-import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.registrysettings.RegistrySettingsFileValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.typed.BpAuthProcessUniquenessValidator;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.registrysettings.RegistrySettingsFileValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.typed.BpTrembitaProcessUniquenessValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.var.GlobalVarsFileValidator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.core.io.ResourceLoader;
+
 import java.io.File;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Set;
-import org.springframework.core.io.ResourceLoader;
 
 public class RegulationValidatorFactory {
 
@@ -60,40 +63,52 @@ public class RegulationValidatorFactory {
   private static final String GLOBAL_VARS_JSON_SCHEMA = "classpath:schema/global-vars-schema.json";
   private static final String FORMS_JSON_SCHEMA = "classpath:schema/forms-schema.json";
   private static final String REGISTRY_SETTINGS_JSON_SCHEMA = "classpath:schema/registry-settings-schema.json";
+  private static final String EMAIL_NOTIFICATION_ARGUMENTS_JSON_SCHEMA = "classpath:schema/email-notification-arguments-schema.json";
+  private static final String INBOX_NOTIFICATION_ARGUMENTS_JSON_SCHEMA = "classpath:schema/inbox-notification-arguments-schema.json";
   private static final String DIIA_NOTIFICATION_ARGUMENTS_JSON_SCHEMA = "classpath:schema/diia-notification-arguments-schema.json";
 
-  private final Map<RegulationFileType, RegulationValidator<File>> regulationTypeValidators;
-  private final Map<RegulationFileType, RegulationValidator<Collection<File>>> groupRegulationTypeValidators;
-  private final Map<RegulationFileType, RegulationValidator<RegulationFiles>> globalRegulationTypeValidators;
+  private final ResourceLoader resourceLoader;
+  private final ObjectMapper yamlObjectMapper;
+  private final ObjectMapper jsonObjectMapper;
+  private final RuleBook<Set<ValidationError>> settingsYamlRuleBook;
+  private final RuleBook<Set<ValidationError>> mainLiquibaseRuleBook;
 
-  public RegulationValidatorFactory(ResourceLoader resourceLoader, ObjectMapper yamlObjectMapper, ObjectMapper jsonObjectMapper,
-                                      RuleBook<Set<ValidationError>> settingsYamlRuleBook, RuleBook<Set<ValidationError>> mainLiquibaseRuleBook) {
-    this.regulationTypeValidators = regulationTypeValidators(resourceLoader, yamlObjectMapper, jsonObjectMapper,
-                settingsYamlRuleBook, mainLiquibaseRuleBook);
-    this.groupRegulationTypeValidators = regulationTypeGroupValidators();
-    this.globalRegulationTypeValidators = globalRegulationTypeValidators(yamlObjectMapper);
+  public RegulationValidatorFactory(
+      ResourceLoader resourceLoader,
+      ObjectMapper yamlObjectMapper,
+      ObjectMapper jsonObjectMapper,
+      RuleBook<Set<ValidationError>> settingsYamlRuleBook,
+      RuleBook<Set<ValidationError>> mainLiquibaseRuleBook) {
+    this.resourceLoader = resourceLoader;
+    this.yamlObjectMapper = yamlObjectMapper;
+    this.jsonObjectMapper = jsonObjectMapper;
+    this.settingsYamlRuleBook = settingsYamlRuleBook;
+    this.mainLiquibaseRuleBook = mainLiquibaseRuleBook;
   }
 
   public RegulationValidator<RegulationFiles> newRegulationFilesValidator() {
+    var regulationTypeValidators = regulationTypeValidators();
+    var groupRegulationTypeValidators = regulationTypeGroupValidators();
+    var globalRegulationTypeValidators = globalRegulationTypeValidators(yamlObjectMapper);
     return new RegulationFilesValidator(regulationTypeValidators, groupRegulationTypeValidators, globalRegulationTypeValidators);
   }
 
-  private Map<RegulationFileType, RegulationValidator<File>> regulationTypeValidators(ResourceLoader resourceLoader, ObjectMapper yamlObjectMapper,
-      ObjectMapper jsonObjectMapper, RuleBook<Set<ValidationError>> settingsYamlRuleBook,
-      RuleBook<Set<ValidationError>> mainLiquibaseRuleBook) {
+  private Map<RegulationFileType, RegulationValidator<File>> regulationTypeValidators() {
     Map<RegulationFileType, RegulationValidator<File>> validators = new EnumMap<>(RegulationFileType.class);
-    validators.put(RegulationFileType.BP_AUTH, newBpAuthFileValidator(resourceLoader, yamlObjectMapper));
-    validators.put(RegulationFileType.BP_TREMBITA, newBpTrembitaFileValidator(resourceLoader, yamlObjectMapper));
-    validators.put(RegulationFileType.BP_TREMBITA_CONFIG, newBpTrembitaConfigFileValidator(resourceLoader, yamlObjectMapper));
-    validators.put(RegulationFileType.ROLES, newRolesFileValidator(resourceLoader, yamlObjectMapper));
-    validators.put(RegulationFileType.GLOBAL_VARS, newGlobalVarsFileValidator(resourceLoader, yamlObjectMapper));
-    validators.put(RegulationFileType.FORMS, newFormsFileValidator(resourceLoader, jsonObjectMapper));
+    validators.put(RegulationFileType.BP_AUTH, newBpAuthFileValidator());
+    validators.put(RegulationFileType.BP_TREMBITA, newBpTrembitaFileValidator());
+    validators.put(RegulationFileType.BP_TREMBITA_CONFIG, newBpTrembitaConfigFileValidator());
+    validators.put(RegulationFileType.ROLES, newRolesFileValidator());
+    validators.put(RegulationFileType.GLOBAL_VARS, newGlobalVarsFileValidator());
+    validators.put(RegulationFileType.FORMS, newFormsFileValidator());
     validators.put(RegulationFileType.BPMN, newBpmnFileValidator());
     validators.put(RegulationFileType.DMN, newDmnFileValidator());
-    validators.put(RegulationFileType.DATAFACTORY_SETTINGS, newDataFactorySettingsFileValidator(yamlObjectMapper, settingsYamlRuleBook));
-    validators.put(RegulationFileType.REGISTRY_SETTINGS, newRegistrySettingsFileValidator(resourceLoader, yamlObjectMapper));
-    validators.put(RegulationFileType.LIQUIBASE, newMainLiquibaseFileValidator(mainLiquibaseRuleBook));
-    validators.put(RegulationFileType.DIIA_NOTIFICATION_TEMPLATE, newDiiaNotificationTemplateValidator(resourceLoader, yamlObjectMapper));
+    validators.put(RegulationFileType.DATAFACTORY_SETTINGS, newDataFactorySettingsFileValidator());
+    validators.put(RegulationFileType.REGISTRY_SETTINGS, newRegistrySettingsFileValidator());
+    validators.put(RegulationFileType.LIQUIBASE, newMainLiquibaseFileValidator());
+    validators.put(RegulationFileType.EMAIL_NOTIFICATION_TEMPLATE, newEmailNotificationTemplateValidator());
+    validators.put(RegulationFileType.INBOX_NOTIFICATION_TEMPLATE, newInboxNotificationTemplateValidator());
+    validators.put(RegulationFileType.DIIA_NOTIFICATION_TEMPLATE, newDiiaNotificationTemplateValidator());
     return validators;
   }
 
@@ -141,7 +156,7 @@ public class RegulationValidatorFactory {
     );
   }
 
-  private RegulationValidator<File> newBpAuthFileValidator(ResourceLoader resourceLoader, ObjectMapper yamlObjectMapper) {
+  private RegulationValidator<File> newBpAuthFileValidator() {
     return decorate(
         CompositeFileValidator.builder()
             .validator(new FileExistenceValidator())
@@ -158,7 +173,7 @@ public class RegulationValidatorFactory {
     );
   }
 
-  private RegulationValidator<File> newBpTrembitaFileValidator(ResourceLoader resourceLoader, ObjectMapper yamlObjectMapper) {
+  private RegulationValidator<File> newBpTrembitaFileValidator() {
     return decorate(
         CompositeFileValidator.builder()
             .validator(new FileExistenceValidator())
@@ -175,7 +190,7 @@ public class RegulationValidatorFactory {
     );
   }
 
-  private RegulationValidator<File> newBpTrembitaConfigFileValidator(ResourceLoader resourceLoader, ObjectMapper yamlObjectMapper) {
+  private RegulationValidator<File> newBpTrembitaConfigFileValidator() {
     return decorate(
         CompositeFileValidator.builder()
             .validator(new FileExistenceValidator())
@@ -186,7 +201,7 @@ public class RegulationValidatorFactory {
     );
   }
 
-  private RegulationValidator<File> newRolesFileValidator(ResourceLoader resourceLoader, ObjectMapper yamlObjectMapper) {
+  private RegulationValidator<File> newRolesFileValidator() {
     return decorate(
         CompositeFileValidator.builder()
             .validator(new FileExistenceValidator())
@@ -197,7 +212,7 @@ public class RegulationValidatorFactory {
     );
   }
 
-  private RegulationValidator<File> newGlobalVarsFileValidator(ResourceLoader resourceLoader, ObjectMapper yamlObjectMapper) {
+  private RegulationValidator<File> newGlobalVarsFileValidator() {
     return decorate(
         CompositeFileValidator.builder()
             .validator(new FileExistenceValidator())
@@ -208,7 +223,7 @@ public class RegulationValidatorFactory {
     );
   }
 
-  private RegulationValidator<File> newFormsFileValidator(ResourceLoader resourceLoader, ObjectMapper jsonObjectMapper) {
+  private RegulationValidator<File> newFormsFileValidator() {
     return decorate(
         CompositeFileValidator.builder()
             .validator(new FileExistenceValidator())
@@ -239,28 +254,69 @@ public class RegulationValidatorFactory {
     );
   }
 
-  private RegulationValidator<File> newDiiaNotificationTemplateValidator(ResourceLoader resourceLoader,
-                                                                         ObjectMapper yamlObjectMapper) {
-    var notificationTemplateValidator = CompositeFileValidator.builder()
-        .validator(new FileExistenceValidator())
-        .validator(new IsNotDirectoryFileValidator())
-        .validator(new EmptyFileValidator())
-        .build();
-    var notificationArgumentsValidator = CompositeFileValidator.builder()
-        .validator(new FileExistenceValidator())
-        .validator(new IsNotDirectoryFileValidator())
-        .validator(new EmptyFileValidator())
-        .validator(new FormsFileValidator(DIIA_NOTIFICATION_ARGUMENTS_JSON_SCHEMA, resourceLoader, yamlObjectMapper))
-        .build();
-    var diiaNotificationTemplateValidator = new DiiaNotificationTemplateValidator(notificationTemplateValidator,
-        notificationArgumentsValidator);
-    var diiaNotificationTemplateDirectoryValidator = new DiiaNotificationTemplateDirectoryValidator(
+  private RegulationValidator<File> newEmailNotificationTemplateValidator() {
+    var notificationArgumentsValidator =
+        ValidationSkipOnDependentDecorator.builder()
+            .skippingValidator(new FileExistenceValidator())
+            .validator(
+                CompositeFileValidator.builder()
+                    .validator(new IsNotDirectoryFileValidator())
+                    .validator(new EmptyFileValidator())
+                    .validator(
+                        new JsonSchemaFileValidator(
+                            EMAIL_NOTIFICATION_ARGUMENTS_JSON_SCHEMA,
+                            resourceLoader,
+                            yamlObjectMapper))
+                    .build())
+            .build();
+    return newNotificationTemplateValidator("notification.ftlh", notificationArgumentsValidator);
+  }
+
+  private RegulationValidator<File> newInboxNotificationTemplateValidator() {
+    var notificationArgumentsValidator =
         CompositeFileValidator.builder()
             .validator(new FileExistenceValidator())
-            .validator(diiaNotificationTemplateValidator)
-            .build()
-    );
-    return decorate(diiaNotificationTemplateDirectoryValidator);
+            .validator(new IsNotDirectoryFileValidator())
+            .validator(new EmptyFileValidator())
+            .validator(
+                new JsonSchemaFileValidator(
+                    INBOX_NOTIFICATION_ARGUMENTS_JSON_SCHEMA, resourceLoader, yamlObjectMapper))
+            .build();
+    return newNotificationTemplateValidator("notification.ftl", notificationArgumentsValidator);
+  }
+
+  private RegulationValidator<File> newDiiaNotificationTemplateValidator() {
+    var notificationArgumentsValidator =
+        CompositeFileValidator.builder()
+            .validator(new FileExistenceValidator())
+            .validator(new IsNotDirectoryFileValidator())
+            .validator(new EmptyFileValidator())
+            .validator(
+                new JsonSchemaFileValidator(
+                    DIIA_NOTIFICATION_ARGUMENTS_JSON_SCHEMA, resourceLoader, yamlObjectMapper))
+            .build();
+    return newNotificationTemplateValidator("notification.diia", notificationArgumentsValidator);
+  }
+
+  private RegulationValidator<File> newNotificationTemplateValidator(
+      String notificationTemplateFileName,
+      RegulationValidator<File> notificationArgumentsValidator) {
+    var templateFileValidator =
+        CompositeFileValidator.builder()
+            .validator(new FileExistenceValidator())
+            .validator(new IsNotDirectoryFileValidator())
+            .validator(new EmptyFileValidator())
+            .build();
+    var notificationTemplateValidator =
+        new NotificationTemplateValidator(
+            notificationTemplateFileName, templateFileValidator, notificationArgumentsValidator);
+    var notificationTemplateDirectoryValidator =
+        new NotificationTemplateDirectoryValidator(
+            CompositeFileValidator.builder()
+                .validator(new FileExistenceValidator())
+                .validator(notificationTemplateValidator)
+                .build());
+    return decorate(notificationTemplateDirectoryValidator);
   }
 
   private RegulationValidator<File> decorate(RegulationValidator<File> validator) {
@@ -277,19 +333,17 @@ public class RegulationValidatorFactory {
     return GlobalFileValidatorLoggingDecorator.wrap(validator);
   }
 
-  private RegulationValidator<File> newDataFactorySettingsFileValidator(ObjectMapper jsonObjectMapper,
-                                                                        RuleBook<Set<ValidationError>> settingsYamlRuleBook) {
+  private RegulationValidator<File> newDataFactorySettingsFileValidator() {
     return decorate(
             CompositeFileValidator.builder()
                     .validator(new FileExistenceValidator())
                     .validator(new FileExtensionValidator())
-                    .validator(new DatafactorySettingsYamlRulesValidator(jsonObjectMapper, settingsYamlRuleBook))
+                    .validator(new DatafactorySettingsYamlRulesValidator(yamlObjectMapper, settingsYamlRuleBook))
                     .build()
     );
   }
 
-  private RegulationValidator<File> newRegistrySettingsFileValidator(
-      ResourceLoader resourceLoader, ObjectMapper yamlObjectMapper) {
+  private RegulationValidator<File> newRegistrySettingsFileValidator() {
     return decorate(
         CompositeFileValidator.builder()
             .validator(new FileExistenceValidator())
@@ -301,7 +355,7 @@ public class RegulationValidatorFactory {
             .build());
   }
 
-  private RegulationValidator<File> newMainLiquibaseFileValidator(RuleBook<Set<ValidationError>> mainLiquibaseRuleBook) {
+  private RegulationValidator<File> newMainLiquibaseFileValidator() {
     return decorate(
             CompositeFileValidator.builder()
                     .validator(new FileExistenceValidator())

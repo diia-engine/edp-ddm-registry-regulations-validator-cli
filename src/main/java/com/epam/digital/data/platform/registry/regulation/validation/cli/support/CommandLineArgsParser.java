@@ -154,6 +154,20 @@ public class CommandLineArgsParser {
         .build());
 
     options.addOption(Option.builder()
+            .longOpt(CommandLineArg.EMAIL_NOTIFICATION_TEMPLATE.getArgOptionName())
+            .hasArgs()
+            .numberOfArgs(1)
+            .desc("Email notification template directory")
+            .build());
+
+    options.addOption(Option.builder()
+            .longOpt(CommandLineArg.INBOX_NOTIFICATION_TEMPLATE.getArgOptionName())
+            .hasArgs()
+            .numberOfArgs(1)
+            .desc("Inbox notification template directory")
+            .build());
+
+    options.addOption(Option.builder()
         .longOpt(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE.getArgOptionName())
         .hasArgs()
         .numberOfArgs(1)

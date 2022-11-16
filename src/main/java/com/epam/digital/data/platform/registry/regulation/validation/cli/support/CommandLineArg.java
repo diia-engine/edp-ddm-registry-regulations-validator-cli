@@ -30,6 +30,8 @@ public enum CommandLineArg {
   REGISTRY_SETTINGS("registry-settings-files"),
   LIQUIBASE("liquibase-files"),
   EXCERPTS("excerpt-folders"),
+  EMAIL_NOTIFICATION_TEMPLATE("email-notification-template-folder"),
+  INBOX_NOTIFICATION_TEMPLATE("inbox-notification-template-folder"),
   DIIA_NOTIFICATION_TEMPLATE("diia-notification-template-folder");
 
   private final String argOptionName;

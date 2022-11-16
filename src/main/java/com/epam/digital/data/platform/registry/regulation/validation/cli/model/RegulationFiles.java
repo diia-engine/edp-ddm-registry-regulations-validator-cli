@@ -52,6 +52,10 @@ public class RegulationFiles {
   @Default
   private Collection<File> excerptFiles = new ArrayList<>();
   @Default
+  private Collection<File> emailNotificationTemplateDirectory = new ArrayList<>();
+  @Default
+  private Collection<File> inboxNotificationTemplateDirectory = new ArrayList<>();
+  @Default
   private Collection<File> diiaNotificationTemplateDirectory = new ArrayList<>();
 
   public boolean isEmpty() {
@@ -67,6 +71,8 @@ public class RegulationFiles {
         && registrySettingsFiles.isEmpty()
         && liquibaseFiles.isEmpty()
         && excerptFiles.isEmpty()
+        && emailNotificationTemplateDirectory.isEmpty()
+        && inboxNotificationTemplateDirectory.isEmpty()
         && diiaNotificationTemplateDirectory.isEmpty();
   }
 }

@@ -31,7 +31,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 
-class DatafactoryDatafactorySettingsYamlRulesValidatorTest extends AbstractRulesValidatorTest {
+class DatafactorySettingsYamlRulesValidatorTest extends AbstractRulesValidatorTest {
 
     private RegulationValidator<File> validator;
 

@@ -133,9 +133,15 @@ public class CommandLineArgsParserTest {
   }
 
   @Test
-  void shouldSupportDiiaTemplateOption() throws ParseException {
-    var options = commandLineArgsParser.parse("--diia-notification-template-folder=path/to/template");
+  void shouldSupportNotificationTemplateOptions() throws ParseException {
+    var options =
+        commandLineArgsParser.parse(
+            "--email-notification-template-folder=path/to/emailTemplate",
+            "--inbox-notification-template-folder=path/to/inboxTemplate",
+            "--diia-notification-template-folder=path/to/diiaTemplate");
 
+    assertTrue(options.hasOption("email-notification-template-folder"));
+    assertTrue(options.hasOption("inbox-notification-template-folder"));
     assertTrue(options.hasOption("diia-notification-template-folder"));
   }
 }
