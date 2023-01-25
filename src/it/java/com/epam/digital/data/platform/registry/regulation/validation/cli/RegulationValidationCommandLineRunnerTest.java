@@ -176,6 +176,28 @@ class RegulationValidationCommandLineRunnerTest {
   }
 
   @Test
+  void shouldFailTrembitaConfigDueToIllegalTrembitaPropsPresent() {
+    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
+            new CommandLineOptionsConverter(), systemExit);
+
+    validationRunner.run(argOf(CommandLineArg.BP_TREMBITA_CONFIG,
+            testResourcePathOf("registry-regulation/broken/broken-configuration-deprecated-trembita-properties.yml")));
+
+    verify(systemExit, times(1)).validationFailure();
+  }
+
+  @Test
+  void shouldFailTrembitaConfigDueToIllegalExtSystemsPropsPresent() {
+    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
+            new CommandLineOptionsConverter(), systemExit);
+
+    validationRunner.run(argOf(CommandLineArg.BP_TREMBITA_CONFIG,
+            testResourcePathOf("registry-regulation/broken/broken-configuration-deprecated-ext-systems-properties.yml")));
+
+    verify(systemExit, times(1)).validationFailure();
+  }
+
+  @Test
   void shouldFailGlobalVarsDueToUnknownThemeFile() {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);

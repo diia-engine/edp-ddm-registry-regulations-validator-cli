@@ -1,53 +1,11 @@
-trembita-exchange-gateway:
-  registries:
-    edr-registry:
-      user-id: 'DDM'
-      protocol-version: '4.0'
-      trembita-url: 'https://url'
-      secret-name: 'token'
-      client:
-        x-road-instance: 'SEVDEIR-TEST'
-        member-class: 'GOV'
-        member-code: '11111111'
-        subsystem-code: 'IDGOV_TEST_01'
-      service:
-        x-road-instance: 'SEVDEIR-TEST'
-        member-class: 'GOV'
-        member-code: '0000000'
-        subsystem-code: '2_MJU_EDR_prod'
-    dracs-registry:
-      trembita-url: 'https://url'
-      user-id: 'DDM'
-      protocol-version: '4.0'
-      client:
-        x-road-instance: 'SEVDEIR-TEST'
-        member-class: 'GOV'
-        member-code: '1231233'
-        subsystem-code: 'IDGOV_TEST_01'
-      service:
-        x-road-instance: 'SEVDEIR-TEST'
-        member-class: 'GOV'
-        member-code: '123123132'
-        subsystem-code: 'TEST_DRAC'
-
 external-systems:
   system1:
-    url: http://url
-    methods:
-      get:
-        path: /get
-        method: GET
-    auth:
-      type: BASIC
-      secret-name: system1-basic-auth
+    operations:
+      create-system:
+        resource-path: /post
+        method: POST
   system2:
-    url: https://url
-    methods:
+    operations:
       get-damaged-property:
-        path: /api/get
+        resource-path: /api/get
         method: GET
-    auth:
-      type: PARTNER_TOKEN
-      secret-name: secret2
-      partner-token-auth-url: https://url
-      token-json-path: $.token

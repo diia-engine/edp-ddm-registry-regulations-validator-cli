@@ -16,7 +16,7 @@
 
   <groupId>com.epam.digital.data.platform</groupId>
   <artifactId>registry-regulations-validator-cli</artifactId>
-  <version>1.8.0</version>
+  <version>1.9.0</version>
 
   <properties>
     <java.version>11</java.version>

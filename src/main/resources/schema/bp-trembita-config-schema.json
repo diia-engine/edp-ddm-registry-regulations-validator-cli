@@ -2,202 +2,14 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "trembita-exchange-gateway": {
-      "type": "object",
-      "properties": {
-        "registries": {
-          "type": "object",
-          "minItems": 0,
-          "properties": {
-            "edr-registry": {
-              "type": "object",
-              "minItems": 0,
-              "properties": {
-                "trembita-url": {
-                  "type": "string",
-                  "minLength": 1
-                },
-                "user-id": {
-                  "type": "string",
-                  "minLength": 1
-                },
-                "protocol-version": {
-                  "type": "string",
-                  "minLength": 1
-                },
-                "secret-name": {
-                  "type": "string",
-                  "minLength": 1
-                },
-                "client": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "x-road-instance": {
-                      "type": "string",
-                      "minLength": 1
-                    },
-                    "member-class": {
-                      "type": "string",
-                      "minLength": 1
-                    },
-                    "member-code": {
-                      "type": "string",
-                      "minLength": 1
-                    },
-                    "subsystem-code": {
-                      "type": "string",
-                      "minLength": 1
-                    }
-                  },
-                  "required": [
-                    "x-road-instance",
-                    "member-class",
-                    "member-code",
-                    "subsystem-code"
-                  ]
-                },
-                "service": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "x-road-instance": {
-                      "type": "string",
-                      "minLength": 1
-                    },
-                    "member-class": {
-                      "type": "string",
-                      "minLength": 1
-                    },
-                    "member-code": {
-                      "type": "string",
-                      "minLength": 1
-                    },
-                    "subsystem-code": {
-                      "type": "string",
-                      "minLength": 1
-                    }
-                  },
-                  "required": [
-                    "x-road-instance",
-                    "member-class",
-                    "member-code",
-                    "subsystem-code"
-                  ]
-                }
-              },
-              "additionalProperties": true,
-              "required": [
-                "trembita-url",
-                "user-id",
-                "protocol-version",
-                "secret-name",
-                "service",
-                "client"
-              ]
-            },
-            "dracs-registry": {
-              "type": "object",
-              "minItems": 0,
-              "properties": {
-                "trembita-url": {
-                  "type": "string",
-                  "minLength": 1
-                },
-                "user-id": {
-                  "type": "string",
-                  "minLength": 1
-                },
-                "protocol-version": {
-                  "type": "string",
-                  "minLength": 1
-                },
-                "client": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "x-road-instance": {
-                      "type": "string",
-                      "minLength": 1
-                    },
-                    "member-class": {
-                      "type": "string",
-                      "minLength": 1
-                    },
-                    "member-code": {
-                      "type": "string",
-                      "minLength": 1
-                    },
-                    "subsystem-code": {
-                      "type": "string",
-                      "minLength": 1
-                    }
-                  },
-                  "required": [
-                    "x-road-instance",
-                    "member-class",
-                    "member-code",
-                    "subsystem-code"
-                  ]
-                },
-                "service": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "x-road-instance": {
-                      "type": "string",
-                      "minLength": 1
-                    },
-                    "member-class": {
-                      "type": "string",
-                      "minLength": 1
-                    },
-                    "member-code": {
-                      "type": "string",
-                      "minLength": 1
-                    },
-                    "subsystem-code": {
-                      "type": "string",
-                      "minLength": 1
-                    }
-                  },
-                  "required": [
-                    "x-road-instance",
-                    "member-class",
-                    "member-code",
-                    "subsystem-code"
-                  ]
-                }
-              },
-              "additionalProperties": true,
-              "required": [
-                "trembita-url",
-                "user-id",
-                "protocol-version",
-                "service",
-                "client"
-              ]
-            }
-          }
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "registries"
-      ]
-    },
     "external-systems": {
       "$ref": "#/$defs/external-systems"
     }
   },
   "additionalProperties": false,
-  "required": [
-    "trembita-exchange-gateway"
-  ],
   "$defs": {
     "external-systems": {
       "type": "object",
-      "minProperties": 1,
       "additionalProperties": {
         "$ref": "#/$defs/external-system"
       }
@@ -205,26 +17,20 @@
     "external-system": {
       "type": "object",
       "properties": {
-        "url": {
-          "type": "string",
-          "pattern": "^https?://.+$"
-        },
-        "methods": {
+        "operations": {
           "type": "object",
           "minProperties": 1,
           "additionalProperties": {
             "$ref": "#/$defs/external-system-method"
           }
-        },
-        "auth": {
-          "$ref": "#/$defs/external-system-auth"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "external-system-method": {
       "type": "object",
       "properties": {
-        "path": {
+        "resource-path": {
           "type": "string",
           "minLength": 1
         },
@@ -244,62 +50,8 @@
       },
       "additionalProperties": false,
       "required": [
-        "path",
+        "resource-path",
         "method"
-      ]
-    },
-    "external-system-auth": {
-      "oneOf": [
-        {
-          "type": "object",
-          "properties": {
-            "type": {
-              "enum": [
-                "BASIC"
-              ]
-            }
-          }
-        },
-        {
-          "type": "object",
-          "properties": {
-            "type": {
-              "enum": [
-                "PARTNER_TOKEN"
-              ]
-            }
-          },
-          "required": [
-            "partner-token-auth-url",
-            "token-json-path"
-          ]
-        }
-      ],
-      "properties": {
-        "type": {
-          "type": "string",
-          "enum": [
-            "BASIC",
-            "PARTNER_TOKEN"
-          ]
-        },
-        "secret-name": {
-          "type": "string",
-          "minLength": 1
-        },
-        "partner-token-auth-url": {
-          "type": "string",
-          "pattern": "^https?://.+$"
-        },
-        "token-json-path": {
-          "type": "string",
-          "pattern": "^\\$\\..+$"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "type",
-        "secret-name"
       ]
     }
   }
