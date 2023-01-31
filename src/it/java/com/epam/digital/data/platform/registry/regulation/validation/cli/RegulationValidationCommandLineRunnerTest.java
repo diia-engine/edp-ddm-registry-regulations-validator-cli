@@ -46,6 +46,8 @@ import org.apache.commons.cli.ParseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -318,6 +320,41 @@ class RegulationValidationCommandLineRunnerTest {
     verify(systemExit, times(1)).complete();
   }
 
+  @Test
+  void shouldPassBpGroupingValidation() {
+    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(), new CommandLineOptionsConverter(), systemExit);
+
+    validationRunner.run(bpmnArgsForBpGroupingRegistryRegulations(),
+        argOf(CommandLineArg.BP_GROUPING,
+            testResourcePathOf("registry-regulation/correct/bp-grouping/bp-grouping.yml"))
+    );
+
+    verify(systemExit).complete();
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {
+      "registry-regulation/broken/bp-grouping/bp-grouping-process-definition-id-duplicates.yml",
+      "registry-regulation/broken/bp-grouping/bp-grouping-process-definition-id-not-exist.yml",
+      "registry-regulation/broken/bp-grouping/bp-grouping-name-duplicates.yml",
+      "registry-regulation/broken/bp-grouping/bp-grouping-invalid-name.yml"
+  })
+  void shouldFailBpGroupingValidation(String bpGroupsFile) {
+    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(), new CommandLineOptionsConverter(), systemExit);
+
+    validationRunner.run(bpmnArgsForBpGroupingRegistryRegulations(),
+        argOf(CommandLineArg.BP_GROUPING, testResourcePathOf(bpGroupsFile))
+    );
+
+    verify(systemExit).validationFailure();
+  }
+
+  private String bpmnArgsForBpGroupingRegistryRegulations() {
+    return argOf(CommandLineArg.BPMN,
+        testResourcePathOf("registry-regulation/correct/bp-grouping/bpmn/process_for_group_1.bpmn"),
+        testResourcePathOf("registry-regulation/correct/bp-grouping//bpmn/process_for_group_2.bpmn"));
+  }
+
   private RegulationValidationCommandLineRunner newValidationRunner(ResourceLoader resourceLoader,
       CommandLineArgsParser commandLineArgsParser,
       CommandLineOptionsConverter commandLineOptionsConverter,
@@ -370,7 +407,8 @@ class RegulationValidationCommandLineRunnerTest {
     return new String[]{
         argOf(CommandLineArg.BP_AUTH, testResourcePathOf("registry-regulation/empty/bp-auth-empty.yml")),
         argOf(CommandLineArg.BP_TREMBITA, testResourcePathOf("registry-regulation/empty/bp-trembita-empty.yml")),
-        argOf(CommandLineArg.ROLES, testResourcePathOf("registry-regulation/empty/roles-empty.yml"))
+        argOf(CommandLineArg.ROLES, testResourcePathOf("registry-regulation/empty/roles-empty.yml")),
+        argOf(CommandLineArg.BP_GROUPING, testResourcePathOf("registry-regulation/empty/bp-grouping-empty.yml"))
     };
   }
 

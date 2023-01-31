@@ -22,6 +22,8 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.model.B
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.RegulationFileType;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.RegulationFiles;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.support.RegulationConfigurationLoader;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpgrouping.BpGroupingProcessDefinitionIdValidator;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpgrouping.BpGroupingUniqueNameValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpAuthToBpmnProcessExistenceValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpTrembitaToBpmnProcessExistenceValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpmnFileGroupUniqueProcessIdValidator;
@@ -41,22 +43,23 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.validat
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.file.ValidationSkipOnDependentDecorator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.json.JsonSchemaFileValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.mainliquibase.MainLiquibaseRulesValidator;
-import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.typed.BpAuthProcessUniquenessValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.registrysettings.RegistrySettingsFileValidator;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.typed.BpAuthProcessUniquenessValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.typed.BpTrembitaProcessUniquenessValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.var.GlobalVarsFileValidator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.core.io.ResourceLoader;
-
 import java.io.File;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Set;
+import org.springframework.core.io.ResourceLoader;
 
 public class RegulationValidatorFactory {
 
   private static final String BP_AUTH_JSON_SCHEMA = "classpath:schema/bp-auth-schema.json";
+
+  private static final String BP_GROUPING_SCHEMA = "classpath:schema/bp-grouping-schema.json";
   private static final String BP_TREMBITA_JSON_SCHEMA = "classpath:schema/bp-trembita-schema.json";
   private static final String BP_TREMBITA_CONFIG_JSON_SCHEMA = "classpath:schema/bp-trembita-config-schema.json";
   private static final String ROLES_JSON_SCHEMA = "classpath:schema/roles-schema.json";
@@ -109,6 +112,7 @@ public class RegulationValidatorFactory {
     validators.put(RegulationFileType.EMAIL_NOTIFICATION_TEMPLATE, newEmailNotificationTemplateValidator());
     validators.put(RegulationFileType.INBOX_NOTIFICATION_TEMPLATE, newInboxNotificationTemplateValidator());
     validators.put(RegulationFileType.DIIA_NOTIFICATION_TEMPLATE, newDiiaNotificationTemplateValidator());
+    validators.put(RegulationFileType.BP_GROUPING, newBpGroupValidator());
     return validators;
   }
 
@@ -123,7 +127,8 @@ public class RegulationValidatorFactory {
           ObjectMapper yamlObjectMapper) {
     return Map.of(
             RegulationFileType.BP_AUTH_TO_BPMN, newBpAuthToProcessDefinitionIdsValidator(yamlObjectMapper),
-            RegulationFileType.BP_TREMBITA_TO_BPMN, newBpTrembitaToBpmnProcessDefinitionIdsValidator(yamlObjectMapper)
+            RegulationFileType.BP_TREMBITA_TO_BPMN, newBpTrembitaToBpmnProcessDefinitionIdsValidator(yamlObjectMapper),
+            RegulationFileType.BP_GROUPING_TO_BPMN, newBpGroupingToBpmnProcessDefinitionIdsValidator(yamlObjectMapper)
 
     );
   }
@@ -138,6 +143,12 @@ public class RegulationValidatorFactory {
     return decorateGlobalValidator(GlobalCompositeRegulationFilesValidator.builder()
             .validator(new BpTrembitaToBpmnProcessExistenceValidator(yamlObjectMapper))
             .build());
+  }
+
+  private RegulationValidator<RegulationFiles> newBpGroupingToBpmnProcessDefinitionIdsValidator(ObjectMapper yamlObjectMapper) {
+    return decorateGlobalValidator(GlobalCompositeRegulationFilesValidator.builder()
+        .validator(new BpGroupingProcessDefinitionIdValidator(yamlObjectMapper))
+        .build());
   }
 
   private RegulationValidator<Collection<File>> newBpmnFileGroupValidator() {
@@ -362,6 +373,18 @@ public class RegulationValidatorFactory {
                     .validator(new FileExtensionValidator())
                     .validator(new MainLiquibaseRulesValidator(mainLiquibaseRuleBook))
                     .build()
+    );
+  }
+
+  private RegulationValidator<File> newBpGroupValidator() {
+    return decorate(
+        CompositeFileValidator.builder()
+            .validator(new FileExistenceValidator())
+            .validator(new FileExtensionValidator())
+            .validator(new EmptyFileValidator())
+            .validator(new JsonSchemaFileValidator(BP_GROUPING_SCHEMA, resourceLoader, yamlObjectMapper))
+            .validator(new BpGroupingUniqueNameValidator(yamlObjectMapper))
+            .build()
     );
   }
 }

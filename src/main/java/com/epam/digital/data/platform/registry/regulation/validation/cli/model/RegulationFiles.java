@@ -57,6 +57,8 @@ public class RegulationFiles {
   private Collection<File> inboxNotificationTemplateDirectory = new ArrayList<>();
   @Default
   private Collection<File> diiaNotificationTemplateDirectory = new ArrayList<>();
+  @Default
+  private Collection<File> bpGroupingFiles = new ArrayList<>();
 
   public boolean isEmpty() {
     return bpTrembitaFiles.isEmpty()
@@ -73,6 +75,7 @@ public class RegulationFiles {
         && excerptFiles.isEmpty()
         && emailNotificationTemplateDirectory.isEmpty()
         && inboxNotificationTemplateDirectory.isEmpty()
-        && diiaNotificationTemplateDirectory.isEmpty();
+        && diiaNotificationTemplateDirectory.isEmpty()
+        && bpGroupingFiles.isEmpty();
   }
 }

@@ -44,6 +44,7 @@ public class CommandLineOptionsConverter {
         .emailNotificationTemplateDirectory(getFilesIfAny(CommandLineArg.EMAIL_NOTIFICATION_TEMPLATE, options))
         .inboxNotificationTemplateDirectory(getFilesIfAny(CommandLineArg.INBOX_NOTIFICATION_TEMPLATE, options))
         .diiaNotificationTemplateDirectory(getFilesIfAny(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE, options))
+        .bpGroupingFiles(getFilesIfAny(CommandLineArg.BP_GROUPING, options))
         .build();
   }
 

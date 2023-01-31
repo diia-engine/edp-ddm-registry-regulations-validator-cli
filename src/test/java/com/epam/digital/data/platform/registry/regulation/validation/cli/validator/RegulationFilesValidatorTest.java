@@ -30,7 +30,7 @@ import java.util.Collection;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-public class RegulationFilesValidatorTest {
+class RegulationFilesValidatorTest {
 
   @Test
   @SuppressWarnings("unchecked")
@@ -47,6 +47,8 @@ public class RegulationFilesValidatorTest {
     RegulationValidator<Collection<File>> excerptsFilesValidator = mock(RegulationValidator.class);
     RegulationValidator<RegulationFiles> bpAuthToBpmnRegulationValidator = mock(RegulationValidator.class);
     RegulationValidator<RegulationFiles> bpTrembitaToBpmnRegulationValidator = mock(RegulationValidator.class);
+    RegulationValidator<File> bpGroupingUniqueNameValidator = mock(RegulationValidator.class);
+    RegulationValidator<RegulationFiles> bpGroupingProcessDefinitionIdValidator = mock(RegulationValidator.class);
 
     var validators = Map.of(
         RegulationFileType.BP_AUTH, bpAuthFileValidator,
@@ -56,7 +58,8 @@ public class RegulationFilesValidatorTest {
         RegulationFileType.FORMS, formsFileValidator,
         RegulationFileType.BPMN, bpmnFileValidator,
         RegulationFileType.DMN, dmnFileValidator,
-        RegulationFileType.EXCERPTS, excerptFilesValidator
+        RegulationFileType.EXCERPTS, excerptFilesValidator,
+        RegulationFileType.BP_GROUPING, bpGroupingUniqueNameValidator
     );
     var groupValidators = Map.of(
         RegulationFileType.BPMN, bpmnFilesValidator,
@@ -65,7 +68,8 @@ public class RegulationFilesValidatorTest {
 
     var globalRegulationValidators = Map.of(
             RegulationFileType.BP_AUTH_TO_BPMN, bpAuthToBpmnRegulationValidator,
-            RegulationFileType.BP_TREMBITA_TO_BPMN, bpTrembitaToBpmnRegulationValidator
+            RegulationFileType.BP_TREMBITA_TO_BPMN, bpTrembitaToBpmnRegulationValidator,
+            RegulationFileType.BP_GROUPING_TO_BPMN, bpGroupingProcessDefinitionIdValidator
     );
 
     var regulationFilesValidator = new RegulationFilesValidator(validators, groupValidators, globalRegulationValidators);
@@ -79,6 +83,7 @@ public class RegulationFilesValidatorTest {
         .bpmnFiles(singleFile())
         .dmnFiles(singleFile())
         .excerptFiles(singleFile())
+        .bpGroupingFiles(singleFile())
         .build();
 
     regulationFilesValidator.validate(regulationFiles, ValidationContext.empty());
@@ -92,6 +97,7 @@ public class RegulationFilesValidatorTest {
     verify(dmnFileValidator, times(1)).validate(any(), any());
     verify(bpmnFilesValidator, times(1)).validate(any(), any());
     verify(excerptsFilesValidator, times(1)).validate(any(), any());
+    verify(bpGroupingUniqueNameValidator, times(1)).validate(any(), any());
   }
 
   private ArrayList<File> singleFile() {

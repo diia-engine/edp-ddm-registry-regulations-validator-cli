@@ -36,7 +36,9 @@ public enum RegulationFileType {
   EXCERPTS(),
   EMAIL_NOTIFICATION_TEMPLATE(),
   INBOX_NOTIFICATION_TEMPLATE(),
-  DIIA_NOTIFICATION_TEMPLATE();
+  DIIA_NOTIFICATION_TEMPLATE(),
+  BP_GROUPING("yml", "yaml"),
+  BP_GROUPING_TO_BPMN();
 
   private final String[] fileExtensions;
 

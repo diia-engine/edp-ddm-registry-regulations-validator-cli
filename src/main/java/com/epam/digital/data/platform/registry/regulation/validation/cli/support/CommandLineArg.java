@@ -32,7 +32,8 @@ public enum CommandLineArg {
   EXCERPTS("excerpt-folders"),
   EMAIL_NOTIFICATION_TEMPLATE("email-notification-template-folder"),
   INBOX_NOTIFICATION_TEMPLATE("inbox-notification-template-folder"),
-  DIIA_NOTIFICATION_TEMPLATE("diia-notification-template-folder");
+  DIIA_NOTIFICATION_TEMPLATE("diia-notification-template-folder"),
+  BP_GROUPING("bp-grouping-files");
 
   private final String argOptionName;
 

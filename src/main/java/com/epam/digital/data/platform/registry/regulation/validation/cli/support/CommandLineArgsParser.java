@@ -180,6 +180,12 @@ public class CommandLineArgsParser {
         .desc("Global variables regulation files (accepts multiple values separated by ',')")
         .build());
 
+    options.addOption(Option.builder()
+        .longOpt(CommandLineArg.BP_GROUPING.getArgOptionName())
+        .numberOfArgs(1)
+        .desc("Business process grouping file")
+        .build());
+
     return options;
   }
 }

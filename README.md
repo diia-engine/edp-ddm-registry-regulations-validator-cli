@@ -32,6 +32,7 @@ Options:
     --datafactory-settings-files=<arg>     Datafactory Settings regulation files with yml, yaml extensions
     --registry-settings-files=<arg>     Registry Settings regulation files with yml, yaml extensions
     --liquibase-files=<arg>    Liquibase regulation files introduce Database change set with xml extensions
+    --bp-grouping-files=<arg>  Business process grouping file
 Exit codes: 0 (success), 1 (system error), 10 (validation failure)
 ```
 ### Test execution
