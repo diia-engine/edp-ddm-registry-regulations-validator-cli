@@ -58,6 +58,20 @@ class RegistrySettingsFileValidatorTest {
 
     assertThat(actualErrors).isEmpty();
   }
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "registry-regulation/broken/registry-settings-started-with-special-characters.yaml",
+        "registry-regulation/broken/registry-settings-special-characters-in-first-three-symbols.yaml"
+      })
+  void shouldFailValidation1(String registrySettingsFile) {
+    var actualErrors =
+        validator.validate(
+            getFileFromClasspath(registrySettingsFile),
+            ValidationContext.of(RegulationFileType.REGISTRY_SETTINGS));
+
+    assertThat(actualErrors).isNotEmpty();
+  }
 
   @ParameterizedTest
   @ValueSource(strings = {
