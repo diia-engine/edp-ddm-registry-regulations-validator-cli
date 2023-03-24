@@ -332,6 +332,18 @@ class RegulationValidationCommandLineRunnerTest {
     verify(systemExit).complete();
   }
 
+  @Test
+  void shouldPassBpGroupingValidationWithEmptyDefinitionsArray() {
+    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(), new CommandLineOptionsConverter(), systemExit);
+
+    validationRunner.run(bpmnArgsForBpGroupingRegistryRegulations(),
+        argOf(CommandLineArg.BP_GROUPING,
+            testResourcePathOf("registry-regulation/correct/bp-grouping/bp-grouping-empty-array.yml"))
+    );
+
+    verify(systemExit).complete();
+  }
+
   @ParameterizedTest
   @ValueSource(strings = {
       "registry-regulation/broken/bp-grouping/bp-grouping-process-definition-id-duplicates.yml",
