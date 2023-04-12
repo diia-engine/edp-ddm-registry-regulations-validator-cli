@@ -26,6 +26,8 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.validat
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.ValidationContext;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import java.io.File;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassRelativeResourceLoader;
@@ -36,7 +38,7 @@ public abstract class JsonSchemaFileValidatorTest {
   private final ResourceLoader resourceLoader = new ClassRelativeResourceLoader(getClass());
 
   protected String shouldPassSchemaValidationFile;
-  protected String shouldFailSchemaValidationFile;
+  protected List<String> shouldFailSchemaValidationFiles;
   protected String schemaLocation;
   protected RegulationFileType regulationFileType;
 
@@ -51,18 +53,20 @@ public abstract class JsonSchemaFileValidatorTest {
   void shouldPassSchemaValidation() {
     var processFile = getFileFromClasspath(shouldPassSchemaValidationFile);
 
-    var errors = validator.validate(processFile, ValidationContext.of(RegulationFileType.BP_AUTH));
+    var errors = validator.validate(processFile, ValidationContext.of(regulationFileType));
 
     assertThat(errors, is(empty()));
   }
 
   @Test
   void shouldFailSchemaValidation() {
-    var processFile = getFileFromClasspath(shouldFailSchemaValidationFile);
+    for (String filePath : shouldFailSchemaValidationFiles) {
+      var processFile = getFileFromClasspath(filePath);
 
-    var errors = validator.validate(processFile, ValidationContext.of(RegulationFileType.BP_AUTH));
+      var errors = validator.validate(processFile, ValidationContext.of(regulationFileType));
 
-    assertThat(errors, is(not(empty())));
+      assertThat(errors, is(not(empty())));
+    }
   }
 
   private File getFileFromClasspath(String filePath) {

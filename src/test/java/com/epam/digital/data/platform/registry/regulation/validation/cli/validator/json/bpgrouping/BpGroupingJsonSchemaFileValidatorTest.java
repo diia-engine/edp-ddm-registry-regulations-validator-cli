@@ -16,8 +16,11 @@
 
 package com.epam.digital.data.platform.registry.regulation.validation.cli.validator.json.bpgrouping;
 
+import com.epam.digital.data.platform.registry.regulation.validation.cli.model.RegulationFileType;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.json.JsonSchemaFileValidatorTest;
 import org.junit.jupiter.api.BeforeEach;
+
+import java.util.List;
 
 public class BpGroupingJsonSchemaFileValidatorTest extends JsonSchemaFileValidatorTest {
 
@@ -25,7 +28,9 @@ public class BpGroupingJsonSchemaFileValidatorTest extends JsonSchemaFileValidat
   public void setUp() {
     this.schemaLocation = "classpath:schema/bp-grouping-schema.json";
     this.shouldPassSchemaValidationFile = "registry-regulation/correct/bp-grouping/bp-grouping.yml";
-    this.shouldFailSchemaValidationFile = "registry-regulation/broken/bp-grouping/bp-grouping-invalid-name.yml";
+    this.shouldFailSchemaValidationFiles =
+        List.of("registry-regulation/broken/bp-grouping/bp-grouping-invalid-name.yml");
+    this.regulationFileType = RegulationFileType.BP_GROUPING;
     super.setUp();
   }
 }

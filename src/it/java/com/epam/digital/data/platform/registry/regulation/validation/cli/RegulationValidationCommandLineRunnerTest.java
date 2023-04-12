@@ -411,7 +411,8 @@ class RegulationValidationCommandLineRunnerTest {
         argOf(CommandLineArg.LIQUIBASE, testResourcePathOf("registry-regulation/correct/test-main-liquibase.xml")),
         argOf(CommandLineArg.EMAIL_NOTIFICATION_TEMPLATE, testResourcePathOf("registry-regulation/correct/email")),
         argOf(CommandLineArg.INBOX_NOTIFICATION_TEMPLATE, testResourcePathOf("registry-regulation/correct/inbox")),
-        argOf(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE, testResourcePathOf("registry-regulation/correct/diia"))
+        argOf(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE, testResourcePathOf("registry-regulation/correct/diia")),
+        argOf(CommandLineArg.MOCK_INTEGRATIONS, testResourcePathOf("registry-regulation/correct/mock-integrations.json"))
     };
   }
 

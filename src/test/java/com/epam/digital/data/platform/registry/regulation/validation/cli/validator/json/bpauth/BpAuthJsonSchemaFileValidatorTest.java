@@ -16,8 +16,11 @@
 
 package com.epam.digital.data.platform.registry.regulation.validation.cli.validator.json.bpauth;
 
+import com.epam.digital.data.platform.registry.regulation.validation.cli.model.RegulationFileType;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.json.JsonSchemaFileValidatorTest;
 import org.junit.jupiter.api.BeforeEach;
+
+import java.util.List;
 
 public class BpAuthJsonSchemaFileValidatorTest extends JsonSchemaFileValidatorTest {
 
@@ -25,7 +28,8 @@ public class BpAuthJsonSchemaFileValidatorTest extends JsonSchemaFileValidatorTe
   public void setUp() {
     this.schemaLocation = "classpath:schema/bp-auth-schema.json";
     this.shouldPassSchemaValidationFile = "registry-regulation/correct/bp-auth.yml";
-    this.shouldFailSchemaValidationFile = "registry-regulation/broken/bp-auth-broken.yml";
+    this.shouldFailSchemaValidationFiles = List.of("registry-regulation/broken/bp-auth-broken.yml");
+    this.regulationFileType = RegulationFileType.BP_AUTH;
     super.setUp();
   }
 

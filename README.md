@@ -33,6 +33,8 @@ Options:
     --registry-settings-files=<arg>     Registry Settings regulation files with yml, yaml extensions
     --liquibase-files=<arg>    Liquibase regulation files introduce Database change set with xml extensions
     --bp-grouping-files=<arg>  Business process grouping file
+    --mock-integration-files=<arg>         Mock Integration regulation files (accepts multiple
+                               values separated by ',')    
 Exit codes: 0 (success), 1 (system error), 10 (validation failure)
 ```
 ### Test execution

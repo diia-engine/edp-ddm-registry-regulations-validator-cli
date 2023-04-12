@@ -69,6 +69,7 @@ public class RegulationValidatorFactory {
   private static final String EMAIL_NOTIFICATION_ARGUMENTS_JSON_SCHEMA = "classpath:schema/email-notification-arguments-schema.json";
   private static final String INBOX_NOTIFICATION_ARGUMENTS_JSON_SCHEMA = "classpath:schema/inbox-notification-arguments-schema.json";
   private static final String DIIA_NOTIFICATION_ARGUMENTS_JSON_SCHEMA = "classpath:schema/diia-notification-arguments-schema.json";
+  private static final String MOCK_INTEGRATIONS_JSON_SCHEMA = "classpath:schema/mock-integrations-schema.json";
 
   private final ResourceLoader resourceLoader;
   private final ObjectMapper yamlObjectMapper;
@@ -113,6 +114,7 @@ public class RegulationValidatorFactory {
     validators.put(RegulationFileType.INBOX_NOTIFICATION_TEMPLATE, newInboxNotificationTemplateValidator());
     validators.put(RegulationFileType.DIIA_NOTIFICATION_TEMPLATE, newDiiaNotificationTemplateValidator());
     validators.put(RegulationFileType.BP_GROUPING, newBpGroupValidator());
+    validators.put(RegulationFileType.MOCK_INTEGRATIONS, newMockIntegrationsFileValidator());
     return validators;
   }
 
@@ -328,6 +330,18 @@ public class RegulationValidatorFactory {
                 .validator(notificationTemplateValidator)
                 .build());
     return decorate(notificationTemplateDirectoryValidator);
+  }
+
+  private RegulationValidator<File> newMockIntegrationsFileValidator() {
+    return decorate(
+        CompositeFileValidator.builder()
+            .validator(new FileExistenceValidator())
+            .validator(new FileExtensionValidator())
+            .validator(new EmptyFileValidator())
+            .validator(
+                new JsonSchemaFileValidator(
+                    MOCK_INTEGRATIONS_JSON_SCHEMA, resourceLoader, jsonObjectMapper))
+            .build());
   }
 
   private RegulationValidator<File> decorate(RegulationValidator<File> validator) {

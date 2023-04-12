@@ -186,6 +186,13 @@ public class CommandLineArgsParser {
         .desc("Business process grouping file")
         .build());
 
+    options.addOption(Option.builder()
+            .longOpt(CommandLineArg.MOCK_INTEGRATIONS.getArgOptionName())
+            .hasArgs()
+            .valueSeparator(',')
+            .desc("Mock integration regulation files (accepts multiple values separated by ',')")
+            .build());
+
     return options;
   }
 }

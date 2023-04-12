@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 EPAM Systems.
+ * Copyright 2023 EPAM Systems.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package com.epam.digital.data.platform.registry.regulation.validation.cli.validator.json.roles;
+package com.epam.digital.data.platform.registry.regulation.validation.cli.validator.json.mockintegrations;
 
-import com.epam.digital.data.platform.registry.regulation.validation.cli.model.RegulationFileType;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.json.JsonSchemaFileValidatorTest;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.util.List;
 
-public class RolesJsonSchemaFileValidatorTest extends JsonSchemaFileValidatorTest {
+public class MockIntegrationsJsonSchemaFileValidatorTest extends JsonSchemaFileValidatorTest {
 
   @BeforeEach
   public void setUp() {
-    this.schemaLocation = "classpath:schema/roles-schema.json";
-    this.shouldPassSchemaValidationFile = "registry-regulation/correct/roles.yml";
-    this.shouldFailSchemaValidationFiles = List.of("registry-regulation/broken/roles-broken.yml");
-    this.regulationFileType = RegulationFileType.ROLES;
+    this.schemaLocation = "classpath:schema/mock-integrations-schema.json";
+    this.shouldPassSchemaValidationFile = "registry-regulation/correct/mock-integrations.json";
+    this.shouldFailSchemaValidationFiles =
+        List.of(
+            "registry-regulation/broken/mock-integrations-mappings-not-array.json",
+            "registry-regulation/broken/mock-integrations-mappings-no-response.json");
     super.setUp();
   }
-
 }
