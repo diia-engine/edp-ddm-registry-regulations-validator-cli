@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 EPAM Systems.
+ * Copyright 2023 EPAM Systems.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.validat
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpAuthToBpmnProcessExistenceValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpTrembitaToBpmnProcessExistenceValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpmnFileGroupUniqueProcessIdValidator;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpmnFileInputsValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpmnFileValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.channel.NotificationTemplateDirectoryValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.channel.NotificationTemplateValidator;
@@ -53,6 +54,7 @@ import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Set;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
 
 public class RegulationValidatorFactory {
@@ -70,6 +72,9 @@ public class RegulationValidatorFactory {
   private static final String INBOX_NOTIFICATION_ARGUMENTS_JSON_SCHEMA = "classpath:schema/inbox-notification-arguments-schema.json";
   private static final String DIIA_NOTIFICATION_ARGUMENTS_JSON_SCHEMA = "classpath:schema/diia-notification-arguments-schema.json";
   private static final String MOCK_INTEGRATIONS_JSON_SCHEMA = "classpath:schema/mock-integrations-schema.json";
+
+  @Value("${element-template-path}")
+  private String elementTemplatePath;
 
   private final ResourceLoader resourceLoader;
   private final ObjectMapper yamlObjectMapper;
@@ -94,11 +99,13 @@ public class RegulationValidatorFactory {
     var regulationTypeValidators = regulationTypeValidators();
     var groupRegulationTypeValidators = regulationTypeGroupValidators();
     var globalRegulationTypeValidators = globalRegulationTypeValidators(yamlObjectMapper);
-    return new RegulationFilesValidator(regulationTypeValidators, groupRegulationTypeValidators, globalRegulationTypeValidators);
+    return new RegulationFilesValidator(regulationTypeValidators, groupRegulationTypeValidators,
+        globalRegulationTypeValidators);
   }
 
   private Map<RegulationFileType, RegulationValidator<File>> regulationTypeValidators() {
-    Map<RegulationFileType, RegulationValidator<File>> validators = new EnumMap<>(RegulationFileType.class);
+    Map<RegulationFileType, RegulationValidator<File>> validators = new EnumMap<>(
+        RegulationFileType.class);
     validators.put(RegulationFileType.BP_AUTH, newBpAuthFileValidator());
     validators.put(RegulationFileType.BP_TREMBITA, newBpTrembitaFileValidator());
     validators.put(RegulationFileType.BP_TREMBITA_CONFIG, newBpTrembitaConfigFileValidator());
@@ -110,9 +117,12 @@ public class RegulationValidatorFactory {
     validators.put(RegulationFileType.DATAFACTORY_SETTINGS, newDataFactorySettingsFileValidator());
     validators.put(RegulationFileType.REGISTRY_SETTINGS, newRegistrySettingsFileValidator());
     validators.put(RegulationFileType.LIQUIBASE, newMainLiquibaseFileValidator());
-    validators.put(RegulationFileType.EMAIL_NOTIFICATION_TEMPLATE, newEmailNotificationTemplateValidator());
-    validators.put(RegulationFileType.INBOX_NOTIFICATION_TEMPLATE, newInboxNotificationTemplateValidator());
-    validators.put(RegulationFileType.DIIA_NOTIFICATION_TEMPLATE, newDiiaNotificationTemplateValidator());
+    validators.put(RegulationFileType.EMAIL_NOTIFICATION_TEMPLATE,
+        newEmailNotificationTemplateValidator());
+    validators.put(RegulationFileType.INBOX_NOTIFICATION_TEMPLATE,
+        newInboxNotificationTemplateValidator());
+    validators.put(RegulationFileType.DIIA_NOTIFICATION_TEMPLATE,
+        newDiiaNotificationTemplateValidator());
     validators.put(RegulationFileType.BP_GROUPING, newBpGroupValidator());
     validators.put(RegulationFileType.MOCK_INTEGRATIONS, newMockIntegrationsFileValidator());
     return validators;
@@ -126,28 +136,34 @@ public class RegulationValidatorFactory {
   }
 
   private Map<RegulationFileType, RegulationValidator<RegulationFiles>> globalRegulationTypeValidators(
-          ObjectMapper yamlObjectMapper) {
+      ObjectMapper yamlObjectMapper) {
     return Map.of(
-            RegulationFileType.BP_AUTH_TO_BPMN, newBpAuthToProcessDefinitionIdsValidator(yamlObjectMapper),
-            RegulationFileType.BP_TREMBITA_TO_BPMN, newBpTrembitaToBpmnProcessDefinitionIdsValidator(yamlObjectMapper),
-            RegulationFileType.BP_GROUPING_TO_BPMN, newBpGroupingToBpmnProcessDefinitionIdsValidator(yamlObjectMapper)
+        RegulationFileType.BP_AUTH_TO_BPMN,
+        newBpAuthToProcessDefinitionIdsValidator(yamlObjectMapper),
+        RegulationFileType.BP_TREMBITA_TO_BPMN,
+        newBpTrembitaToBpmnProcessDefinitionIdsValidator(yamlObjectMapper),
+        RegulationFileType.BP_GROUPING_TO_BPMN,
+        newBpGroupingToBpmnProcessDefinitionIdsValidator(yamlObjectMapper)
 
     );
   }
 
-  private RegulationValidator<RegulationFiles> newBpAuthToProcessDefinitionIdsValidator(ObjectMapper yamlObjectMapper) {
+  private RegulationValidator<RegulationFiles> newBpAuthToProcessDefinitionIdsValidator(
+      ObjectMapper yamlObjectMapper) {
     return decorateGlobalValidator(GlobalCompositeRegulationFilesValidator.builder()
-            .validator(new BpAuthToBpmnProcessExistenceValidator(yamlObjectMapper))
-            .build());
+        .validator(new BpAuthToBpmnProcessExistenceValidator(yamlObjectMapper))
+        .build());
   }
 
-  private RegulationValidator<RegulationFiles> newBpTrembitaToBpmnProcessDefinitionIdsValidator(ObjectMapper yamlObjectMapper) {
+  private RegulationValidator<RegulationFiles> newBpTrembitaToBpmnProcessDefinitionIdsValidator(
+      ObjectMapper yamlObjectMapper) {
     return decorateGlobalValidator(GlobalCompositeRegulationFilesValidator.builder()
-            .validator(new BpTrembitaToBpmnProcessExistenceValidator(yamlObjectMapper))
-            .build());
+        .validator(new BpTrembitaToBpmnProcessExistenceValidator(yamlObjectMapper))
+        .build());
   }
 
-  private RegulationValidator<RegulationFiles> newBpGroupingToBpmnProcessDefinitionIdsValidator(ObjectMapper yamlObjectMapper) {
+  private RegulationValidator<RegulationFiles> newBpGroupingToBpmnProcessDefinitionIdsValidator(
+      ObjectMapper yamlObjectMapper) {
     return decorateGlobalValidator(GlobalCompositeRegulationFilesValidator.builder()
         .validator(new BpGroupingProcessDefinitionIdValidator(yamlObjectMapper))
         .build());
@@ -175,7 +191,8 @@ public class RegulationValidatorFactory {
             .validator(new FileExistenceValidator())
             .validator(new FileExtensionValidator())
             .validator(new EmptyFileValidator())
-            .validator(new JsonSchemaFileValidator(BP_AUTH_JSON_SCHEMA, resourceLoader, yamlObjectMapper))
+            .validator(
+                new JsonSchemaFileValidator(BP_AUTH_JSON_SCHEMA, resourceLoader, yamlObjectMapper))
             .validator(
                 TypedConfigurationValidator.<BpAuthConfiguration>builder()
                     .configurationClass(BpAuthConfiguration.class)
@@ -192,7 +209,8 @@ public class RegulationValidatorFactory {
             .validator(new FileExistenceValidator())
             .validator(new FileExtensionValidator())
             .validator(new EmptyFileValidator())
-            .validator(new JsonSchemaFileValidator(BP_TREMBITA_JSON_SCHEMA, resourceLoader, yamlObjectMapper))
+            .validator(new JsonSchemaFileValidator(BP_TREMBITA_JSON_SCHEMA, resourceLoader,
+                yamlObjectMapper))
             .validator(
                 TypedConfigurationValidator.<BpTrembitaConfiguration>builder()
                     .configurationClass(BpTrembitaConfiguration.class)
@@ -209,7 +227,8 @@ public class RegulationValidatorFactory {
             .validator(new FileExistenceValidator())
             .validator(new FileExtensionValidator())
             .validator(new EmptyFileValidator())
-            .validator(new JsonSchemaFileValidator(BP_TREMBITA_CONFIG_JSON_SCHEMA, resourceLoader, yamlObjectMapper))
+            .validator(new JsonSchemaFileValidator(BP_TREMBITA_CONFIG_JSON_SCHEMA, resourceLoader,
+                yamlObjectMapper))
             .build()
     );
   }
@@ -220,7 +239,8 @@ public class RegulationValidatorFactory {
             .validator(new FileExistenceValidator())
             .validator(new FileExtensionValidator())
             .validator(new EmptyFileValidator())
-            .validator(new JsonSchemaFileValidator(ROLES_JSON_SCHEMA, resourceLoader, yamlObjectMapper))
+            .validator(
+                new JsonSchemaFileValidator(ROLES_JSON_SCHEMA, resourceLoader, yamlObjectMapper))
             .build()
     );
   }
@@ -231,7 +251,8 @@ public class RegulationValidatorFactory {
             .validator(new FileExistenceValidator())
             .validator(new FileExtensionValidator())
             .validator(new EmptyFileValidator())
-            .validator(new GlobalVarsFileValidator(GLOBAL_VARS_JSON_SCHEMA, resourceLoader, yamlObjectMapper))
+            .validator(new GlobalVarsFileValidator(GLOBAL_VARS_JSON_SCHEMA, resourceLoader,
+                yamlObjectMapper))
             .build()
     );
   }
@@ -253,6 +274,7 @@ public class RegulationValidatorFactory {
             .validator(new FileExistenceValidator())
             .validator(new FileExtensionValidator())
             .validator(new BpmnFileValidator())
+            .validator(new BpmnFileInputsValidator(elementTemplatePath))
             .build()
     );
   }
@@ -354,17 +376,18 @@ public class RegulationValidatorFactory {
   }
 
   private RegulationValidator<RegulationFiles> decorateGlobalValidator(
-          RegulationValidator<RegulationFiles> validator) {
+      RegulationValidator<RegulationFiles> validator) {
     return GlobalFileValidatorLoggingDecorator.wrap(validator);
   }
 
   private RegulationValidator<File> newDataFactorySettingsFileValidator() {
     return decorate(
-            CompositeFileValidator.builder()
-                    .validator(new FileExistenceValidator())
-                    .validator(new FileExtensionValidator())
-                    .validator(new DatafactorySettingsYamlRulesValidator(yamlObjectMapper, settingsYamlRuleBook))
-                    .build()
+        CompositeFileValidator.builder()
+            .validator(new FileExistenceValidator())
+            .validator(new FileExtensionValidator())
+            .validator(
+                new DatafactorySettingsYamlRulesValidator(yamlObjectMapper, settingsYamlRuleBook))
+            .build()
     );
   }
 
@@ -382,11 +405,11 @@ public class RegulationValidatorFactory {
 
   private RegulationValidator<File> newMainLiquibaseFileValidator() {
     return decorate(
-            CompositeFileValidator.builder()
-                    .validator(new FileExistenceValidator())
-                    .validator(new FileExtensionValidator())
-                    .validator(new MainLiquibaseRulesValidator(mainLiquibaseRuleBook))
-                    .build()
+        CompositeFileValidator.builder()
+            .validator(new FileExistenceValidator())
+            .validator(new FileExtensionValidator())
+            .validator(new MainLiquibaseRulesValidator(mainLiquibaseRuleBook))
+            .build()
     );
   }
 
@@ -396,7 +419,8 @@ public class RegulationValidatorFactory {
             .validator(new FileExistenceValidator())
             .validator(new FileExtensionValidator())
             .validator(new EmptyFileValidator())
-            .validator(new JsonSchemaFileValidator(BP_GROUPING_SCHEMA, resourceLoader, yamlObjectMapper))
+            .validator(
+                new JsonSchemaFileValidator(BP_GROUPING_SCHEMA, resourceLoader, yamlObjectMapper))
             .validator(new BpGroupingUniqueNameValidator(yamlObjectMapper))
             .build()
     );

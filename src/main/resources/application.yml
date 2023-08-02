@@ -5,3 +5,5 @@ spring:
     web-application-type: none
     banner-mode: off
     log-startup-info: off
+
+element-template-path: '/var/lib/business-process-modeller-extensions/business-process-modeler-element-templates.json'

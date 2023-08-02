@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 EPAM Systems.
+ * Copyright 2023 EPAM Systems.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,13 +32,13 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.validat
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.ValidationError;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import com.google.common.collect.Sets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import com.google.common.collect.Sets;
 import lombok.SneakyThrows;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -51,6 +51,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(SpringExtension.class)
 class RegulationValidationCommandLineRunnerTest {
@@ -144,7 +145,8 @@ class RegulationValidationCommandLineRunnerTest {
 
   @Test
   void shouldFailBpmnDueToDuplicatedProcessId() {
-    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(), new CommandLineOptionsConverter(), systemExit);
+    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
+        new CommandLineOptionsConverter(), systemExit);
 
     validationRunner.run(correctRegistryRegulations());
     validationRunner.run(argOf(CommandLineArg.BPMN,
@@ -180,10 +182,11 @@ class RegulationValidationCommandLineRunnerTest {
   @Test
   void shouldFailTrembitaConfigDueToIllegalTrembitaPropsPresent() {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
-            new CommandLineOptionsConverter(), systemExit);
+        new CommandLineOptionsConverter(), systemExit);
 
     validationRunner.run(argOf(CommandLineArg.BP_TREMBITA_CONFIG,
-            testResourcePathOf("registry-regulation/broken/broken-configuration-deprecated-trembita-properties.yml")));
+        testResourcePathOf(
+            "registry-regulation/broken/broken-configuration-deprecated-trembita-properties.yml")));
 
     verify(systemExit, times(1)).validationFailure();
   }
@@ -191,10 +194,11 @@ class RegulationValidationCommandLineRunnerTest {
   @Test
   void shouldFailTrembitaConfigDueToIllegalExtSystemsPropsPresent() {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
-            new CommandLineOptionsConverter(), systemExit);
+        new CommandLineOptionsConverter(), systemExit);
 
     validationRunner.run(argOf(CommandLineArg.BP_TREMBITA_CONFIG,
-            testResourcePathOf("registry-regulation/broken/broken-configuration-deprecated-ext-systems-properties.yml")));
+        testResourcePathOf(
+            "registry-regulation/broken/broken-configuration-deprecated-ext-systems-properties.yml")));
 
     verify(systemExit, times(1)).validationFailure();
   }
@@ -213,9 +217,9 @@ class RegulationValidationCommandLineRunnerTest {
   @Test
   void shouldFailDatafactorySettingYamlFileDueToInvalidParams() {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
-            new CommandLineOptionsConverter(), systemExit);
+        new CommandLineOptionsConverter(), systemExit);
     validationRunner.run(argOf(CommandLineArg.DATAFACTORY_SETTINGS,
-            testResourcePathOf("registry-regulation/broken/settings.yaml")));
+        testResourcePathOf("registry-regulation/broken/settings.yaml")));
 
     verify(systemExit, times(1)).validationFailure();
   }
@@ -223,9 +227,9 @@ class RegulationValidationCommandLineRunnerTest {
   @Test
   void shouldFailRegistrySettingsYamlFileDueToInvalidParams() {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
-            new CommandLineOptionsConverter(), systemExit);
+        new CommandLineOptionsConverter(), systemExit);
     validationRunner.run(argOf(CommandLineArg.REGISTRY_SETTINGS,
-            testResourcePathOf("registry-regulation/broken/registry-settings-long-title.yaml")));
+        testResourcePathOf("registry-regulation/broken/registry-settings-long-title.yaml")));
 
     verify(systemExit, times(1)).validationFailure();
   }
@@ -243,9 +247,9 @@ class RegulationValidationCommandLineRunnerTest {
   @Test
   void shouldFailMainLiquibaseFileDueToInvalidParams() {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
-            new CommandLineOptionsConverter(), systemExit);
+        new CommandLineOptionsConverter(), systemExit);
     validationRunner.run(argOf(CommandLineArg.LIQUIBASE,
-            testResourcePathOf("registry-regulation/broken/main-liquibase/test-main-liquibase.xml")));
+        testResourcePathOf("registry-regulation/broken/main-liquibase/test-main-liquibase.xml")));
 
     verify(systemExit, times(1)).validationFailure();
   }
@@ -253,9 +257,9 @@ class RegulationValidationCommandLineRunnerTest {
   @Test
   void shouldFailEmailNotificationDueToInvalidMetadata() {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
-            new CommandLineOptionsConverter(), systemExit);
+        new CommandLineOptionsConverter(), systemExit);
     validationRunner.run(argOf(CommandLineArg.EMAIL_NOTIFICATION_TEMPLATE,
-            testResourcePathOf("registry-regulation/broken/email")));
+        testResourcePathOf("registry-regulation/broken/email")));
 
     verify(systemExit).validationFailure();
   }
@@ -263,9 +267,9 @@ class RegulationValidationCommandLineRunnerTest {
   @Test
   void shouldFailEmailNotificationDueToNoTemplateFile() {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
-            new CommandLineOptionsConverter(), systemExit);
+        new CommandLineOptionsConverter(), systemExit);
     validationRunner.run(argOf(CommandLineArg.EMAIL_NOTIFICATION_TEMPLATE,
-            testResourcePathOf("registry-regulation/broken/email2")));
+        testResourcePathOf("registry-regulation/broken/email2")));
 
     verify(systemExit, times(1)).validationFailure();
   }
@@ -273,9 +277,9 @@ class RegulationValidationCommandLineRunnerTest {
   @Test
   void shouldFailInboxNotificationEmptyMetadata() {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
-            new CommandLineOptionsConverter(), systemExit);
+        new CommandLineOptionsConverter(), systemExit);
     validationRunner.run(argOf(CommandLineArg.INBOX_NOTIFICATION_TEMPLATE,
-            testResourcePathOf("registry-regulation/broken/inbox")));
+        testResourcePathOf("registry-regulation/broken/inbox")));
 
     verify(systemExit).validationFailure();
   }
@@ -283,9 +287,9 @@ class RegulationValidationCommandLineRunnerTest {
   @Test
   void shouldFailInboxNotificationDueToNoMetadataFile() {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
-            new CommandLineOptionsConverter(), systemExit);
+        new CommandLineOptionsConverter(), systemExit);
     validationRunner.run(argOf(CommandLineArg.INBOX_NOTIFICATION_TEMPLATE,
-            testResourcePathOf("registry-regulation/broken/inbox2")));
+        testResourcePathOf("registry-regulation/broken/inbox2")));
 
     verify(systemExit, times(1)).validationFailure();
   }
@@ -322,7 +326,8 @@ class RegulationValidationCommandLineRunnerTest {
 
   @Test
   void shouldPassBpGroupingValidation() {
-    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(), new CommandLineOptionsConverter(), systemExit);
+    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
+        new CommandLineOptionsConverter(), systemExit);
 
     validationRunner.run(bpmnArgsForBpGroupingRegistryRegulations(),
         argOf(CommandLineArg.BP_GROUPING,
@@ -334,11 +339,13 @@ class RegulationValidationCommandLineRunnerTest {
 
   @Test
   void shouldPassBpGroupingValidationWithEmptyDefinitionsArray() {
-    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(), new CommandLineOptionsConverter(), systemExit);
+    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
+        new CommandLineOptionsConverter(), systemExit);
 
     validationRunner.run(bpmnArgsForBpGroupingRegistryRegulations(),
         argOf(CommandLineArg.BP_GROUPING,
-            testResourcePathOf("registry-regulation/correct/bp-grouping/bp-grouping-empty-array.yml"))
+            testResourcePathOf(
+                "registry-regulation/correct/bp-grouping/bp-grouping-empty-array.yml"))
     );
 
     verify(systemExit).complete();
@@ -352,7 +359,8 @@ class RegulationValidationCommandLineRunnerTest {
       "registry-regulation/broken/bp-grouping/bp-grouping-invalid-name.yml"
   })
   void shouldFailBpGroupingValidation(String bpGroupsFile) {
-    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(), new CommandLineOptionsConverter(), systemExit);
+    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
+        new CommandLineOptionsConverter(), systemExit);
 
     validationRunner.run(bpmnArgsForBpGroupingRegistryRegulations(),
         argOf(CommandLineArg.BP_GROUPING, testResourcePathOf(bpGroupsFile))
@@ -364,32 +372,39 @@ class RegulationValidationCommandLineRunnerTest {
   private String bpmnArgsForBpGroupingRegistryRegulations() {
     return argOf(CommandLineArg.BPMN,
         testResourcePathOf("registry-regulation/correct/bp-grouping/bpmn/process_for_group_1.bpmn"),
-        testResourcePathOf("registry-regulation/correct/bp-grouping//bpmn/process_for_group_2.bpmn"));
+        testResourcePathOf(
+            "registry-regulation/correct/bp-grouping//bpmn/process_for_group_2.bpmn"));
   }
 
   private RegulationValidationCommandLineRunner newValidationRunner(ResourceLoader resourceLoader,
       CommandLineArgsParser commandLineArgsParser,
       CommandLineOptionsConverter commandLineOptionsConverter,
       SystemExit systemExit) {
+    var validatorFactory = new RegulationValidatorFactory(resourceLoader, new YAMLMapper(),
+        new JsonMapper(), settingsYamlRuleBook(), mainLiquibaseRuleBook());
+
+    var elementTemplatePath = Objects.requireNonNull(
+            getClass().getClassLoader().getResource("business-process-modeler-element-template.json"))
+        .getPath();
+    ReflectionTestUtils.setField(validatorFactory, "elementTemplatePath", elementTemplatePath);
+
     return new RegulationValidationCommandLineRunner(
-        new RegulationValidatorFactory(resourceLoader, new YAMLMapper(), new JsonMapper(),
-                settingsYamlRuleBook(), mainLiquibaseRuleBook()),
-        commandLineArgsParser, commandLineOptionsConverter, systemExit
+        validatorFactory, commandLineArgsParser, commandLineOptionsConverter, systemExit
     );
   }
 
   private RuleBook<Set<ValidationError>> settingsYamlRuleBook() {
     return getRuleBookRunner(
-            "com.epam.digital.data.platform.registry.regulation.validation.cli.validator.datasettings.rules");
+        "com.epam.digital.data.platform.registry.regulation.validation.cli.validator.datasettings.rules");
   }
 
   private RuleBook<Set<ValidationError>> mainLiquibaseRuleBook() {
     return getRuleBookRunner(
-            "com.epam.digital.data.platform.registry.regulation.validation.cli.validator.mainliquibase.rules");
+        "com.epam.digital.data.platform.registry.regulation.validation.cli.validator.mainliquibase.rules");
   }
 
   @SuppressWarnings("unchecked")
-  private RuleBook<Set<ValidationError>> getRuleBookRunner(String rulePackage)  {
+  private RuleBook<Set<ValidationError>> getRuleBookRunner(String rulePackage) {
     var springAwareRuleBookRunner = new RuleBookRunner(rulePackage);
     springAwareRuleBookRunner.setDefaultResult(Sets.newHashSet());
     return springAwareRuleBookRunner;
@@ -397,31 +412,45 @@ class RegulationValidationCommandLineRunnerTest {
 
   private String[] correctRegistryRegulations() {
     return new String[]{
-        argOf(CommandLineArg.GLOBAL_VARS, testResourcePathOf("registry-regulation/correct/global-vars.yml")),
-        argOf(CommandLineArg.BP_AUTH, testResourcePathOf("registry-regulation/correct/bp-auth.yml")),
-        argOf(CommandLineArg.BP_TREMBITA, testResourcePathOf("registry-regulation/correct/bp-trembita.yml")),
-        argOf(CommandLineArg.BP_TREMBITA_CONFIG, testResourcePathOf("registry-regulation/correct/configuration.yml")),
+        argOf(CommandLineArg.GLOBAL_VARS,
+            testResourcePathOf("registry-regulation/correct/global-vars.yml")),
+        argOf(CommandLineArg.BP_AUTH,
+            testResourcePathOf("registry-regulation/correct/bp-auth.yml")),
+        argOf(CommandLineArg.BP_TREMBITA,
+            testResourcePathOf("registry-regulation/correct/bp-trembita.yml")),
+        argOf(CommandLineArg.BP_TREMBITA_CONFIG,
+            testResourcePathOf("registry-regulation/correct/configuration.yml")),
         argOf(CommandLineArg.ROLES, testResourcePathOf("registry-regulation/correct/roles.yml")),
         argOf(CommandLineArg.BPMN,
-                testResourcePathOf("registry-regulation/correct/process.bpmn"),
-                testResourcePathOf("registry-regulation/correct/trembita-process.bpmn")),
+            testResourcePathOf("registry-regulation/correct/process.bpmn"),
+            testResourcePathOf("registry-regulation/correct/trembita-process.bpmn")),
         argOf(CommandLineArg.DMN, testResourcePathOf("registry-regulation/correct/rule.dmn")),
         argOf(CommandLineArg.FORMS, testResourcePathOf("registry-regulation/correct/ui-form.json")),
-        argOf(CommandLineArg.DATAFACTORY_SETTINGS, testResourcePathOf("registry-regulation/correct/settings.yaml")),
-        argOf(CommandLineArg.LIQUIBASE, testResourcePathOf("registry-regulation/correct/test-main-liquibase.xml")),
-        argOf(CommandLineArg.EMAIL_NOTIFICATION_TEMPLATE, testResourcePathOf("registry-regulation/correct/email")),
-        argOf(CommandLineArg.INBOX_NOTIFICATION_TEMPLATE, testResourcePathOf("registry-regulation/correct/inbox")),
-        argOf(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE, testResourcePathOf("registry-regulation/correct/diia")),
-        argOf(CommandLineArg.MOCK_INTEGRATIONS, testResourcePathOf("registry-regulation/correct/mock-integrations.json"))
+        argOf(CommandLineArg.DATAFACTORY_SETTINGS,
+            testResourcePathOf("registry-regulation/correct/settings.yaml")),
+        argOf(CommandLineArg.LIQUIBASE,
+            testResourcePathOf("registry-regulation/correct/test-main-liquibase.xml")),
+        argOf(CommandLineArg.EMAIL_NOTIFICATION_TEMPLATE,
+            testResourcePathOf("registry-regulation/correct/email")),
+        argOf(CommandLineArg.INBOX_NOTIFICATION_TEMPLATE,
+            testResourcePathOf("registry-regulation/correct/inbox")),
+        argOf(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE,
+            testResourcePathOf("registry-regulation/correct/diia")),
+        argOf(CommandLineArg.MOCK_INTEGRATIONS,
+            testResourcePathOf("registry-regulation/correct/mock-integrations.json"))
     };
   }
 
   private String[] emptyRegistryRegulations() {
     return new String[]{
-        argOf(CommandLineArg.BP_AUTH, testResourcePathOf("registry-regulation/empty/bp-auth-empty.yml")),
-        argOf(CommandLineArg.BP_TREMBITA, testResourcePathOf("registry-regulation/empty/bp-trembita-empty.yml")),
-        argOf(CommandLineArg.ROLES, testResourcePathOf("registry-regulation/empty/roles-empty.yml")),
-        argOf(CommandLineArg.BP_GROUPING, testResourcePathOf("registry-regulation/empty/bp-grouping-empty.yml"))
+        argOf(CommandLineArg.BP_AUTH,
+            testResourcePathOf("registry-regulation/empty/bp-auth-empty.yml")),
+        argOf(CommandLineArg.BP_TREMBITA,
+            testResourcePathOf("registry-regulation/empty/bp-trembita-empty.yml")),
+        argOf(CommandLineArg.ROLES,
+            testResourcePathOf("registry-regulation/empty/roles-empty.yml")),
+        argOf(CommandLineArg.BP_GROUPING,
+            testResourcePathOf("registry-regulation/empty/bp-grouping-empty.yml"))
     };
   }
 
