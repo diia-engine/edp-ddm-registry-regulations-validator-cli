@@ -42,6 +42,7 @@ public class FileValidatorLoggingDecorator implements RegulationValidator<File> 
 
   @Override
   public Set<ValidationError> validate(File regulationFile, ValidationContext validationContext) {
+    log.info("[{}] Starting validation of regulation file.", regulationFile.getName());
     var errors = this.validator.validate(regulationFile, validationContext);
 
     if (errors.isEmpty()) {
