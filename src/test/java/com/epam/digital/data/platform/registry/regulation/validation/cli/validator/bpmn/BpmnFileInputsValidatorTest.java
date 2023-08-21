@@ -114,6 +114,19 @@ class BpmnFileInputsValidatorTest {
   }
 
   @Test
+  void getPropertyValueFromActivity_nullValue() {
+    var activity = Mockito.mock(Activity.class);
+    Mockito.doReturn(null).when(activity).getExtensionElements();
+
+    var property = createEmptyProperty();
+    property.getBinding().setName("propName");
+
+    var actualSet = BpmnFileInputsValidator.getPropertyValueFromActivity(activity, property);
+
+    Assertions.assertThat(actualSet).isEmpty();
+  }
+
+  @Test
   @SuppressWarnings("unchecked")
   void getInValueFromActivity() {
     var activity = Mockito.mock(Activity.class);
@@ -142,6 +155,19 @@ class BpmnFileInputsValidatorTest {
   }
 
   @Test
+  void getInValueFromActivity_nullValue() {
+    var activity = Mockito.mock(Activity.class);
+    Mockito.doReturn(null).when(activity).getExtensionElements();
+
+    var property = createEmptyProperty();
+    property.getBinding().setName("propName");
+
+    var actualSet = BpmnFileInputsValidator.getInValueFromActivity(activity, property);
+
+    Assertions.assertThat(actualSet).isEmpty();
+  }
+
+  @Test
   @SuppressWarnings("unchecked")
   void getOutValueFromActivity() {
     var activity = Mockito.mock(Activity.class);
@@ -167,6 +193,19 @@ class BpmnFileInputsValidatorTest {
     var actualSet = BpmnFileInputsValidator.getOutValueFromActivity(activity, property);
 
     Assertions.assertThat(actualSet).hasSize(1).contains("propName");
+  }
+
+  @Test
+  void getOutValueFromActivity_nullValue() {
+    var activity = Mockito.mock(Activity.class);
+    Mockito.doReturn(null).when(activity).getExtensionElements();
+
+    var property = createEmptyProperty();
+    property.getBinding().setSource("{ propValue }");
+
+    var actualSet = BpmnFileInputsValidator.getOutValueFromActivity(activity, property);
+
+    Assertions.assertThat(actualSet).isEmpty();
   }
 
   @Test
@@ -200,6 +239,19 @@ class BpmnFileInputsValidatorTest {
   }
 
   @Test
+  void getInputParameterValueFromActivity_nullValue() {
+    var activity = Mockito.mock(Activity.class);
+    Mockito.doReturn(null).when(activity).getExtensionElements();
+
+    var property = createEmptyProperty();
+    property.getBinding().setName("propName");
+
+    var actualSet = BpmnFileInputsValidator.getInputParameterValueFromActivity(activity, property);
+
+    Assertions.assertThat(actualSet).isEmpty();
+  }
+
+  @Test
   @SuppressWarnings("unchecked")
   void getOutputParameterValueFromActivity() {
     var activity = Mockito.mock(Activity.class);
@@ -227,6 +279,18 @@ class BpmnFileInputsValidatorTest {
     var actualSet = BpmnFileInputsValidator.getOutputParameterValueFromActivity(activity, property);
 
     Assertions.assertThat(actualSet).hasSize(1).contains("propName");
+  }
+  @Test
+  void getOutputParameterValueFromActivity_nullValue() {
+    var activity = Mockito.mock(Activity.class);
+    Mockito.doReturn(null).when(activity).getExtensionElements();
+
+    var property = createEmptyProperty();
+    property.getBinding().setSource("{ propValue }");
+
+    var actualSet = BpmnFileInputsValidator.getOutputParameterValueFromActivity(activity, property);
+
+    Assertions.assertThat(actualSet).isEmpty();
   }
 
   @Test

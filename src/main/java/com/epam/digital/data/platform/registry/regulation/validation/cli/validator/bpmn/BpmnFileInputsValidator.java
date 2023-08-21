@@ -160,7 +160,11 @@ public class BpmnFileInputsValidator implements RegulationValidator<File> {
   @VisibleForTesting
   static Set<String> getPropertyValueFromActivity(Activity activity, Property property) {
     var propertyName = property.getBinding().getName();
-    return activity.getExtensionElements().getElementsQuery()
+    var extensionElements = activity.getExtensionElements();
+    if (Objects.isNull(extensionElements)) {
+      return Set.of();
+    }
+    return extensionElements.getElementsQuery()
         .filterByType(CamundaProperties.class)
         .list()
         .stream()
@@ -174,7 +178,11 @@ public class BpmnFileInputsValidator implements RegulationValidator<File> {
   @VisibleForTesting
   static Set<String> getInValueFromActivity(Activity activity, Property property) {
     var propertyName = property.getBinding().getName();
-    return activity.getExtensionElements().getElementsQuery()
+    var extensionElements = activity.getExtensionElements();
+    if (Objects.isNull(extensionElements)) {
+      return Set.of();
+    }
+    return extensionElements.getElementsQuery()
         .filterByType(CamundaIn.class)
         .list()
         .stream()
@@ -187,7 +195,11 @@ public class BpmnFileInputsValidator implements RegulationValidator<File> {
   @VisibleForTesting
   static Set<String> getOutValueFromActivity(Activity activity, Property property) {
     var propertyName = property.getBinding().getSource();
-    return activity.getExtensionElements().getElementsQuery()
+    var extensionElements = activity.getExtensionElements();
+    if (Objects.isNull(extensionElements)) {
+      return Set.of();
+    }
+    return extensionElements.getElementsQuery()
         .filterByType(CamundaOut.class)
         .list()
         .stream()
@@ -200,7 +212,11 @@ public class BpmnFileInputsValidator implements RegulationValidator<File> {
   @VisibleForTesting
   static Set<String> getInputParameterValueFromActivity(Activity activity, Property property) {
     var propertyName = property.getBinding().getName();
-    return activity.getExtensionElements().getElementsQuery()
+    var extensionElements = activity.getExtensionElements();
+    if (Objects.isNull(extensionElements)) {
+      return Set.of();
+    }
+    return extensionElements.getElementsQuery()
         .filterByType(CamundaInputOutput.class)
         .list()
         .stream()
@@ -214,7 +230,11 @@ public class BpmnFileInputsValidator implements RegulationValidator<File> {
   @VisibleForTesting
   static Set<String> getOutputParameterValueFromActivity(Activity activity, Property property) {
     var propertyName = property.getBinding().getSource();
-    return activity.getExtensionElements().getElementsQuery()
+    var extensionElements = activity.getExtensionElements();
+    if (Objects.isNull(extensionElements)) {
+      return Set.of();
+    }
+    return extensionElements.getElementsQuery()
         .filterByType(CamundaInputOutput.class)
         .list()
         .stream()
