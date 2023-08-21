@@ -25,6 +25,7 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.support
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpgrouping.BpGroupingProcessDefinitionIdValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpgrouping.BpGroupingUniqueNameValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpAuthToBpmnProcessExistenceValidator;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpAuthToBpmnRoleExistenceValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpTrembitaToBpmnProcessExistenceValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpmnFileGroupUniqueProcessIdValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpmnFileInputsValidator;
@@ -45,6 +46,7 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.validat
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.json.JsonSchemaFileValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.mainliquibase.MainLiquibaseRulesValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.registrysettings.RegistrySettingsFileValidator;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.report.ReportRoleExistenceValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.typed.BpAuthProcessUniquenessValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.typed.BpTrembitaProcessUniquenessValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.var.GlobalVarsFileValidator;
@@ -52,6 +54,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.util.Collection;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,18 +66,30 @@ public class RegulationValidatorFactory {
 
   private static final String BP_GROUPING_SCHEMA = "classpath:schema/bp-grouping-schema.json";
   private static final String BP_TREMBITA_JSON_SCHEMA = "classpath:schema/bp-trembita-schema.json";
-  private static final String BP_TREMBITA_CONFIG_JSON_SCHEMA = "classpath:schema/bp-trembita-config-schema.json";
+  private static final String BP_TREMBITA_CONFIG_JSON_SCHEMA =
+      "classpath:schema/bp-trembita-config-schema.json";
   private static final String ROLES_JSON_SCHEMA = "classpath:schema/roles-schema.json";
   private static final String GLOBAL_VARS_JSON_SCHEMA = "classpath:schema/global-vars-schema.json";
   private static final String FORMS_JSON_SCHEMA = "classpath:schema/forms-schema.json";
-  private static final String REGISTRY_SETTINGS_JSON_SCHEMA = "classpath:schema/registry-settings-schema.json";
-  private static final String EMAIL_NOTIFICATION_ARGUMENTS_JSON_SCHEMA = "classpath:schema/email-notification-arguments-schema.json";
-  private static final String INBOX_NOTIFICATION_ARGUMENTS_JSON_SCHEMA = "classpath:schema/inbox-notification-arguments-schema.json";
-  private static final String DIIA_NOTIFICATION_ARGUMENTS_JSON_SCHEMA = "classpath:schema/diia-notification-arguments-schema.json";
-  private static final String MOCK_INTEGRATIONS_JSON_SCHEMA = "classpath:schema/mock-integrations-schema.json";
+  private static final String REGISTRY_SETTINGS_JSON_SCHEMA =
+      "classpath:schema/registry-settings-schema.json";
+  private static final String EMAIL_NOTIFICATION_ARGUMENTS_JSON_SCHEMA =
+      "classpath:schema/email-notification-arguments-schema.json";
+  private static final String INBOX_NOTIFICATION_ARGUMENTS_JSON_SCHEMA =
+      "classpath:schema/inbox-notification-arguments-schema.json";
+  private static final String DIIA_NOTIFICATION_ARGUMENTS_JSON_SCHEMA =
+      "classpath:schema/diia-notification-arguments-schema.json";
+  private static final String MOCK_INTEGRATIONS_JSON_SCHEMA =
+      "classpath:schema/mock-integrations-schema.json";
 
   @Value("${element-template-path}")
   private String elementTemplatePath;
+
+  @Value("${officer-permissions-file}")
+  private String officerPermissionsFile;
+
+  @Value("${default-roles}")
+  private List<String> defaultRoles;
 
   private final ResourceLoader resourceLoader;
   private final ObjectMapper yamlObjectMapper;
@@ -145,8 +160,13 @@ public class RegulationValidatorFactory {
         RegulationFileType.BP_GROUPING_TO_BPMN,
         newBpGroupingToBpmnProcessDefinitionIdsValidator(yamlObjectMapper),
         RegulationFileType.BPMN,
-        newBpmnFileInputsValidator(elementTemplatePath)
-     );
+        newBpmnFileInputsValidator(elementTemplatePath),
+        RegulationFileType.BP_ROLE_EXISTENCE,
+        newBpAuthToBpmnRoleExistenceValidator(),
+        RegulationFileType.REPORT_ROLE_EXISTENCE,
+        newReportRoleExistenceValidator()
+
+    );
   }
 
   private RegulationValidator<RegulationFiles> newBpAuthToProcessDefinitionIdsValidator(
@@ -431,5 +451,18 @@ public class RegulationValidatorFactory {
             .validator(new BpGroupingUniqueNameValidator(yamlObjectMapper))
             .build()
     );
+  }
+
+  private RegulationValidator<RegulationFiles> newBpAuthToBpmnRoleExistenceValidator() {
+    return decorateGlobalValidator(GlobalCompositeRegulationFilesValidator.builder()
+        .validator(new BpAuthToBpmnRoleExistenceValidator(yamlObjectMapper, defaultRoles))
+        .build());
+  }
+
+  private RegulationValidator<RegulationFiles> newReportRoleExistenceValidator() {
+    return decorateGlobalValidator(GlobalCompositeRegulationFilesValidator.builder()
+        .validator(new ReportRoleExistenceValidator(yamlObjectMapper, officerPermissionsFile,
+            defaultRoles))
+        .build());
   }
 }

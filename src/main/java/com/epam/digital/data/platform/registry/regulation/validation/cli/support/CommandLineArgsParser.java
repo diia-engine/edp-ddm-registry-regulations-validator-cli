@@ -193,6 +193,13 @@ public class CommandLineArgsParser {
             .desc("Mock integration regulation files (accepts multiple values separated by ',')")
             .build());
 
+    options.addOption(Option.builder()
+        .longOpt(CommandLineArg.REPORTS_FOLDERS.getArgOptionName())
+        .hasArgs()
+        .valueSeparator(',')
+        .desc("Folders with reports files (accepts multiple values separated by ',')")
+        .build());
+
     return options;
   }
 }

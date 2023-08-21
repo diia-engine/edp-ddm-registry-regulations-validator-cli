@@ -39,7 +39,9 @@ public enum RegulationFileType {
   DIIA_NOTIFICATION_TEMPLATE(),
   BP_GROUPING("yml", "yaml"),
   BP_GROUPING_TO_BPMN(),
-  MOCK_INTEGRATIONS("json");
+  MOCK_INTEGRATIONS("json"),
+  BP_ROLE_EXISTENCE(),
+  REPORT_ROLE_EXISTENCE();
 
   private final String[] fileExtensions;
 

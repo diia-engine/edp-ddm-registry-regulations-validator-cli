@@ -50,6 +50,8 @@ class RegulationFilesValidatorTest {
     RegulationValidator<File> bpGroupingUniqueNameValidator = mock(RegulationValidator.class);
     RegulationValidator<RegulationFiles> bpGroupingProcessDefinitionIdValidator = mock(RegulationValidator.class);
     RegulationValidator<RegulationFiles> bpInputValidator = mock(RegulationValidator.class);
+    RegulationValidator<RegulationFiles> bpAuthToBpmnRoleExistenceValidator = mock(RegulationValidator.class);
+    RegulationValidator<RegulationFiles> reportRoleExistenceValidator = mock(RegulationValidator.class);
 
     var validators = Map.of(
         RegulationFileType.BP_AUTH, bpAuthFileValidator,
@@ -71,7 +73,9 @@ class RegulationFilesValidatorTest {
             RegulationFileType.BP_AUTH_TO_BPMN, bpAuthToBpmnRegulationValidator,
             RegulationFileType.BP_TREMBITA_TO_BPMN, bpTrembitaToBpmnRegulationValidator,
             RegulationFileType.BP_GROUPING_TO_BPMN, bpGroupingProcessDefinitionIdValidator,
-            RegulationFileType.BPMN, bpInputValidator
+            RegulationFileType.BPMN, bpInputValidator,
+            RegulationFileType.BP_ROLE_EXISTENCE, bpAuthToBpmnRoleExistenceValidator,
+            RegulationFileType.REPORT_ROLE_EXISTENCE, reportRoleExistenceValidator
     );
 
     var regulationFilesValidator = new RegulationFilesValidator(validators, groupValidators, globalRegulationValidators);
@@ -86,6 +90,7 @@ class RegulationFilesValidatorTest {
         .dmnFiles(singleFile())
         .excerptFiles(singleFile())
         .bpGroupingFiles(singleFile())
+        .reportsFolders(singleFile())
         .build();
 
     regulationFilesValidator.validate(regulationFiles, ValidationContext.empty());

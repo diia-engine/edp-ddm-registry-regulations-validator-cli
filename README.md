@@ -13,7 +13,7 @@ Example: java -jar registry-regulations-validator-cli.jar
          [--bpmn-files=<arg>] [--dmn-files=<arg>] [--form-files=<arg>]
          [--global-vars-files=<arg>] [--roles-files=<arg>] 
          [--datafactory-settings-files=<arg>] [--registry-settings-files=<arg>]
-         [--liquibase-files=<arg>]
+         [--liquibase-files=<arg>] [--report-folders=<arg>]
 Options:
     --help                     Help on utility usage
     --bp-auth-files=<arg>      BP authorization regulation files (accepts
@@ -21,7 +21,6 @@ Options:
     --bp-trembita-files=<arg>  BP Trembita configuration regulation file
     --bp-trembita-config=<arg> BP Trembita registries configuration file
     --bpmn-files=<arg>         Business processes regulation files (accepts multiple values separated by ',')
-                               (accepts multiple values separated by ',')
     --dmn-files=<arg>          Business rules regulation files (accepts
                                multiple values separated by ',')
     --form-files=<arg>         UI forms regulation files (accepts multiple
@@ -35,6 +34,8 @@ Options:
     --bp-grouping-files=<arg>  Business process grouping file
     --mock-integration-files=<arg>         Mock Integration regulation files (accepts multiple
                                values separated by ',')    
+    --report-folders=<arg>     Folders with report files (accepts multiple values separated by ',')                      
+                               
 Exit codes: 0 (success), 1 (system error), 10 (validation failure)
 ```
 ### Test execution

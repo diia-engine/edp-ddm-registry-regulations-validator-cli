@@ -446,7 +446,7 @@ class RegulationValidationCommandLineRunnerTest {
             testResourcePathOf("registry-regulation/correct/bp-trembita.yml")),
         argOf(CommandLineArg.BP_TREMBITA_CONFIG,
             testResourcePathOf("registry-regulation/correct/configuration.yml")),
-        argOf(CommandLineArg.ROLES, testResourcePathOf("registry-regulation/correct/roles.yml")),
+        argOf(CommandLineArg.ROLES, testResourcePathOf("registry-regulation/correct/officer.yml")),
         argOf(CommandLineArg.BPMN,
             testResourcePathOf("registry-regulation/correct/process.bpmn"),
             testResourcePathOf("registry-regulation/correct/trembita-process.bpmn")),
