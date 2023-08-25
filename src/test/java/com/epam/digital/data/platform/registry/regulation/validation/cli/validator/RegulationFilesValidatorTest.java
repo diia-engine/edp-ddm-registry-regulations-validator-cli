@@ -52,6 +52,7 @@ class RegulationFilesValidatorTest {
     RegulationValidator<RegulationFiles> bpInputValidator = mock(RegulationValidator.class);
     RegulationValidator<RegulationFiles> bpAuthToBpmnRoleExistenceValidator = mock(RegulationValidator.class);
     RegulationValidator<RegulationFiles> reportRoleExistenceValidator = mock(RegulationValidator.class);
+    RegulationValidator<RegulationFiles> formToSearchConditionExistenceValidator = mock(RegulationValidator.class);
 
     var validators = Map.of(
         RegulationFileType.BP_AUTH, bpAuthFileValidator,
@@ -75,7 +76,8 @@ class RegulationFilesValidatorTest {
             RegulationFileType.BP_GROUPING_TO_BPMN, bpGroupingProcessDefinitionIdValidator,
             RegulationFileType.BPMN, bpInputValidator,
             RegulationFileType.BP_ROLE_EXISTENCE, bpAuthToBpmnRoleExistenceValidator,
-            RegulationFileType.REPORT_ROLE_EXISTENCE, reportRoleExistenceValidator
+            RegulationFileType.REPORT_ROLE_EXISTENCE, reportRoleExistenceValidator,
+            RegulationFileType.FORM_TO_SC, formToSearchConditionExistenceValidator
     );
 
     var regulationFilesValidator = new RegulationFilesValidator(validators, groupValidators, globalRegulationValidators);
@@ -105,6 +107,7 @@ class RegulationFilesValidatorTest {
     verify(bpmnFilesValidator, times(1)).validate(any(), any());
     verify(excerptsFilesValidator, times(1)).validate(any(), any());
     verify(bpGroupingUniqueNameValidator, times(1)).validate(any(), any());
+    verify(formToSearchConditionExistenceValidator, times(1)).validate(any(), any());
   }
 
   private ArrayList<File> singleFile() {

@@ -86,6 +86,8 @@ public class RegulationFilesValidator implements RegulationValidator<RegulationF
 
     errors.addAll(validateGlobalFiles(regulationFiles, RegulationFileType.REPORT_ROLE_EXISTENCE));
 
+    errors.addAll(validateGlobalFiles(regulationFiles, RegulationFileType.FORM_TO_SC));
+
     regulationFiles.getBpGroupingFiles().forEach(file -> errors.addAll(validate(file, RegulationFileType.BP_GROUPING)));
 
     return errors;

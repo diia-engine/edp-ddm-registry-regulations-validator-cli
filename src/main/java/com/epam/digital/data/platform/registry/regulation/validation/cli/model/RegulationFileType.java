@@ -41,7 +41,8 @@ public enum RegulationFileType {
   BP_GROUPING_TO_BPMN(),
   MOCK_INTEGRATIONS("json"),
   BP_ROLE_EXISTENCE(),
-  REPORT_ROLE_EXISTENCE();
+  REPORT_ROLE_EXISTENCE(),
+  FORM_TO_SC("json", "xml");
 
   private final String[] fileExtensions;
 

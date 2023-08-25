@@ -90,7 +90,7 @@
       "data": {
         "values": [],
         "json": "",
-        "url": "/officer/api/data-factory/koatuu-obl-contains-name",
+        "url": "",
         "resource": "",
         "custom": "",
         "headers": [
@@ -140,7 +140,7 @@
       "data": {
         "values": [],
         "json": "",
-        "url": "/officer/api/data-factory/koatuu-np-starts-with-name-by-obl",
+        "url": "",
         "resource": "",
         "custom": "",
         "headers": [
@@ -309,7 +309,7 @@
       "data": {
         "values": [],
         "json": "",
-        "url": "/officer/api/data-factory/ownership-contains-name",
+        "url": "",
         "resource": "",
         "custom": "",
         "headers": [
@@ -358,7 +358,7 @@
       "data": {
         "values": [],
         "json": "",
-        "url": "/officer/api/data-factory/kopfg-contains-name",
+        "url": "",
         "resource": "",
         "custom": "",
         "headers": [

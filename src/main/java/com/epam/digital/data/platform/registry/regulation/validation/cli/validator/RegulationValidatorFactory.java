@@ -17,6 +17,8 @@
 package com.epam.digital.data.platform.registry.regulation.validation.cli.validator;
 
 import com.deliveredtechnologies.rulebook.model.RuleBook;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpmnFileInputsValidator;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.form.FormToSearchConditionExistenceValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.BpAuthConfiguration;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.BpTrembitaConfiguration;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.RegulationFileType;
@@ -28,7 +30,6 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.validat
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpAuthToBpmnRoleExistenceValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpTrembitaToBpmnProcessExistenceValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpmnFileGroupUniqueProcessIdValidator;
-import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpmnFileInputsValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpmnFileValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.channel.NotificationTemplateDirectoryValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.channel.NotificationTemplateValidator;
@@ -158,8 +159,9 @@ public class RegulationValidatorFactory {
         RegulationFileType.BP_ROLE_EXISTENCE,
         newBpAuthToBpmnRoleExistenceValidator(),
         RegulationFileType.REPORT_ROLE_EXISTENCE,
-        newReportRoleExistenceValidator()
-
+        newReportRoleExistenceValidator(),
+        RegulationFileType.FORM_TO_SC,
+        newFormToSearchConditionExistenceValidator()
     );
   }
 
@@ -457,6 +459,12 @@ public class RegulationValidatorFactory {
     return decorateGlobalValidator(GlobalCompositeRegulationFilesValidator.builder()
         .validator(new ReportRoleExistenceValidator(yamlObjectMapper, officerPermissionsFile,
             defaultRoles))
+        .build());
+  }
+
+  private RegulationValidator<RegulationFiles> newFormToSearchConditionExistenceValidator() {
+    return decorateGlobalValidator(GlobalCompositeRegulationFilesValidator.builder()
+        .validator(new FormToSearchConditionExistenceValidator(jsonObjectMapper))
         .build());
   }
 }
