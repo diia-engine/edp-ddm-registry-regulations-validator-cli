@@ -8,13 +8,6 @@ spring:
 
 element-template-path: '/var/lib/business-process-modeller-extensions/business-process-modeler-element-templates.json'
 officer-permissions-file: 'officer.yml'
-default-roles:
-  - officer
-  - citizen
-  - unregistered-individual
-  - unregistered-entrepreneur
-  - unregistered-legal
-  - unregistered-officer
-  - entrepreneur
-  - legal
-  - individual
+default-roles: 'officer, citizen, unregistered-individual, 
+                unregistered-entrepreneur, unregistered-legal, 
+                unregistered-officer, entrepreneur, legal, individual'

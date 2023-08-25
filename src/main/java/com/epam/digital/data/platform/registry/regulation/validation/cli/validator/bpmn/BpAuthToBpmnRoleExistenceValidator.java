@@ -31,7 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.util.CollectionUtils;
 
 @RequiredArgsConstructor
 public class BpAuthToBpmnRoleExistenceValidator implements RegulationValidator<RegulationFiles> {
@@ -65,19 +65,17 @@ public class BpAuthToBpmnRoleExistenceValidator implements RegulationValidator<R
                 String.format("Exception during reading file %s", e.getMessage())));
       }
     }
-    if (null != defaultRoles && ArrayUtils.isNotEmpty(defaultRoles.toArray())) {
+    if (!CollectionUtils.isEmpty(defaultRoles)) {
       existingRoles.addAll(defaultRoles);
     }
+    processConfigs.forEach(config -> config.getAuthorization().getProcessDefinitions().stream()
+        .flatMap(definition -> definition.getRoles().stream())
+        .distinct()
+        .filter(roleName -> !existingRoles.contains(roleName))
+        .forEach(roleName -> errors.add(
+            ValidationError.of(context.getRegulationFileType(), config.getRegulationFile(),
+                String.format("Role with name : %s does not exists", roleName)))));
 
-    processConfigs.forEach((config) ->
-        config.getAuthorization().getProcessDefinitions().forEach((definition) ->
-            definition.getRoles().forEach(roleName -> {
-              if (!existingRoles.contains(roleName)) {
-                errors.add(
-                    ValidationError.of(context.getRegulationFileType(), config.getRegulationFile(),
-                        String.format("Role with name : %s does not exists", roleName)));
-              }
-            })));
     return errors;
   }
 
