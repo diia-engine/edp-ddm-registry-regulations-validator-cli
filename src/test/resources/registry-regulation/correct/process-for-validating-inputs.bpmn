@@ -47,7 +47,7 @@
         <camunda:out source="camundaOutWithConstraint" target="someTarget"/>
         <camunda:inputOutput>
           <camunda:inputParameter name="camundaInputParameterWithoutConstraint"></camunda:inputParameter>
-          <camunda:inputParameter name="camundaInputParameterWithConstraint">someInput</camunda:inputParameter>
+          <camunda:inputParameter name="camundaInputParameterWithConstraint">testRole</camunda:inputParameter>
           <camunda:outputParameter name="">camundaOutputParameterWithoutConstraint</camunda:outputParameter>
           <camunda:outputParameter name="someName">camundaOutputParameterWithConstraint</camunda:outputParameter>
         </camunda:inputOutput>

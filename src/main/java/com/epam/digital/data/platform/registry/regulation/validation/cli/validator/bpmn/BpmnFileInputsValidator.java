@@ -16,8 +16,7 @@
 
 package com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn;
 
-import static org.camunda.bpm.model.bpmn.impl.BpmnModelConstants.CAMUNDA_NS;
-
+import com.epam.digital.data.platform.registry.regulation.validation.cli.exception.FileProcessingException;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.ElementTemplate;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.ElementTemplate.Property;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.RegulationFiles;
@@ -27,6 +26,16 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.validat
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.util.BpmnUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Sets;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.camunda.bpm.model.bpmn.Bpmn;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.camunda.bpm.model.bpmn.instance.Activity;
+import org.camunda.bpm.model.bpmn.instance.camunda.*;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.util.CollectionUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -34,25 +43,12 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Sets;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.camunda.bpm.model.bpmn.Bpmn;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.instance.Activity;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaIn;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaInputOutput;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaInputParameter;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaOut;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaOutputParameter;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaProperties;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaProperty;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.util.CollectionUtils;
+import static org.camunda.bpm.model.bpmn.impl.BpmnModelConstants.CAMUNDA_NS;
 
 @Slf4j
 public class BpmnFileInputsValidator implements RegulationValidator<RegulationFiles> {
 
+  private final List<String> defaultRoles;
   private static final Map<String, BiFunction<Activity, Property, Set<String>>> GET_VALUES_FOR_VALIDATION_FUNCTIONS = Map.of(
       "property", BpmnFileInputsValidator::getAttributeValuesFromActivity,
       "camunda:property", BpmnFileInputsValidator::getPropertyValueFromActivity,
@@ -62,13 +58,15 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
       "camunda:outputParameter", BpmnFileInputsValidator::getOutputParameterValueFromActivity
   );
 
-  private static final Map<String, BiFunction<String, RegulationFiles, Boolean>> INPUT_VALIDATION_FUNCTIONS = Map.ofEntries(
-      Map.entry("process.id", BpmnFileInputsValidator::validateProcessId)
+  private final Map<String, BiFunction<String, RegulationFiles, Boolean>> INPUT_VALIDATION_FUNCTIONS = Map.ofEntries(
+      Map.entry("role.name", this::validateRoleName),
+      Map.entry("process.id", this::validateProcessId)
   );
 
   private final Map<String, ElementTemplate> elementTemplates;
 
-  public BpmnFileInputsValidator(String elementTemplatePath) {
+  public BpmnFileInputsValidator(String elementTemplatePath, List<String> defaultRoles) {
+    this.defaultRoles = defaultRoles;
     var jsonFile = new File(elementTemplatePath);
 
     var objectMapper = new Jackson2ObjectMapperBuilder()
@@ -95,7 +93,7 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
   }
 
   private Set<ValidationError> validateElementTemplateParameters(BpmnModelInstance bpmnModel,
-      File regulationFile, ValidationContext validationContext, RegulationFiles regulationFiles) {
+                                                                 File regulationFile, ValidationContext validationContext, RegulationFiles regulationFiles) {
     var validationErrors = new HashSet<ValidationError>();
     var elements = bpmnModel.getModelElementsByType(Activity.class)
         .stream()
@@ -119,7 +117,7 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
   }
 
   private Set<ValidationError> validateElementAgainstElementTemplate(Activity activity, ElementTemplate elementTemplate,
-      File regulationFile, ValidationContext validationContext, RegulationFiles regulationFiles) {
+                                                                     File regulationFile, ValidationContext validationContext, RegulationFiles regulationFiles) {
     var properties = elementTemplate.getProperties();
 
     return properties.stream()
@@ -130,7 +128,7 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
   }
 
   private ValidationError validatePropertyInElement(Activity activity, ElementTemplate.Property property,
-      File regulationFile, ValidationContext validationContext, RegulationFiles regulationFiles) {
+                                                    File regulationFile, ValidationContext validationContext, RegulationFiles regulationFiles) {
     var getValuesFunction = GET_VALUES_FOR_VALIDATION_FUNCTIONS.get(
         property.getBinding().getType());
     var propertyValueSet = getValuesFunction.apply(activity, property);
@@ -150,13 +148,18 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
     }
 
     String type = property.getConstraints().getType();
-    if(!StringUtils.isBlank(type)){
+    if (!StringUtils.isBlank(type)) {
       var inputValidationFunction = INPUT_VALIDATION_FUNCTIONS.get(type);
-      if (Objects.nonNull(inputValidationFunction) && !inputValidationFunction.apply(propertyValue, regulationFiles)) {
-        return ValidationError.of(validationContext.getRegulationFileType(), regulationFile,
-            String.format("In task %s of process %s, the input parameter %s doesn't exist",
-                activity.getId(), regulationFile.getName(), property.getBinding()));
+      try {
+        if (Objects.nonNull(inputValidationFunction) && !inputValidationFunction.apply(propertyValue, regulationFiles)) {
+          return ValidationError.of(validationContext.getRegulationFileType(), regulationFile,
+              String.format("In task %s of process %s, the input parameter %s doesn't exist",
+                  activity.getId(), regulationFile.getName(), property.getBinding()));
+        }
+      } catch (FileProcessingException e) {
+        return ValidationError.of(validationContext.getRegulationFileType(), regulationFile, e.getMessage());
       }
+
     }
 
     return null;
@@ -267,8 +270,15 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
   }
 
   @VisibleForTesting
-  static Boolean validateProcessId(String processId, RegulationFiles regulationFiles) {
+  Boolean validateProcessId(String processId, RegulationFiles regulationFiles) {
     return BpmnUtil.getBpmnFilesProcessDefinitionsId(regulationFiles).contains(processId);
+  }
+
+  @VisibleForTesting
+  Boolean validateRoleName(String roleName, RegulationFiles regulationFiles) {
+    Set<String> roles = BpmnUtil.getRoles(regulationFiles);
+    roles.addAll(Objects.requireNonNullElse(defaultRoles, Collections.emptySet()));
+    return roles.contains(roleName);
   }
 
   private static class ElementTemplateListTypeReference extends

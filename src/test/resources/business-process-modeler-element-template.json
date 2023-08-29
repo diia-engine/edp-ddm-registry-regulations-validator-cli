@@ -89,7 +89,8 @@
           "name": "camundaInputParameterWithConstraint"
         },
         "constraints": {
-          "notEmpty": true
+          "notEmpty": true,
+          "type": "role.name"
         }
       },
       {

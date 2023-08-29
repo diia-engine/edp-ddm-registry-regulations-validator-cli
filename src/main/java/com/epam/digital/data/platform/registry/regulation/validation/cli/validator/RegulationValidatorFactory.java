@@ -66,21 +66,15 @@ public class RegulationValidatorFactory {
 
   private static final String BP_GROUPING_SCHEMA = "classpath:schema/bp-grouping-schema.json";
   private static final String BP_TREMBITA_JSON_SCHEMA = "classpath:schema/bp-trembita-schema.json";
-  private static final String BP_TREMBITA_CONFIG_JSON_SCHEMA =
-      "classpath:schema/bp-trembita-config-schema.json";
+  private static final String BP_TREMBITA_CONFIG_JSON_SCHEMA = "classpath:schema/bp-trembita-config-schema.json";
   private static final String ROLES_JSON_SCHEMA = "classpath:schema/roles-schema.json";
   private static final String GLOBAL_VARS_JSON_SCHEMA = "classpath:schema/global-vars-schema.json";
   private static final String FORMS_JSON_SCHEMA = "classpath:schema/forms-schema.json";
-  private static final String REGISTRY_SETTINGS_JSON_SCHEMA =
-      "classpath:schema/registry-settings-schema.json";
-  private static final String EMAIL_NOTIFICATION_ARGUMENTS_JSON_SCHEMA =
-      "classpath:schema/email-notification-arguments-schema.json";
-  private static final String INBOX_NOTIFICATION_ARGUMENTS_JSON_SCHEMA =
-      "classpath:schema/inbox-notification-arguments-schema.json";
-  private static final String DIIA_NOTIFICATION_ARGUMENTS_JSON_SCHEMA =
-      "classpath:schema/diia-notification-arguments-schema.json";
-  private static final String MOCK_INTEGRATIONS_JSON_SCHEMA =
-      "classpath:schema/mock-integrations-schema.json";
+  private static final String REGISTRY_SETTINGS_JSON_SCHEMA = "classpath:schema/registry-settings-schema.json";
+  private static final String EMAIL_NOTIFICATION_ARGUMENTS_JSON_SCHEMA = "classpath:schema/email-notification-arguments-schema.json";
+  private static final String INBOX_NOTIFICATION_ARGUMENTS_JSON_SCHEMA = "classpath:schema/inbox-notification-arguments-schema.json";
+  private static final String DIIA_NOTIFICATION_ARGUMENTS_JSON_SCHEMA = "classpath:schema/diia-notification-arguments-schema.json";
+  private static final String MOCK_INTEGRATIONS_JSON_SCHEMA = "classpath:schema/mock-integrations-schema.json";
 
   @Value("${element-template-path}")
   private String elementTemplatePath;
@@ -160,7 +154,7 @@ public class RegulationValidatorFactory {
         RegulationFileType.BP_GROUPING_TO_BPMN,
         newBpGroupingToBpmnProcessDefinitionIdsValidator(yamlObjectMapper),
         RegulationFileType.BPMN,
-        newBpmnFileInputsValidator(elementTemplatePath),
+        newBpmnFileInputsValidator(elementTemplatePath, defaultRoles),
         RegulationFileType.BP_ROLE_EXISTENCE,
         newBpAuthToBpmnRoleExistenceValidator(),
         RegulationFileType.REPORT_ROLE_EXISTENCE,
@@ -177,9 +171,9 @@ public class RegulationValidatorFactory {
   }
 
   private RegulationValidator<RegulationFiles> newBpmnFileInputsValidator(
-      String elementTemplatePath) {
+      String elementTemplatePath, List<String> defaultRoles) {
     return decorateGlobalValidator(GlobalCompositeRegulationFilesValidator.builder()
-        .validator(new BpmnFileInputsValidator(elementTemplatePath))
+        .validator(new BpmnFileInputsValidator(elementTemplatePath, defaultRoles))
         .build());
   }
 

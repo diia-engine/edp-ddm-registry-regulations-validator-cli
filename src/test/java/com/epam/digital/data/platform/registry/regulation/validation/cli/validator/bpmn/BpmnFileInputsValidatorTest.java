@@ -299,7 +299,8 @@ class BpmnFileInputsValidatorTest {
     var templatePath = Objects.requireNonNull(
             getClass().getClassLoader().getResource("business-process-modeler-element-template.json"))
         .getPath();
-    var validator = new BpmnFileInputsValidator(templatePath);
+    var defaultRoles = List.of("testRole");
+    var validator = new BpmnFileInputsValidator(templatePath, defaultRoles);
 
     var correctFile = Objects.requireNonNull(getClass().getClassLoader()
         .getResource("registry-regulation/correct/process-for-validating-inputs.bpmn")).getPath();
@@ -314,7 +315,8 @@ class BpmnFileInputsValidatorTest {
     var templatePath = Objects.requireNonNull(
             getClass().getClassLoader().getResource("business-process-modeler-element-template.json"))
         .getPath();
-    var validator = new BpmnFileInputsValidator(templatePath);
+    var defaultRoles = List.of("testRole");
+    var validator = new BpmnFileInputsValidator(templatePath, defaultRoles);
 
     var correctFile = Objects.requireNonNull(getClass().getClassLoader()
         .getResource("registry-regulation/broken/process-for-validating-inputs.bpmn")).getPath();
@@ -322,12 +324,13 @@ class BpmnFileInputsValidatorTest {
     var result = validator.validate(RegulationFiles.builder().bpmnFiles(List.of(new File(correctFile))).build(), ValidationContext.empty());
 
     Assertions.assertThat(result)
-        .hasSize(8);
+        .hasSize(9);
   }
 
   @Test
   void validateIllegalStateIfNoTemplatesFound() {
-    Assertions.assertThatThrownBy(() -> new BpmnFileInputsValidator("nonExistedFile"))
+    var defaultRoles = List.of("testRole");
+    Assertions.assertThatThrownBy(() -> new BpmnFileInputsValidator("nonExistedFile", defaultRoles))
         .isInstanceOf(IllegalStateException.class)
         .hasMessage("During reading elementTemplates file occurred error.")
         .hasCauseInstanceOf(FileNotFoundException.class);

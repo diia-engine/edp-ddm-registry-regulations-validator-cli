@@ -36,6 +36,7 @@ import com.google.common.collect.Sets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -413,6 +414,7 @@ class RegulationValidationCommandLineRunnerTest {
             getClass().getClassLoader().getResource("business-process-modeler-element-template.json"))
         .getPath();
     ReflectionTestUtils.setField(validatorFactory, "elementTemplatePath", elementTemplatePath);
+    ReflectionTestUtils.setField(validatorFactory, "defaultRoles", List.of("testRole"));
 
     return new RegulationValidationCommandLineRunner(
         validatorFactory, commandLineArgsParser, commandLineOptionsConverter, systemExit
