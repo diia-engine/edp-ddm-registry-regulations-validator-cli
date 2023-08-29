@@ -53,16 +53,5 @@ public abstract class AbstractBpToBpmnProcessExistenceValidator implements Regul
     return errors;
   }
 
-  public Set<String> getBpmnFilesProcessDefinitionsId(RegulationFiles regulationFiles) {
-    Set<String> bpmnProcessDefinitionsId = new HashSet<>();
-    for (File file : regulationFiles.getBpmnFiles()) {
-      if (file.exists()) {
-        Collection<Process> modelElementsByType = Bpmn.readModelFromFile(file).getModelElementsByType(Process.class);
-        bpmnProcessDefinitionsId.addAll(modelElementsByType.stream().map(BaseElement::getId).collect(Collectors.toSet()));
-      }
-    }
-    return bpmnProcessDefinitionsId;
-  }
-
   protected abstract Set<String> getDefinitionsIdsFromBpFile(File bpFile) throws IOException;
 }

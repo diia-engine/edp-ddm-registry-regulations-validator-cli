@@ -37,7 +37,8 @@
           "name": "camundaPropertyWithConstraint"
         },
         "constraints": {
-          "notEmpty": true
+          "notEmpty": true,
+          "type": "process.id"
         }
       },
       {

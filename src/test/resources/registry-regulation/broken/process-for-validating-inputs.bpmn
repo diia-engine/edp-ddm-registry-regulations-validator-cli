@@ -36,7 +36,7 @@
         </camunda:inputOutput>
         <camunda:properties>
           <camunda:property name="camundaPropertyWithoutConstraint" value="" />
-          <camunda:property name="camundaPropertyWithConstraint" value="someValue" />
+          <camunda:property name="camundaPropertyWithConstraint" value="NotExistingProcessId" />
         </camunda:properties>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_13f24am</bpmn:incoming>

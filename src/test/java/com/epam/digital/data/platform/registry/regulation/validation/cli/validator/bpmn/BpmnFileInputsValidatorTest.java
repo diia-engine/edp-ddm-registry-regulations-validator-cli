@@ -19,6 +19,7 @@ package com.epam.digital.data.platform.registry.regulation.validation.cli.valida
 import static org.camunda.bpm.model.bpmn.impl.BpmnModelConstants.CAMUNDA_NS;
 
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.ElementTemplate;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.model.RegulationFiles;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.ValidationContext;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -303,7 +304,7 @@ class BpmnFileInputsValidatorTest {
     var correctFile = Objects.requireNonNull(getClass().getClassLoader()
         .getResource("registry-regulation/correct/process-for-validating-inputs.bpmn")).getPath();
 
-    var result = validator.validate(new File(correctFile), ValidationContext.empty());
+    var result = validator.validate(RegulationFiles.builder().bpmnFiles(List.of(new File(correctFile))).build(), ValidationContext.empty());
 
     Assertions.assertThat(result).isEmpty();
   }
@@ -318,10 +319,10 @@ class BpmnFileInputsValidatorTest {
     var correctFile = Objects.requireNonNull(getClass().getClassLoader()
         .getResource("registry-regulation/broken/process-for-validating-inputs.bpmn")).getPath();
 
-    var result = validator.validate(new File(correctFile), ValidationContext.empty());
+    var result = validator.validate(RegulationFiles.builder().bpmnFiles(List.of(new File(correctFile))).build(), ValidationContext.empty());
 
     Assertions.assertThat(result)
-        .hasSize(7);
+        .hasSize(8);
   }
 
   @Test

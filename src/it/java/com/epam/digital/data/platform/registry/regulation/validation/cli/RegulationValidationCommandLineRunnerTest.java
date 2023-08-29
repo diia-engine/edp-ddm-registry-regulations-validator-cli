@@ -369,6 +369,32 @@ class RegulationValidationCommandLineRunnerTest {
     verify(systemExit).validationFailure();
   }
 
+  @Test
+  void shouldFailBPMNFIleInputValidation() {
+    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
+        new CommandLineOptionsConverter(), systemExit);
+
+    validationRunner.run(correctRegistryRegulations());
+    validationRunner.run(argOf(CommandLineArg.BPMN,
+        testResourcePathOf("registry-regulation/broken/process-for-validating-inputs.bpmn"))
+    );
+
+    verify(systemExit, times(1)).validationFailure();
+  }
+
+  @Test
+  void shouldPassBPMNFIleInputValidation() {
+    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
+        new CommandLineOptionsConverter(), systemExit);
+
+    validationRunner.run(correctRegistryRegulations());
+    validationRunner.run(argOf(CommandLineArg.BPMN,
+        testResourcePathOf("registry-regulation/correct/process-for-validating-inputs.bpmn"))
+    );
+
+    verify(systemExit, times(0)).validationFailure();
+  }
+
   private String bpmnArgsForBpGroupingRegistryRegulations() {
     return argOf(CommandLineArg.BPMN,
         testResourcePathOf("registry-regulation/correct/bp-grouping/bpmn/process_for_group_1.bpmn"),

@@ -49,6 +49,7 @@ class RegulationFilesValidatorTest {
     RegulationValidator<RegulationFiles> bpTrembitaToBpmnRegulationValidator = mock(RegulationValidator.class);
     RegulationValidator<File> bpGroupingUniqueNameValidator = mock(RegulationValidator.class);
     RegulationValidator<RegulationFiles> bpGroupingProcessDefinitionIdValidator = mock(RegulationValidator.class);
+    RegulationValidator<RegulationFiles> bpInputValidator = mock(RegulationValidator.class);
 
     var validators = Map.of(
         RegulationFileType.BP_AUTH, bpAuthFileValidator,
@@ -69,7 +70,8 @@ class RegulationFilesValidatorTest {
     var globalRegulationValidators = Map.of(
             RegulationFileType.BP_AUTH_TO_BPMN, bpAuthToBpmnRegulationValidator,
             RegulationFileType.BP_TREMBITA_TO_BPMN, bpTrembitaToBpmnRegulationValidator,
-            RegulationFileType.BP_GROUPING_TO_BPMN, bpGroupingProcessDefinitionIdValidator
+            RegulationFileType.BP_GROUPING_TO_BPMN, bpGroupingProcessDefinitionIdValidator,
+            RegulationFileType.BPMN, bpInputValidator
     );
 
     var regulationFilesValidator = new RegulationFilesValidator(validators, groupValidators, globalRegulationValidators);

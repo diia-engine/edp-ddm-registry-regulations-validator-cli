@@ -143,15 +143,23 @@ public class RegulationValidatorFactory {
         RegulationFileType.BP_TREMBITA_TO_BPMN,
         newBpTrembitaToBpmnProcessDefinitionIdsValidator(yamlObjectMapper),
         RegulationFileType.BP_GROUPING_TO_BPMN,
-        newBpGroupingToBpmnProcessDefinitionIdsValidator(yamlObjectMapper)
-
-    );
+        newBpGroupingToBpmnProcessDefinitionIdsValidator(yamlObjectMapper),
+        RegulationFileType.BPMN,
+        newBpmnFileInputsValidator(elementTemplatePath)
+     );
   }
 
   private RegulationValidator<RegulationFiles> newBpAuthToProcessDefinitionIdsValidator(
       ObjectMapper yamlObjectMapper) {
     return decorateGlobalValidator(GlobalCompositeRegulationFilesValidator.builder()
         .validator(new BpAuthToBpmnProcessExistenceValidator(yamlObjectMapper))
+        .build());
+  }
+
+  private RegulationValidator<RegulationFiles> newBpmnFileInputsValidator(
+      String elementTemplatePath) {
+    return decorateGlobalValidator(GlobalCompositeRegulationFilesValidator.builder()
+        .validator(new BpmnFileInputsValidator(elementTemplatePath))
         .build());
   }
 
@@ -274,7 +282,6 @@ public class RegulationValidatorFactory {
             .validator(new FileExistenceValidator())
             .validator(new FileExtensionValidator())
             .validator(new BpmnFileValidator())
-            .validator(new BpmnFileInputsValidator(elementTemplatePath))
             .build()
     );
   }
