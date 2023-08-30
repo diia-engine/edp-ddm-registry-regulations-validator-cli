@@ -337,7 +337,7 @@ class BpmnFileInputsValidatorTest {
     var result = validator.validate(regulationFiles, ValidationContext.empty());
 
     Assertions.assertThat(result)
-        .hasSize(11);
+        .hasSize(13);
   }
 
   @Test

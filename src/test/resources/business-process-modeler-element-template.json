@@ -97,11 +97,22 @@
         "label": "Camunda input parameter with constraint",
         "binding": {
           "type": "camunda:inputParameter",
-          "name": "resourceWithConstraint"
+          "name": "table"
         },
         "constraints": {
           "notEmpty": true,
           "type": "table.rest-api-name"
+        }
+      },
+      {
+        "label": "Camunda input parameter with constraint",
+        "binding": {
+          "type": "camunda:inputParameter",
+          "name": "compositeEntity"
+        },
+        "constraints": {
+          "notEmpty": true,
+          "type": "composite-entity.rest-api-name"
         }
       },
       {

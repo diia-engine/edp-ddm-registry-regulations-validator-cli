@@ -16,6 +16,7 @@
 
 package com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn;
 
+import com.epam.digital.data.platform.liquibase.extension.change.core.DdmCreateCompositeEntityChange;
 import com.epam.digital.data.platform.liquibase.extension.change.core.DdmCreateTableChange;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.exception.FileProcessingException;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.ElementTemplate;
@@ -62,10 +63,12 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
       "camunda:outputParameter", BpmnFileInputsValidator::getOutputParameterValueFromActivity
   );
   private static Set<String> tableNames;
+  private static Set<String> compositeEntityNames;
 
   private final Map<String, BiFunction<String, RegulationFiles, Boolean>> INPUT_VALIDATION_FUNCTIONS = Map.ofEntries(
       Map.entry("role.name", this::validateRoleName),
       Map.entry("table.rest-api-name", this::validateTableName),
+      Map.entry("composite-entity.rest-api-name", this::validateCompositeEntityName),
       Map.entry("process.id", this::validateProcessId)
   );
 
@@ -96,7 +99,9 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
     if (!liquibaseFiles.isEmpty()) {
       var mainLiquibase = liquibaseFiles.iterator().next();
       try {
-        tableNames = getTableNames(mainLiquibase);
+        var changes = getChanges(mainLiquibase);
+        tableNames = getTableNames(changes);
+        compositeEntityNames = getCompositeEntityNames(changes);
       } catch (LiquibaseException e) {
         errors.add(ValidationError.of(context.getRegulationFileType(), mainLiquibase,
                 "File processing failure", e)
@@ -304,12 +309,27 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
     return tableNames.contains(tableName);
   }
 
-  private Set<String> getTableNames(File mainLiquibase) throws LiquibaseException {
-    List<Change> allChanges = getAllChanges(getDatabaseChangeLog(mainLiquibase));
-    return allChanges.stream()
+  @VisibleForTesting
+  Boolean validateCompositeEntityName(String compositeEntityName, RegulationFiles regulationFiles) {
+    return compositeEntityNames.contains(compositeEntityName);
+  }
+
+  private Set<String> getTableNames(List<Change> changes) throws LiquibaseException {
+    return changes.stream()
         .filter(change -> DdmCreateTableChange.class.isAssignableFrom(change.getClass()))
         .map(change -> ((DdmCreateTableChange) change).getTableName().replaceAll("_", "-"))
         .collect(Collectors.toSet());
+  }
+
+  private Set<String> getCompositeEntityNames(List<Change> changes) throws LiquibaseException {
+    return changes.stream()
+        .filter(change -> DdmCreateCompositeEntityChange.class.isAssignableFrom(change.getClass()))
+        .map(change -> ((DdmCreateCompositeEntityChange) change).getName().replaceAll("_", "-"))
+        .collect(Collectors.toSet());
+  }
+
+  private List<Change> getChanges(File mainLiquibase) throws LiquibaseException {
+    return getAllChanges(getDatabaseChangeLog(mainLiquibase));
   }
 
   private static class ElementTemplateListTypeReference extends

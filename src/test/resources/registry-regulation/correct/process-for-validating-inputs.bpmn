@@ -48,7 +48,8 @@
         <camunda:inputOutput>
           <camunda:inputParameter name="camundaInputParameterWithoutConstraint"></camunda:inputParameter>
           <camunda:inputParameter name="camundaInputParameterWithConstraint">testRole</camunda:inputParameter>
-          <camunda:inputParameter name="resourceWithConstraint">person</camunda:inputParameter>
+          <camunda:inputParameter name="table">person</camunda:inputParameter>
+          <camunda:inputParameter name="compositeEntity">composite-entity</camunda:inputParameter>
           <camunda:outputParameter name="">camundaOutputParameterWithoutConstraint</camunda:outputParameter>
           <camunda:outputParameter name="someName">camundaOutputParameterWithConstraint</camunda:outputParameter>
         </camunda:inputOutput>

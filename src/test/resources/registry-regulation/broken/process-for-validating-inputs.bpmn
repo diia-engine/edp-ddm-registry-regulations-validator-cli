@@ -31,7 +31,8 @@
         <camunda:inputOutput>
           <camunda:inputParameter name="camundaInputParameterWithoutConstraint" />
           <camunda:inputParameter name="camundaInputParameterWithConstraint">someInput</camunda:inputParameter>
-          <camunda:inputParameter name="resourceWithConstraint">someInput</camunda:inputParameter>
+          <camunda:inputParameter name="table">someInput</camunda:inputParameter>
+          <camunda:inputParameter name="compositeEntity">someInput</camunda:inputParameter>
           <camunda:outputParameter name="">camundaOutputParameterWithoutConstraint</camunda:outputParameter>
           <camunda:outputParameter name="someName">camundaOutputParameterWithConstraint</camunda:outputParameter>
         </camunda:inputOutput>
