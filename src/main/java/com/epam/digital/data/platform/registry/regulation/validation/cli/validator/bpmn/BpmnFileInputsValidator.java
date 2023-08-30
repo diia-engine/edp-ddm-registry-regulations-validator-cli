@@ -16,6 +16,7 @@
 
 package com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn;
 
+import com.epam.digital.data.platform.liquibase.extension.change.core.DdmCreateTableChange;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.exception.FileProcessingException;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.ElementTemplate;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.ElementTemplate.Property;
@@ -27,6 +28,8 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.validat
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
+import liquibase.change.Change;
+import liquibase.exception.LiquibaseException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.camunda.bpm.model.bpmn.Bpmn;
@@ -43,12 +46,13 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.epam.digital.data.platform.registry.regulation.validation.cli.validator.mainliquibase.util.MainLiquibaseUtil.getAllChanges;
+import static com.epam.digital.data.platform.registry.regulation.validation.cli.validator.mainliquibase.util.MainLiquibaseUtil.getDatabaseChangeLog;
 import static org.camunda.bpm.model.bpmn.impl.BpmnModelConstants.CAMUNDA_NS;
 
 @Slf4j
 public class BpmnFileInputsValidator implements RegulationValidator<RegulationFiles> {
 
-  private final List<String> defaultRoles;
   private static final Map<String, BiFunction<Activity, Property, Set<String>>> GET_VALUES_FOR_VALIDATION_FUNCTIONS = Map.of(
       "property", BpmnFileInputsValidator::getAttributeValuesFromActivity,
       "camunda:property", BpmnFileInputsValidator::getPropertyValueFromActivity,
@@ -57,13 +61,16 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
       "camunda:inputParameter", BpmnFileInputsValidator::getInputParameterValueFromActivity,
       "camunda:outputParameter", BpmnFileInputsValidator::getOutputParameterValueFromActivity
   );
+  private static Set<String> tableNames;
 
   private final Map<String, BiFunction<String, RegulationFiles, Boolean>> INPUT_VALIDATION_FUNCTIONS = Map.ofEntries(
       Map.entry("role.name", this::validateRoleName),
+      Map.entry("table.rest-api-name", this::validateTableName),
       Map.entry("process.id", this::validateProcessId)
   );
 
   private final Map<String, ElementTemplate> elementTemplates;
+  private final List<String> defaultRoles;
 
   public BpmnFileInputsValidator(String elementTemplatePath, List<String> defaultRoles) {
     this.defaultRoles = defaultRoles;
@@ -85,6 +92,17 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
   @Override
   public Set<ValidationError> validate(RegulationFiles regulationFiles, ValidationContext context) {
     Set<ValidationError> errors = Sets.newHashSet();
+    var liquibaseFiles = regulationFiles.getLiquibaseFiles();
+    if (!liquibaseFiles.isEmpty()) {
+      var mainLiquibase = liquibaseFiles.iterator().next();
+      try {
+        tableNames = getTableNames(mainLiquibase);
+      } catch (LiquibaseException e) {
+        errors.add(ValidationError.of(context.getRegulationFileType(), mainLiquibase,
+                "File processing failure", e)
+        );
+      }
+    }
     regulationFiles.getBpmnFiles()
         .forEach(bpmn -> errors.addAll(
             validateElementTemplateParameters(loadProcessModel(bpmn), bpmn, context, regulationFiles)
@@ -279,6 +297,19 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
     Set<String> roles = BpmnUtil.getRoles(regulationFiles);
     roles.addAll(Objects.requireNonNullElse(defaultRoles, Collections.emptySet()));
     return roles.contains(roleName);
+  }
+
+  @VisibleForTesting
+  Boolean validateTableName(String tableName, RegulationFiles regulationFiles) {
+    return tableNames.contains(tableName);
+  }
+
+  private Set<String> getTableNames(File mainLiquibase) throws LiquibaseException {
+    List<Change> allChanges = getAllChanges(getDatabaseChangeLog(mainLiquibase));
+    return allChanges.stream()
+        .filter(change -> DdmCreateTableChange.class.isAssignableFrom(change.getClass()))
+        .map(change -> ((DdmCreateTableChange) change).getTableName().replaceAll("_", "-"))
+        .collect(Collectors.toSet());
   }
 
   private static class ElementTemplateListTypeReference extends

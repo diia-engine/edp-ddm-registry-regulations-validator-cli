@@ -304,8 +304,15 @@ class BpmnFileInputsValidatorTest {
 
     var correctFile = Objects.requireNonNull(getClass().getClassLoader()
         .getResource("registry-regulation/correct/process-for-validating-inputs.bpmn")).getPath();
+    var mainLiquibase = Objects.requireNonNull(getClass().getClassLoader()
+        .getResource("registry-regulation/broken/test-main-liquibase.xml")).getPath();
 
-    var result = validator.validate(RegulationFiles.builder().bpmnFiles(List.of(new File(correctFile))).build(), ValidationContext.empty());
+    RegulationFiles regulationFiles = RegulationFiles.builder()
+        .bpmnFiles(List.of(new File(correctFile)))
+        .liquibaseFiles(List.of(new File(mainLiquibase)))
+        .build();
+
+    var result = validator.validate(regulationFiles, ValidationContext.empty());
 
     Assertions.assertThat(result).isEmpty();
   }
@@ -320,11 +327,17 @@ class BpmnFileInputsValidatorTest {
 
     var correctFile = Objects.requireNonNull(getClass().getClassLoader()
         .getResource("registry-regulation/broken/process-for-validating-inputs.bpmn")).getPath();
+    var mainLiquibase = Objects.requireNonNull(getClass().getClassLoader()
+        .getResource("registry-regulation/broken/test-main-liquibase.xml")).getPath();
 
-    var result = validator.validate(RegulationFiles.builder().bpmnFiles(List.of(new File(correctFile))).build(), ValidationContext.empty());
+    RegulationFiles regulationFiles = RegulationFiles.builder()
+        .bpmnFiles(List.of(new File(correctFile)))
+        .liquibaseFiles(List.of(new File(mainLiquibase)))
+        .build();
+    var result = validator.validate(regulationFiles, ValidationContext.empty());
 
     Assertions.assertThat(result)
-        .hasSize(9);
+        .hasSize(11);
   }
 
   @Test

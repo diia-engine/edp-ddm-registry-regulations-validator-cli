@@ -94,6 +94,17 @@
         }
       },
       {
+        "label": "Camunda input parameter with constraint",
+        "binding": {
+          "type": "camunda:inputParameter",
+          "name": "resourceWithConstraint"
+        },
+        "constraints": {
+          "notEmpty": true,
+          "type": "table.rest-api-name"
+        }
+      },
+      {
         "label": "Camunda output parameter w/o constraint",
         "binding": {
           "type": "camunda:outputParameter",

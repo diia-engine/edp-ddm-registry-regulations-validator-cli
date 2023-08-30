@@ -19,7 +19,6 @@ package com.epam.digital.data.platform.registry.regulation.validation.cli.valida
 import com.epam.digital.data.platform.liquibase.extension.change.core.DdmCreateSearchConditionChange;
 import com.epam.digital.data.platform.liquibase.extension.change.core.DdmDropSearchConditionChange;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.RegulationFiles;
-import com.epam.digital.data.platform.registry.regulation.validation.cli.utils.ChangelogParser;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.RegulationValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.ValidationContext;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.ValidationError;
@@ -27,21 +26,19 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import liquibase.change.Change;
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.LiquibaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.epam.digital.data.platform.registry.regulation.validation.cli.validator.mainliquibase.util.MainLiquibaseUtil.getAllChanges;
+import static com.epam.digital.data.platform.registry.regulation.validation.cli.validator.mainliquibase.util.MainLiquibaseUtil.getDatabaseChangeLog;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -59,7 +56,7 @@ public class FormToSearchConditionExistenceValidator implements
     if (!liquibaseFiles.isEmpty()) {
       var mainLiquibase = liquibaseFiles.iterator().next();
       try {
-        changes = getAllChanges(mainLiquibase);
+        changes = getAllChanges(getDatabaseChangeLog(mainLiquibase));
       } catch (LiquibaseException e) {
         return Collections.singleton(
             ValidationError.of(context.getRegulationFileType(), mainLiquibase,
@@ -121,18 +118,6 @@ public class FormToSearchConditionExistenceValidator implements
             c -> c,
             (first, second) -> second
         ));
-  }
-
-  private DatabaseChangeLog getDatabaseChangeLog(File regulationFile) throws LiquibaseException {
-    return ChangelogParser.parseChangeLog(regulationFile);
-  }
-
-  private List<Change> getAllChanges(File mainLiquibase) throws LiquibaseException {
-
-    return getDatabaseChangeLog(mainLiquibase).getChangeSets()
-        .stream()
-        .flatMap(x -> x.getChanges().stream())
-        .collect(Collectors.toList());
   }
 
   private String getChangeName(Change change) {
