@@ -20,7 +20,7 @@
       <bpmn:incoming>Flow_166fwyk</bpmn:incoming>
       <bpmn:outgoing>Flow_09gp6fy</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:userTask id="addLabFormActivity" name="Внести дані про лабораторію" camunda:modelerTemplate="formUserTaskTemplate" camunda:formKey="add-lab-bp-add-lab" camunda:assignee="${initiator}">
+    <bpmn:userTask id="addLabFormActivity" name="Внести дані про лабораторію" camunda:modelerTemplate="formUserTaskTemplate" camunda:formKey="shared-sign-lab" camunda:assignee="${initiator}">
       <bpmn:extensionElements>
         <camunda:properties>
           <camunda:property name="eSign" value=""/>
