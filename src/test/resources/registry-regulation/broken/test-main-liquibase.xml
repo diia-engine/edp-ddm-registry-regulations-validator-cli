@@ -25,4 +25,12 @@
             <ext:nestedEntity table="table2" name="entity1"/>
         </ext:createCompositeEntity>
     </changeSet>
+
+    <changeSet author="testUser" id="2">
+        <ext:partialUpdate name="partial_update_entity">
+            <ext:table name="table1">
+                <ext:column name="column1"/>
+            </ext:table>
+        </ext:partialUpdate>
+    </changeSet>
 </databaseChangeLog>

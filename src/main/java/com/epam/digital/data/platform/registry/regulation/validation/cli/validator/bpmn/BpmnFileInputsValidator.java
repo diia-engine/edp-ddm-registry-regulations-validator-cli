@@ -18,6 +18,7 @@ package com.epam.digital.data.platform.registry.regulation.validation.cli.valida
 
 import com.epam.digital.data.platform.liquibase.extension.change.core.DdmCreateCompositeEntityChange;
 import com.epam.digital.data.platform.liquibase.extension.change.core.DdmCreateTableChange;
+import com.epam.digital.data.platform.liquibase.extension.change.core.DdmPartialUpdateChange;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.exception.FileProcessingException;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.ElementTemplate;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.ElementTemplate.Property;
@@ -62,18 +63,23 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
       "camunda:inputParameter", BpmnFileInputsValidator::getInputParameterValueFromActivity,
       "camunda:outputParameter", BpmnFileInputsValidator::getOutputParameterValueFromActivity
   );
+
   private static Set<String> tableNames;
   private static Set<String> compositeEntityNames;
+  private static Set<String> partialUpdateEntityNames;
 
-  private final Map<String, BiFunction<String, RegulationFiles, Boolean>> INPUT_VALIDATION_FUNCTIONS = Map.ofEntries(
-      Map.entry("role.name", this::validateRoleName),
-      Map.entry("table.rest-api-name", this::validateTableName),
-      Map.entry("composite-entity.rest-api-name", this::validateCompositeEntityName),
-      Map.entry("process.id", this::validateProcessId)
+  private final Map<String, Function<String, Boolean>> INPUT_VALIDATION_FUNCTIONS = Map.ofEntries(
+      Map.entry("role.name", (role) -> this.allRoles.contains(role)),
+      Map.entry("table.rest-api-name", (table) -> tableNames.contains(table)),
+      Map.entry("composite-entity.rest-api-name", (compositeEntity) -> compositeEntityNames.contains(compositeEntity)),
+      Map.entry("partial-update.rest-api-name", (partialUpdate) -> partialUpdateEntityNames.contains(partialUpdate)),
+      Map.entry("process.id", (processId) -> this.processIds.contains(processId))
   );
 
   private final Map<String, ElementTemplate> elementTemplates;
   private final List<String> defaultRoles;
+  private Set<String> processIds;
+  private Set<String> allRoles;
 
   public BpmnFileInputsValidator(String elementTemplatePath, List<String> defaultRoles) {
     this.defaultRoles = defaultRoles;
@@ -95,6 +101,18 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
   @Override
   public Set<ValidationError> validate(RegulationFiles regulationFiles, ValidationContext context) {
     Set<ValidationError> errors = Sets.newHashSet();
+    init(regulationFiles, context, errors);
+    regulationFiles.getBpmnFiles()
+        .forEach(bpmn -> errors.addAll(
+            validateElementTemplateParameters(loadProcessModel(bpmn), bpmn, context)
+        ));
+    return errors;
+  }
+
+  private void init(RegulationFiles regulationFiles, ValidationContext context, Set<ValidationError> errors) {
+    processIds = BpmnUtil.getBpmnFilesProcessDefinitionsId(regulationFiles);
+    allRoles = getAllRoles(regulationFiles);
+
     var liquibaseFiles = regulationFiles.getLiquibaseFiles();
     if (!liquibaseFiles.isEmpty()) {
       var mainLiquibase = liquibaseFiles.iterator().next();
@@ -102,21 +120,17 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
         var changes = getChanges(mainLiquibase);
         tableNames = getTableNames(changes);
         compositeEntityNames = getCompositeEntityNames(changes);
+        partialUpdateEntityNames = getPartialUpdateEntityNames(changes);
       } catch (LiquibaseException e) {
         errors.add(ValidationError.of(context.getRegulationFileType(), mainLiquibase,
                 "File processing failure", e)
         );
       }
     }
-    regulationFiles.getBpmnFiles()
-        .forEach(bpmn -> errors.addAll(
-            validateElementTemplateParameters(loadProcessModel(bpmn), bpmn, context, regulationFiles)
-        ));
-    return errors;
   }
 
   private Set<ValidationError> validateElementTemplateParameters(BpmnModelInstance bpmnModel,
-                                                                 File regulationFile, ValidationContext validationContext, RegulationFiles regulationFiles) {
+                                                                 File regulationFile, ValidationContext validationContext) {
     var validationErrors = new HashSet<ValidationError>();
     var elements = bpmnModel.getModelElementsByType(Activity.class)
         .stream()
@@ -132,26 +146,25 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
         continue;
       }
       validationErrors.addAll(
-          validateElementAgainstElementTemplate(element, elementTemplate, regulationFile,
-              validationContext, regulationFiles));
+          validateElementAgainstElementTemplate(element, elementTemplate, regulationFile, validationContext));
     }
 
     return validationErrors;
   }
 
   private Set<ValidationError> validateElementAgainstElementTemplate(Activity activity, ElementTemplate elementTemplate,
-                                                                     File regulationFile, ValidationContext validationContext, RegulationFiles regulationFiles) {
+                                                                     File regulationFile, ValidationContext validationContext) {
     var properties = elementTemplate.getProperties();
 
     return properties.stream()
         .map(property -> validatePropertyInElement(activity, property, regulationFile,
-            validationContext, regulationFiles))
+            validationContext))
         .filter(Objects::nonNull)
         .collect(Collectors.toSet());
   }
 
   private ValidationError validatePropertyInElement(Activity activity, ElementTemplate.Property property,
-                                                    File regulationFile, ValidationContext validationContext, RegulationFiles regulationFiles) {
+                                                    File regulationFile, ValidationContext validationContext) {
     var getValuesFunction = GET_VALUES_FOR_VALIDATION_FUNCTIONS.get(
         property.getBinding().getType());
     var propertyValueSet = getValuesFunction.apply(activity, property);
@@ -174,7 +187,7 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
     if (!StringUtils.isBlank(type)) {
       var inputValidationFunction = INPUT_VALIDATION_FUNCTIONS.get(type);
       try {
-        if (Objects.nonNull(inputValidationFunction) && !inputValidationFunction.apply(propertyValue, regulationFiles)) {
+        if (Objects.nonNull(inputValidationFunction) && !inputValidationFunction.apply(propertyValue)) {
           return ValidationError.of(validationContext.getRegulationFileType(), regulationFile,
               String.format("In task %s of process %s, the input parameter %s doesn't exist",
                   activity.getId(), regulationFile.getName(), property.getBinding()));
@@ -292,39 +305,30 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
         .collect(Collectors.toSet());
   }
 
-  @VisibleForTesting
-  Boolean validateProcessId(String processId, RegulationFiles regulationFiles) {
-    return BpmnUtil.getBpmnFilesProcessDefinitionsId(regulationFiles).contains(processId);
-  }
-
-  @VisibleForTesting
-  Boolean validateRoleName(String roleName, RegulationFiles regulationFiles) {
+  private Set<String> getAllRoles(RegulationFiles regulationFiles) {
     Set<String> roles = BpmnUtil.getRoles(regulationFiles);
     roles.addAll(Objects.requireNonNullElse(defaultRoles, Collections.emptySet()));
-    return roles.contains(roleName);
+    return roles;
   }
 
-  @VisibleForTesting
-  Boolean validateTableName(String tableName, RegulationFiles regulationFiles) {
-    return tableNames.contains(tableName);
-  }
-
-  @VisibleForTesting
-  Boolean validateCompositeEntityName(String compositeEntityName, RegulationFiles regulationFiles) {
-    return compositeEntityNames.contains(compositeEntityName);
-  }
-
-  private Set<String> getTableNames(List<Change> changes) throws LiquibaseException {
+  private Set<String> getTableNames(List<Change> changes) {
     return changes.stream()
         .filter(change -> DdmCreateTableChange.class.isAssignableFrom(change.getClass()))
         .map(change -> ((DdmCreateTableChange) change).getTableName().replaceAll("_", "-"))
         .collect(Collectors.toSet());
   }
 
-  private Set<String> getCompositeEntityNames(List<Change> changes) throws LiquibaseException {
+  private Set<String> getCompositeEntityNames(List<Change> changes) {
     return changes.stream()
         .filter(change -> DdmCreateCompositeEntityChange.class.isAssignableFrom(change.getClass()))
         .map(change -> ((DdmCreateCompositeEntityChange) change).getName().replaceAll("_", "-"))
+        .collect(Collectors.toSet());
+  }
+
+  private Set<String> getPartialUpdateEntityNames(List<Change> changes) {
+    return changes.stream()
+        .filter(change -> DdmPartialUpdateChange.class.isAssignableFrom(change.getClass()))
+        .map(change -> ((DdmPartialUpdateChange) change).getName().replaceAll("_", "-"))
         .collect(Collectors.toSet());
   }
 
