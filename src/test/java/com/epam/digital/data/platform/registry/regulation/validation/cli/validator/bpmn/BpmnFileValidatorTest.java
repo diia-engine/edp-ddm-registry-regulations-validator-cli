@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 EPAM Systems.
+ * Copyright 2023 EPAM Systems.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,6 +112,45 @@ public class BpmnFileValidatorTest {
     var errors = this.validator.validate(unsupportedFile, ValidationContext.of(RegulationFileType.BPMN));
 
     assertThat(errors, is(not(empty())));
+  }
+
+  @Test
+  void shouldFailDueToMissingCompleterTaskId() {
+    var brokenProcessFile = getFileFromClasspath("registry-regulation/broken/juel-functions/completer.bpmn");
+
+    var errors = this.validator.validate(brokenProcessFile, ValidationContext.of(RegulationFileType.BPMN));
+
+    assertThat(errors, is(not(empty())));
+    assertThat(errors.iterator().next().getErrorMessage(), is("Element id 'addLabFormActivity1' not found for completer() juel function"));
+  }
+
+  @Test
+  void shouldFailDueToMissingSignSubmissionTaskId() {
+    var brokenProcessFile = getFileFromClasspath("registry-regulation/broken/juel-functions/sign_submission.bpmn");
+
+    var errors = this.validator.validate(brokenProcessFile, ValidationContext.of(RegulationFileType.BPMN));
+
+    assertThat(errors, is(not(empty())));
+    assertThat(errors.iterator().next().getErrorMessage(), is("Element id 'signLabFormActivity1' not found for sign_submission() juel function"));
+  }
+
+  @Test
+  void shouldFailDueToMissingSubmissionTaskId() {
+    var brokenProcessFile = getFileFromClasspath("registry-regulation/broken/juel-functions/submission.bpmn");
+
+    var errors = this.validator.validate(brokenProcessFile, ValidationContext.of(RegulationFileType.BPMN));
+
+    assertThat(errors, is(not(empty())));
+    assertThat(errors.iterator().next().getErrorMessage(), is("Element id 'addLabFormActivity1' not found for submission() juel function"));
+  }
+
+  @Test
+  void shouldPassValidationWhenDynamicValueInJuelFunction() {
+    var brokenProcessFile = getFileFromClasspath("registry-regulation/broken/juel-functions/skip-validation.bpmn");
+
+    var errors = this.validator.validate(brokenProcessFile, ValidationContext.of(RegulationFileType.BPMN));
+
+    assertThat(errors, is(empty()));
   }
 
   private File getFileFromClasspath(String filePath) {
