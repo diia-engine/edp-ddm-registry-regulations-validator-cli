@@ -305,11 +305,14 @@ class BpmnFileInputsValidatorTest {
     var correctFile = Objects.requireNonNull(getClass().getClassLoader()
         .getResource("registry-regulation/correct/process-for-validating-inputs.bpmn")).getPath();
     var mainLiquibase = Objects.requireNonNull(getClass().getClassLoader()
-        .getResource("registry-regulation/broken/test-main-liquibase.xml")).getPath();
+        .getResource("registry-regulation/correct/test-main-liquibase.xml")).getPath();
+    var bpTrembitaConfig = Objects.requireNonNull(getClass().getClassLoader()
+        .getResource("registry-regulation/correct/configuration.yml")).getPath();
 
     RegulationFiles regulationFiles = RegulationFiles.builder()
         .bpmnFiles(List.of(new File(correctFile)))
         .liquibaseFiles(List.of(new File(mainLiquibase)))
+        .bpTrembitaConfig(List.of(new File(bpTrembitaConfig)))
         .build();
 
     var result = validator.validate(regulationFiles, ValidationContext.empty());
@@ -329,15 +332,18 @@ class BpmnFileInputsValidatorTest {
         .getResource("registry-regulation/broken/process-for-validating-inputs.bpmn")).getPath();
     var mainLiquibase = Objects.requireNonNull(getClass().getClassLoader()
         .getResource("registry-regulation/broken/test-main-liquibase.xml")).getPath();
+    var bpTrembitaConfig = Objects.requireNonNull(getClass().getClassLoader()
+        .getResource("registry-regulation/correct/configuration.yml")).getPath();
 
     RegulationFiles regulationFiles = RegulationFiles.builder()
         .bpmnFiles(List.of(new File(correctFile)))
         .liquibaseFiles(List.of(new File(mainLiquibase)))
+        .bpTrembitaConfig(List.of(new File(bpTrembitaConfig)))
         .build();
     var result = validator.validate(regulationFiles, ValidationContext.empty());
 
     Assertions.assertThat(result)
-        .hasSize(15);
+        .hasSize(19);
   }
 
   @Test

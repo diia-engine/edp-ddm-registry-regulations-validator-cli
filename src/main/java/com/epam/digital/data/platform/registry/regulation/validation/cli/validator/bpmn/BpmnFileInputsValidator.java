@@ -20,6 +20,7 @@ import com.epam.digital.data.platform.liquibase.extension.change.core.DdmCreateC
 import com.epam.digital.data.platform.liquibase.extension.change.core.DdmCreateTableChange;
 import com.epam.digital.data.platform.liquibase.extension.change.core.DdmPartialUpdateChange;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.exception.FileProcessingException;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.model.BpTrembitaExternalSystemsConfiguration.ExternalSystem;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.ElementTemplate;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.ElementTemplate.Property;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.RegulationFiles;
@@ -67,12 +68,16 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
   private static Set<String> tableNames;
   private static Set<String> compositeEntityNames;
   private static Set<String> partialUpdateEntityNames;
-
+  private static Map<String, ExternalSystem> externalSystems;
+  private static Set<String> externalSystemNames;
+  private static Set<String> externalSystemOperationNames;
   private final Map<String, Function<String, Boolean>> INPUT_VALIDATION_FUNCTIONS = Map.ofEntries(
       Map.entry("role.name", (role) -> this.allRoles.contains(role)),
       Map.entry("table.rest-api-name", (table) -> tableNames.contains(table)),
       Map.entry("composite-entity.rest-api-name", (compositeEntity) -> compositeEntityNames.contains(compositeEntity)),
       Map.entry("partial-update.rest-api-name", (partialUpdate) -> partialUpdateEntityNames.contains(partialUpdate)),
+      Map.entry("external-system.name", (externalSystemName) -> externalSystemNames.contains(externalSystemName)),
+      Map.entry("external-system.operation.name", (externalSystemOperationName) -> externalSystemOperationNames.contains(externalSystemOperationName)),
       Map.entry("process.id", (processId) -> this.processIds.contains(processId))
   );
 
@@ -113,19 +118,23 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
     processIds = BpmnUtil.getBpmnFilesProcessDefinitionsId(regulationFiles);
     allRoles = getAllRoles(regulationFiles);
 
-    var liquibaseFiles = regulationFiles.getLiquibaseFiles();
-    if (!liquibaseFiles.isEmpty()) {
-      var mainLiquibase = liquibaseFiles.iterator().next();
-      try {
+    try {
+      externalSystems = getExternalSystems(regulationFiles);
+      externalSystemNames = getExternalSystemNames();
+      externalSystemOperationNames = getExternalSystemOperationNames();
+      var liquibaseFiles = regulationFiles.getLiquibaseFiles();
+      if (!liquibaseFiles.isEmpty()) {
+        var mainLiquibase = liquibaseFiles.iterator().next();
+
         var changes = getChanges(mainLiquibase);
         tableNames = getTableNames(changes);
         compositeEntityNames = getCompositeEntityNames(changes);
         partialUpdateEntityNames = getPartialUpdateEntityNames(changes);
-      } catch (LiquibaseException e) {
-        errors.add(ValidationError.of(context.getRegulationFileType(), mainLiquibase,
-                "File processing failure", e)
-        );
       }
+    } catch (FileProcessingException e) {
+      errors.add(ValidationError.of(context.getRegulationFileType(), e.getFile(),
+          e.getMessage(), e)
+      );
     }
   }
 
@@ -332,8 +341,29 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
         .collect(Collectors.toSet());
   }
 
-  private List<Change> getChanges(File mainLiquibase) throws LiquibaseException {
-    return getAllChanges(getDatabaseChangeLog(mainLiquibase));
+  private Map<String, ExternalSystem> getExternalSystems(RegulationFiles regulationFiles) {
+    return BpmnUtil.getTrembitaExternalSystems(regulationFiles);
+  }
+
+  private Set<String> getExternalSystemNames() {
+    return externalSystems.keySet();
+  }
+
+  private Set<String> getExternalSystemOperationNames() {
+    return externalSystems.values().stream()
+        .map(externalSystem -> externalSystem.getOperations().keySet())
+        .flatMap(Set::stream)
+        .collect(Collectors.toSet());
+  }
+
+  private List<Change> getChanges(File mainLiquibase) {
+    try {
+      return getAllChanges(getDatabaseChangeLog(mainLiquibase));
+    } catch (LiquibaseException e) {
+      throw new FileProcessingException(
+          String.format("A failure occurred while processing file %s", mainLiquibase.getName()), mainLiquibase, e);
+
+    }
   }
 
   private static class ElementTemplateListTypeReference extends

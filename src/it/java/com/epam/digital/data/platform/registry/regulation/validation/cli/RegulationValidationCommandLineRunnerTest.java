@@ -35,6 +35,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.google.common.collect.Sets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -129,7 +130,7 @@ class RegulationValidationCommandLineRunnerTest {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
 
-    validationRunner.run(correctRegistryRegulations());
+    validationRunner.run(correctRegistryRegulations().toArray(new String[0]));
 
     verify(systemExit, times(1)).complete();
   }
@@ -149,7 +150,7 @@ class RegulationValidationCommandLineRunnerTest {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
 
-    validationRunner.run(correctRegistryRegulations());
+    validationRunner.run(correctRegistryRegulations().toArray(new String[0]));
     validationRunner.run(argOf(CommandLineArg.BPMN,
         testResourcePathOf("registry-regulation/broken/test-duplicated-process-id-bp-1.bpmn"),
         testResourcePathOf("registry-regulation/broken/test-duplicated-process-id-bp-2.bpmn"))
@@ -375,10 +376,10 @@ class RegulationValidationCommandLineRunnerTest {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
 
-    validationRunner.run(correctRegistryRegulations());
-    validationRunner.run(argOf(CommandLineArg.BPMN,
-        testResourcePathOf("registry-regulation/broken/process-for-validating-inputs.bpmn"))
-    );
+    List<String> regulations = new ArrayList<>(correctRegistryRegulations());
+    regulations.add(argOf(CommandLineArg.BPMN,
+        testResourcePathOf("registry-regulation/broken/process-for-validating-inputs.bpmn")));
+    validationRunner.run(regulations.toArray(new String[0]));
 
     verify(systemExit, times(1)).validationFailure();
   }
@@ -388,10 +389,7 @@ class RegulationValidationCommandLineRunnerTest {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
 
-    validationRunner.run(correctRegistryRegulations());
-    validationRunner.run(argOf(CommandLineArg.BPMN,
-        testResourcePathOf("registry-regulation/correct/process-for-validating-inputs.bpmn"))
-    );
+    validationRunner.run(correctRegistryRegulations().toArray(new String[0]));
 
     verify(systemExit, times(0)).validationFailure();
   }
@@ -438,8 +436,8 @@ class RegulationValidationCommandLineRunnerTest {
     return springAwareRuleBookRunner;
   }
 
-  private String[] correctRegistryRegulations() {
-    return new String[]{
+  private List<String> correctRegistryRegulations() {
+    return List.of(
         argOf(CommandLineArg.GLOBAL_VARS,
             testResourcePathOf("registry-regulation/correct/global-vars.yml")),
         argOf(CommandLineArg.BP_AUTH,
@@ -451,6 +449,7 @@ class RegulationValidationCommandLineRunnerTest {
         argOf(CommandLineArg.ROLES, testResourcePathOf("registry-regulation/correct/officer.yml")),
         argOf(CommandLineArg.BPMN,
             testResourcePathOf("registry-regulation/correct/process.bpmn"),
+            testResourcePathOf("registry-regulation/correct/process-for-validating-inputs.bpmn"),
             testResourcePathOf("registry-regulation/correct/trembita-process.bpmn")),
         argOf(CommandLineArg.DMN, testResourcePathOf("registry-regulation/correct/rule.dmn")),
         argOf(CommandLineArg.FORMS, testResourcePathOf("registry-regulation/correct/ui-form.json")),
@@ -466,7 +465,7 @@ class RegulationValidationCommandLineRunnerTest {
             testResourcePathOf("registry-regulation/correct/diia")),
         argOf(CommandLineArg.MOCK_INTEGRATIONS,
             testResourcePathOf("registry-regulation/correct/mock-integrations.json"))
-    };
+    );
   }
 
   private String[] emptyRegistryRegulations() {

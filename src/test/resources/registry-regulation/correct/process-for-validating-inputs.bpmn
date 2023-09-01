@@ -51,6 +51,8 @@
           <camunda:inputParameter name="table">person</camunda:inputParameter>
           <camunda:inputParameter name="compositeEntity">composite-entity</camunda:inputParameter>
           <camunda:inputParameter name="partialUpdateEntity">partial-update-entity</camunda:inputParameter>
+          <camunda:inputParameter name="externalSystemName">system1</camunda:inputParameter>
+          <camunda:inputParameter name="externalSystemOperationName">create-system</camunda:inputParameter>
           <camunda:outputParameter name="">camundaOutputParameterWithoutConstraint</camunda:outputParameter>
           <camunda:outputParameter name="someName">camundaOutputParameterWithConstraint</camunda:outputParameter>
         </camunda:inputOutput>

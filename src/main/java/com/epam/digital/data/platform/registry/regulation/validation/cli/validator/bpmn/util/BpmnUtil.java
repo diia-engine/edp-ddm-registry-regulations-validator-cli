@@ -18,6 +18,7 @@ package com.epam.digital.data.platform.registry.regulation.validation.cli.valida
 
 import com.epam.digital.data.platform.registry.regulation.validation.cli.exception.FileProcessingException;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.BpRoleConfiguration;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.model.BpTrembitaExternalSystemsConfiguration;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.RegulationFiles;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
@@ -27,10 +28,10 @@ import org.camunda.bpm.model.bpmn.instance.Process;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.epam.digital.data.platform.registry.regulation.validation.cli.model.BpTrembitaExternalSystemsConfiguration.ExternalSystem;
 
 public class BpmnUtil {
 
@@ -48,21 +49,37 @@ public class BpmnUtil {
   }
 
   public static Set<String> getRoles(RegulationFiles regulationFiles) {
-    Set<String> roles = new HashSet<>();
+    return regulationFiles.getRolesFiles().stream()
+        .filter(File::exists)
+        .map(BpmnUtil::readBpRoleConfiguration)
+        .map(BpRoleConfiguration::getRoles)
+        .flatMap(List::stream)
+        .map(BpRoleConfiguration.Role::getName)
+        .collect(Collectors.toSet());
+  }
 
-    for (File file : regulationFiles.getRolesFiles()) {
-      try {
-        if (file.exists()) {
-          roles.addAll(yamlMapper.readValue(file, BpRoleConfiguration.class)
-              .getRoles()
-              .stream()
-              .map(BpRoleConfiguration.Role::getName)
-              .collect(Collectors.toSet()));
-        }
-      } catch (IOException e) {
-        throw new FileProcessingException("File processing failure", e);
-      }
+  public static Map<String, ExternalSystem> getTrembitaExternalSystems(RegulationFiles regulationFiles) {
+    return regulationFiles.getBpTrembitaConfig().stream()
+        .filter(File::exists)
+        .map(BpmnUtil::readBpTrembitaExternalSystemsConfiguration)
+        .map(BpTrembitaExternalSystemsConfiguration::getExternalSystems)
+        .flatMap(m -> m.entrySet().stream())
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+  }
+
+  private static BpRoleConfiguration readBpRoleConfiguration(File file) {
+    try {
+      return yamlMapper.readValue(file, BpRoleConfiguration.class);
+    } catch (IOException e) {
+      throw new FileProcessingException(String.format("A failure occurred while processing file %s", file.getName()), file, e);
     }
-    return roles;
+  }
+
+  private static BpTrembitaExternalSystemsConfiguration readBpTrembitaExternalSystemsConfiguration(File file) {
+    try {
+      return yamlMapper.readValue(file, BpTrembitaExternalSystemsConfiguration.class);
+    } catch (IOException e) {
+      throw new FileProcessingException(String.format("A failure occurred while processing file %s", file.getName()), file, e);
+    }
   }
 }

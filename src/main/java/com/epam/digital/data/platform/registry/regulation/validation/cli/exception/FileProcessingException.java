@@ -16,7 +16,17 @@
 
 package com.epam.digital.data.platform.registry.regulation.validation.cli.exception;
 
+import lombok.Getter;
+
+import java.io.File;
+
+
 public class FileProcessingException extends RuntimeException {
-  public FileProcessingException(String message, Exception cause) {
+  @Getter
+  private final File file;
+
+  public FileProcessingException(String message, File file, Exception cause) {
+    super(message, cause);
+    this.file = file;
   }
 }
