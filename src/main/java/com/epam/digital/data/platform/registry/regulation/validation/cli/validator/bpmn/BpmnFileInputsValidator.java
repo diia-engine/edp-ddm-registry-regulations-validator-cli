@@ -39,13 +39,20 @@ import org.apache.commons.lang3.StringUtils;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.Activity;
-import org.camunda.bpm.model.bpmn.instance.camunda.*;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaIn;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaInputOutput;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaInputParameter;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaOut;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaOutputParameter;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaProperties;
+import org.camunda.bpm.model.bpmn.instance.camunda.CamundaProperty;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.CollectionUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -55,6 +62,7 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.epam.digital.data.platform.registry.regulation.validation.cli.validator.mainliquibase.util.MainLiquibaseUtil.getAllChanges;
 import static com.epam.digital.data.platform.registry.regulation.validation.cli.validator.mainliquibase.util.MainLiquibaseUtil.getDatabaseChangeLog;
@@ -86,6 +94,7 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
       Map.entry("external-system.name", (externalSystemName) -> externalSystemNames.contains(externalSystemName)),
       Map.entry("external-system.operation.name", (externalSystemOperationName) -> externalSystemOperationNames.contains(externalSystemOperationName)),
       Map.entry("excerpt.name", (excerptName) -> this.excerptNames.contains(excerptName)),
+      Map.entry("notification.template.name", (notificationName) -> this.notificationNames.contains(notificationName)),
       Map.entry("process.id", (processId) -> this.processIds.contains(processId))
   );
 
@@ -94,6 +103,7 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
   private Set<String> processIds;
   private Set<String> allRoles;
   private Set<String> excerptNames;
+  private Set<String> notificationNames;
 
   public BpmnFileInputsValidator(String elementTemplatePath, List<String> defaultRoles) {
     this.defaultRoles = defaultRoles;
@@ -126,6 +136,7 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
   private void init(RegulationFiles regulationFiles, ValidationContext context, Set<ValidationError> errors) {
     processIds = BpmnUtil.getBpmnFilesProcessDefinitionsId(regulationFiles);
     allRoles = getAllRoles(regulationFiles);
+    notificationNames = getNotificationNames(regulationFiles);
 
     try {
       externalSystems = getExternalSystems(regulationFiles);
@@ -203,7 +214,11 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
     }
 
     String type = property.getConstraints().getType();
-    if (!StringUtils.isBlank(type)) {
+    if (!StringUtils.isBlank(type) && !StringUtils.isBlank(propertyValue)) {
+      if (isExpression(propertyValue)){
+        log.warn(String.format("Unable to validate property due to dynamic value: %s", propertyValue));
+        return null;
+      }
       var inputValidationFunction = INPUT_VALIDATION_FUNCTIONS.get(type);
       try {
         if (Objects.nonNull(inputValidationFunction) && !inputValidationFunction.apply(propertyValue)) {
@@ -372,6 +387,26 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
         .map(file -> file.isDirectory() ? file.getName() : FilenameUtils.getBaseName(file.getName()))
         .filter(StringUtils::isNotBlank)
         .collect(Collectors.toSet());
+  }
+
+  private Set<String> getNotificationNames(RegulationFiles regulationFiles) {
+    return Stream.of(regulationFiles.getDiiaNotificationTemplateDirectory(),
+            regulationFiles.getEmailNotificationTemplateDirectory(),
+            regulationFiles.getInboxNotificationTemplateDirectory())
+        .flatMap(dir -> getNotificationNamesByDir(dir).stream())
+        .collect(Collectors.toSet());
+  }
+
+  private Set<String> getNotificationNamesByDir(Collection<File> notificationDir) {
+    return notificationDir.stream()
+        .filter(File::isDirectory)
+        .flatMap(dir -> Arrays.stream(Objects.requireNonNull(dir.listFiles(File::isDirectory))))
+        .map(File::getName)
+        .collect(Collectors.toSet());
+  }
+
+  private Boolean isExpression(String input) {
+    return (input.startsWith("${") || input.startsWith("#{")) && input.endsWith("}");
   }
 
   private List<Change> getChanges(File mainLiquibase) {
