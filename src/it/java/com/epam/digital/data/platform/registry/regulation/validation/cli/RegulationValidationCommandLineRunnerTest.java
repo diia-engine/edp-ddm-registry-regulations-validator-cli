@@ -463,6 +463,8 @@ class RegulationValidationCommandLineRunnerTest {
             testResourcePathOf("registry-regulation/correct/inbox")),
         argOf(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE,
             testResourcePathOf("registry-regulation/correct/diia")),
+        argOf(CommandLineArg.EXCERPTS,
+            testResourcePathOf("registry-regulation/correct/excerpts-docx")),
         argOf(CommandLineArg.MOCK_INTEGRATIONS,
             testResourcePathOf("registry-regulation/correct/mock-integrations.json"))
     );

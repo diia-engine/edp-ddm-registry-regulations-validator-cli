@@ -51,7 +51,7 @@ public class BpmnUtil {
   public static Set<String> getRoles(RegulationFiles regulationFiles) {
     return regulationFiles.getRolesFiles().stream()
         .filter(File::exists)
-        .map(BpmnUtil::readBpRoleConfiguration)
+        .map(file -> readConfiguration(file, BpRoleConfiguration.class))
         .map(BpRoleConfiguration::getRoles)
         .flatMap(List::stream)
         .map(BpRoleConfiguration.Role::getName)
@@ -61,23 +61,15 @@ public class BpmnUtil {
   public static Map<String, ExternalSystem> getTrembitaExternalSystems(RegulationFiles regulationFiles) {
     return regulationFiles.getBpTrembitaConfig().stream()
         .filter(File::exists)
-        .map(BpmnUtil::readBpTrembitaExternalSystemsConfiguration)
+        .map(file -> readConfiguration(file, BpTrembitaExternalSystemsConfiguration.class))
         .map(BpTrembitaExternalSystemsConfiguration::getExternalSystems)
         .flatMap(m -> m.entrySet().stream())
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
-  private static BpRoleConfiguration readBpRoleConfiguration(File file) {
+  private static <T> T readConfiguration(File file, Class<T> clazz) {
     try {
-      return yamlMapper.readValue(file, BpRoleConfiguration.class);
-    } catch (IOException e) {
-      throw new FileProcessingException(String.format("A failure occurred while processing file %s", file.getName()), file, e);
-    }
-  }
-
-  private static BpTrembitaExternalSystemsConfiguration readBpTrembitaExternalSystemsConfiguration(File file) {
-    try {
-      return yamlMapper.readValue(file, BpTrembitaExternalSystemsConfiguration.class);
+      return yamlMapper.readValue(file, clazz);
     } catch (IOException e) {
       throw new FileProcessingException(String.format("A failure occurred while processing file %s", file.getName()), file, e);
     }

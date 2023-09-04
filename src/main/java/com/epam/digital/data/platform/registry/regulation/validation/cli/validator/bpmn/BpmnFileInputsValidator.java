@@ -34,6 +34,7 @@ import com.google.common.collect.Sets;
 import liquibase.change.Change;
 import liquibase.exception.LiquibaseException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -44,7 +45,13 @@ import org.springframework.util.CollectionUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -78,6 +85,7 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
       Map.entry("partial-update.rest-api-name", (partialUpdate) -> partialUpdateEntityNames.contains(partialUpdate)),
       Map.entry("external-system.name", (externalSystemName) -> externalSystemNames.contains(externalSystemName)),
       Map.entry("external-system.operation.name", (externalSystemOperationName) -> externalSystemOperationNames.contains(externalSystemOperationName)),
+      Map.entry("excerpt.name", (excerptName) -> this.excerptNames.contains(excerptName)),
       Map.entry("process.id", (processId) -> this.processIds.contains(processId))
   );
 
@@ -85,6 +93,7 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
   private final List<String> defaultRoles;
   private Set<String> processIds;
   private Set<String> allRoles;
+  private Set<String> excerptNames;
 
   public BpmnFileInputsValidator(String elementTemplatePath, List<String> defaultRoles) {
     this.defaultRoles = defaultRoles;
@@ -122,6 +131,7 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
       externalSystems = getExternalSystems(regulationFiles);
       externalSystemNames = getExternalSystemNames();
       externalSystemOperationNames = getExternalSystemOperationNames();
+      excerptNames = getExcerptNames(regulationFiles);
       var liquibaseFiles = regulationFiles.getLiquibaseFiles();
       if (!liquibaseFiles.isEmpty()) {
         var mainLiquibase = liquibaseFiles.iterator().next();
@@ -353,6 +363,14 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
     return externalSystems.values().stream()
         .map(externalSystem -> externalSystem.getOperations().keySet())
         .flatMap(Set::stream)
+        .collect(Collectors.toSet());
+  }
+
+  private Set<String> getExcerptNames(RegulationFiles regulationFiles) {
+    return regulationFiles.getExcerptFiles().stream()
+        .flatMap(dir -> Arrays.stream(Objects.requireNonNull(dir.listFiles(file -> !file.isHidden()))))
+        .map(file -> file.isDirectory() ? file.getName() : FilenameUtils.getBaseName(file.getName()))
+        .filter(StringUtils::isNotBlank)
         .collect(Collectors.toSet());
   }
 

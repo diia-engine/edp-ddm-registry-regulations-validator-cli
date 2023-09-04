@@ -149,6 +149,17 @@
         }
       },
       {
+        "label": "Camunda input parameter with constraint",
+        "binding": {
+          "type": "camunda:inputParameter",
+          "name": "excerptName"
+        },
+        "constraints": {
+          "notEmpty": true,
+          "type": "excerpt.name"
+        }
+      },
+      {
         "label": "Camunda output parameter w/o constraint",
         "binding": {
           "type": "camunda:outputParameter",

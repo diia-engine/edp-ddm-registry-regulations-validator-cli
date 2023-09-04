@@ -308,11 +308,14 @@ class BpmnFileInputsValidatorTest {
         .getResource("registry-regulation/correct/test-main-liquibase.xml")).getPath();
     var bpTrembitaConfig = Objects.requireNonNull(getClass().getClassLoader()
         .getResource("registry-regulation/correct/configuration.yml")).getPath();
+    var excerptsDocx = Objects.requireNonNull(getClass().getClassLoader()
+        .getResource("registry-regulation/correct/excerpts-docx")).getPath();
 
     RegulationFiles regulationFiles = RegulationFiles.builder()
         .bpmnFiles(List.of(new File(correctFile)))
         .liquibaseFiles(List.of(new File(mainLiquibase)))
         .bpTrembitaConfig(List.of(new File(bpTrembitaConfig)))
+        .excerptFiles(List.of(new File(excerptsDocx)))
         .build();
 
     var result = validator.validate(regulationFiles, ValidationContext.empty());
@@ -334,16 +337,19 @@ class BpmnFileInputsValidatorTest {
         .getResource("registry-regulation/broken/test-main-liquibase.xml")).getPath();
     var bpTrembitaConfig = Objects.requireNonNull(getClass().getClassLoader()
         .getResource("registry-regulation/correct/configuration.yml")).getPath();
+    var excerptsDocx = Objects.requireNonNull(getClass().getClassLoader()
+        .getResource("registry-regulation/broken/excerpts-docx")).getPath();
 
     RegulationFiles regulationFiles = RegulationFiles.builder()
         .bpmnFiles(List.of(new File(correctFile)))
         .liquibaseFiles(List.of(new File(mainLiquibase)))
         .bpTrembitaConfig(List.of(new File(bpTrembitaConfig)))
+        .excerptFiles(List.of(new File(excerptsDocx)))
         .build();
     var result = validator.validate(regulationFiles, ValidationContext.empty());
 
     Assertions.assertThat(result)
-        .hasSize(19);
+        .hasSize(21);
   }
 
   @Test

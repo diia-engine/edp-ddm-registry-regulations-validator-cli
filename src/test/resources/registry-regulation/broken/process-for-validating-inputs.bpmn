@@ -36,6 +36,7 @@
           <camunda:inputParameter name="partialUpdateEntity">someInput</camunda:inputParameter>
           <camunda:inputParameter name="externalSystemName">someInput</camunda:inputParameter>
           <camunda:inputParameter name="externalSystemOperationName">someInput</camunda:inputParameter>
+          <camunda:inputParameter name="excerptName">someInput</camunda:inputParameter>
           <camunda:outputParameter name="">camundaOutputParameterWithoutConstraint</camunda:outputParameter>
           <camunda:outputParameter name="someName">camundaOutputParameterWithConstraint</camunda:outputParameter>
         </camunda:inputOutput>
