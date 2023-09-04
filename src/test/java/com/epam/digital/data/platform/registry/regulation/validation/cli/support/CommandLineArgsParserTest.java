@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 EPAM Systems.
+ * Copyright 2023 EPAM Systems.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,10 +35,17 @@ public class CommandLineArgsParserTest {
   }
 
   @Test
-  public void shouldSupportHelpOption() throws ParseException {
-    var options = commandLineArgsParser.parse("--help");
+  public void shouldSupportFileOption() throws ParseException {
+    var options = commandLineArgsParser.parse("--file=test");
 
-    assertTrue(options.hasOption("help"));
+    assertTrue(options.hasOption("file"));
+  }
+
+  @Test
+  public void shouldSupportFileDetailedOption() throws ParseException {
+    var options = commandLineArgsParser.parse("--file-detailed=test");
+
+    assertTrue(options.hasOption("file-detailed"));
   }
 
   @Test

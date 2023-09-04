@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 EPAM Systems.
+ * Copyright 2023 EPAM Systems.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,8 @@ public enum RegulationFileType {
   MOCK_INTEGRATIONS("json"),
   BP_ROLE_EXISTENCE(),
   REPORT_ROLE_EXISTENCE(),
-  FORM_TO_SC("json", "xml");
+  FORM_TO_SC("json", "xml"),
+  REPORTS("json");
 
   private final String[] fileExtensions;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 EPAM Systems.
+ * Copyright 2023 EPAM Systems.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,12 @@ public class RegulationFiles {
   private Collection<File> mockIntegrationFiles = new ArrayList<>();
   @Default
   private Collection<File> reportsFolders = new ArrayList<>();
+  @Default
+  private Collection<File> files = new ArrayList<>();
+  @Default
+  private Collection<File> filesDetailed = new ArrayList<>();
+  @Default
+  private Collection<File> reportsFiles = new ArrayList<>();
 
   public boolean isEmpty() {
     return bpTrembitaFiles.isEmpty()
@@ -82,6 +88,7 @@ public class RegulationFiles {
         && diiaNotificationTemplateDirectory.isEmpty()
         && bpGroupingFiles.isEmpty()
         && mockIntegrationFiles.isEmpty()
-        && reportsFolders.isEmpty();
+        && reportsFolders.isEmpty()
+        && reportsFiles.isEmpty();
   }
 }

@@ -20,9 +20,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class RegulationValidatorCliApplication {
+public class RegistryRegulationCliApplication {
 
   public static void main(String[] args) {
-    SpringApplication.run(RegulationValidatorCliApplication.class, args);
+    SpringApplication.run(RegistryRegulationCliApplication.class, args);
   }
 }

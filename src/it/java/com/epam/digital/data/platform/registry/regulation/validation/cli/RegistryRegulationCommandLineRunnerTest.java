@@ -23,7 +23,9 @@ import static org.mockito.Mockito.when;
 
 import com.deliveredtechnologies.rulebook.model.RuleBook;
 import com.deliveredtechnologies.rulebook.model.runner.RuleBookRunner;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.command.CommandManager;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.RegulationFiles;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.service.OpenShiftService;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.support.CommandLineArg;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.support.CommandLineArgsParser;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.support.CommandLineOptionsConverter;
@@ -42,7 +44,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,33 +57,36 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(SpringExtension.class)
-class RegulationValidationCommandLineRunnerTest {
+class RegistryRegulationCommandLineRunnerTest {
 
   @Autowired
   private ResourceLoader resourceLoader;
 
   private SystemExit systemExit;
   private CommandLineArgsParser commandLineArgsParser;
+  private OpenShiftService openShiftService;
+  private JsonMapper jsonMapper;
   private CommandLineOptionsConverter commandLineOptionsConverter;
-  private RegulationValidationCommandLineRunner validationRunner;
+  private RegistryRegulationCommandLineRunner validationRunner;
+
+  private static final String VALIDATE_COMMAND = "validate";
+  private static final String HELP_COMMAND = "help";
 
   @BeforeEach
   void setUp() {
     this.systemExit = mock(SystemExit.class);
     this.commandLineArgsParser = mock(CommandLineArgsParser.class);
     this.commandLineOptionsConverter = mock(CommandLineOptionsConverter.class);
+    this.openShiftService = mock(OpenShiftService.class);
+    this.jsonMapper = mock(JsonMapper.class);
   }
 
   @Test
-  void shouldDisplayHelpIfSpecified() throws ParseException {
-    var options = new Options();
-    options.addOption(Option.builder().longOpt("help").build());
-    when(commandLineArgsParser.parse("--help")).thenReturn(options);
-
+  void shouldDisplayHelpInfo() {
     validationRunner = newValidationRunner(resourceLoader, commandLineArgsParser,
         commandLineOptionsConverter, systemExit);
 
-    validationRunner.run("--help");
+    validationRunner.run(HELP_COMMAND);
 
     verify(commandLineArgsParser, times(1)).printHelp();
     verify(systemExit, times(1)).complete();
@@ -93,7 +97,7 @@ class RegulationValidationCommandLineRunnerTest {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
 
-    validationRunner.run("--bp-auth=");
+    validationRunner.run(VALIDATE_COMMAND, "--bp-auth=");
 
     verify(systemExit, times(1)).complete();
   }
@@ -151,7 +155,7 @@ class RegulationValidationCommandLineRunnerTest {
         new CommandLineOptionsConverter(), systemExit);
 
     validationRunner.run(correctRegistryRegulations().toArray(new String[0]));
-    validationRunner.run(argOf(CommandLineArg.BPMN,
+    validationRunner.run(VALIDATE_COMMAND, argOf(CommandLineArg.BPMN,
         testResourcePathOf("registry-regulation/broken/test-duplicated-process-id-bp-1.bpmn"),
         testResourcePathOf("registry-regulation/broken/test-duplicated-process-id-bp-2.bpmn"))
     );
@@ -164,7 +168,7 @@ class RegulationValidationCommandLineRunnerTest {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
 
-    validationRunner.run(argOf(CommandLineArg.BP_AUTH,
+    validationRunner.run(VALIDATE_COMMAND, argOf(CommandLineArg.BP_AUTH,
         testResourcePathOf("registry-regulation/broken/bp-auth-duplicates.yml")));
 
     verify(systemExit, times(1)).validationFailure();
@@ -175,7 +179,7 @@ class RegulationValidationCommandLineRunnerTest {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
 
-    validationRunner.run(argOf(CommandLineArg.BP_TREMBITA,
+    validationRunner.run(VALIDATE_COMMAND, argOf(CommandLineArg.BP_TREMBITA,
         testResourcePathOf("registry-regulation/broken/bp-trembita-duplicates.yml")));
 
     verify(systemExit, times(1)).validationFailure();
@@ -186,7 +190,7 @@ class RegulationValidationCommandLineRunnerTest {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
 
-    validationRunner.run(argOf(CommandLineArg.BP_TREMBITA_CONFIG,
+    validationRunner.run(VALIDATE_COMMAND, argOf(CommandLineArg.BP_TREMBITA_CONFIG,
         testResourcePathOf(
             "registry-regulation/broken/broken-configuration-deprecated-trembita-properties.yml")));
 
@@ -198,7 +202,7 @@ class RegulationValidationCommandLineRunnerTest {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
 
-    validationRunner.run(argOf(CommandLineArg.BP_TREMBITA_CONFIG,
+    validationRunner.run(VALIDATE_COMMAND, argOf(CommandLineArg.BP_TREMBITA_CONFIG,
         testResourcePathOf(
             "registry-regulation/broken/broken-configuration-deprecated-ext-systems-properties.yml")));
 
@@ -210,7 +214,7 @@ class RegulationValidationCommandLineRunnerTest {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
 
-    validationRunner.run(argOf(CommandLineArg.GLOBAL_VARS,
+    validationRunner.run(VALIDATE_COMMAND, argOf(CommandLineArg.GLOBAL_VARS,
         testResourcePathOf("registry-regulation/broken/global-vars-themeFile-broken.yml")));
 
     verify(systemExit, times(1)).validationFailure();
@@ -220,7 +224,7 @@ class RegulationValidationCommandLineRunnerTest {
   void shouldFailDatafactorySettingYamlFileDueToInvalidParams() {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
-    validationRunner.run(argOf(CommandLineArg.DATAFACTORY_SETTINGS,
+    validationRunner.run(VALIDATE_COMMAND, argOf(CommandLineArg.DATAFACTORY_SETTINGS,
         testResourcePathOf("registry-regulation/broken/settings.yaml")));
 
     verify(systemExit, times(1)).validationFailure();
@@ -230,7 +234,7 @@ class RegulationValidationCommandLineRunnerTest {
   void shouldFailRegistrySettingsYamlFileDueToInvalidParams() {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
-    validationRunner.run(argOf(CommandLineArg.REGISTRY_SETTINGS,
+    validationRunner.run(VALIDATE_COMMAND, argOf(CommandLineArg.REGISTRY_SETTINGS,
         testResourcePathOf("registry-regulation/broken/registry-settings-long-title.yaml")));
 
     verify(systemExit, times(1)).validationFailure();
@@ -240,8 +244,18 @@ class RegulationValidationCommandLineRunnerTest {
   void shouldFailRegistrySettingsYamlFileDueToEmptyTitleOrTitleFull() {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
-    validationRunner.run(argOf(CommandLineArg.REGISTRY_SETTINGS,
+    validationRunner.run(VALIDATE_COMMAND, argOf(CommandLineArg.REGISTRY_SETTINGS,
         testResourcePathOf("registry-regulation/broken/registry-settings-empty-title.yaml")));
+
+    verify(systemExit, times(1)).validationFailure();
+  }
+
+  @Test
+  void shouldFailReportQueriesUniqueNameValidations() {
+    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
+            new CommandLineOptionsConverter(), systemExit);
+    validationRunner.run(VALIDATE_COMMAND, argOf(CommandLineArg.REPORTS,
+            testResourcePathOf("registry-regulation/broken/reports/officer/queries/queries.json")));
 
     verify(systemExit, times(1)).validationFailure();
   }
@@ -250,7 +264,7 @@ class RegulationValidationCommandLineRunnerTest {
   void shouldFailMainLiquibaseFileDueToInvalidParams() {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
-    validationRunner.run(argOf(CommandLineArg.LIQUIBASE,
+    validationRunner.run(VALIDATE_COMMAND, argOf(CommandLineArg.LIQUIBASE,
         testResourcePathOf("registry-regulation/broken/main-liquibase/test-main-liquibase.xml")));
 
     verify(systemExit, times(1)).validationFailure();
@@ -260,7 +274,7 @@ class RegulationValidationCommandLineRunnerTest {
   void shouldFailEmailNotificationDueToInvalidMetadata() {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
-    validationRunner.run(argOf(CommandLineArg.EMAIL_NOTIFICATION_TEMPLATE,
+    validationRunner.run(VALIDATE_COMMAND, argOf(CommandLineArg.EMAIL_NOTIFICATION_TEMPLATE,
         testResourcePathOf("registry-regulation/broken/email")));
 
     verify(systemExit).validationFailure();
@@ -270,7 +284,7 @@ class RegulationValidationCommandLineRunnerTest {
   void shouldFailEmailNotificationDueToNoTemplateFile() {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
-    validationRunner.run(argOf(CommandLineArg.EMAIL_NOTIFICATION_TEMPLATE,
+    validationRunner.run(VALIDATE_COMMAND, argOf(CommandLineArg.EMAIL_NOTIFICATION_TEMPLATE,
         testResourcePathOf("registry-regulation/broken/email2")));
 
     verify(systemExit, times(1)).validationFailure();
@@ -280,7 +294,7 @@ class RegulationValidationCommandLineRunnerTest {
   void shouldFailInboxNotificationEmptyMetadata() {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
-    validationRunner.run(argOf(CommandLineArg.INBOX_NOTIFICATION_TEMPLATE,
+    validationRunner.run(VALIDATE_COMMAND, argOf(CommandLineArg.INBOX_NOTIFICATION_TEMPLATE,
         testResourcePathOf("registry-regulation/broken/inbox")));
 
     verify(systemExit).validationFailure();
@@ -290,7 +304,7 @@ class RegulationValidationCommandLineRunnerTest {
   void shouldFailInboxNotificationDueToNoMetadataFile() {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
-    validationRunner.run(argOf(CommandLineArg.INBOX_NOTIFICATION_TEMPLATE,
+    validationRunner.run(VALIDATE_COMMAND, argOf(CommandLineArg.INBOX_NOTIFICATION_TEMPLATE,
         testResourcePathOf("registry-regulation/broken/inbox2")));
 
     verify(systemExit, times(1)).validationFailure();
@@ -300,7 +314,7 @@ class RegulationValidationCommandLineRunnerTest {
   void shouldFailDiiaNotificationDueToInvalidParams() {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
-    validationRunner.run(argOf(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE,
+    validationRunner.run(VALIDATE_COMMAND, argOf(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE,
         testResourcePathOf("registry-regulation/broken/diia")));
 
     verify(systemExit, times(1)).validationFailure();
@@ -310,7 +324,7 @@ class RegulationValidationCommandLineRunnerTest {
   void shouldFailDiiaNotificationDueToTemplateFolderIsNotDirectory() {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
-    validationRunner.run(argOf(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE,
+    validationRunner.run(VALIDATE_COMMAND, argOf(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE,
         testResourcePathOf("registry-regulation/correct/global-vars.yml")));
 
     verify(systemExit, times(1)).validationFailure();
@@ -320,7 +334,7 @@ class RegulationValidationCommandLineRunnerTest {
   void shouldPassIfDirectoryIsNotExists() {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
-    validationRunner.run(argOf(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE,
+    validationRunner.run(VALIDATE_COMMAND, argOf(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE,
         "registry-regulation/correct/absent_directory"));
 
     verify(systemExit, times(1)).complete();
@@ -331,7 +345,7 @@ class RegulationValidationCommandLineRunnerTest {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
 
-    validationRunner.run(bpmnArgsForBpGroupingRegistryRegulations(),
+    validationRunner.run(VALIDATE_COMMAND, bpmnArgsForBpGroupingRegistryRegulations(),
         argOf(CommandLineArg.BP_GROUPING,
             testResourcePathOf("registry-regulation/correct/bp-grouping/bp-grouping.yml"))
     );
@@ -344,7 +358,7 @@ class RegulationValidationCommandLineRunnerTest {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
 
-    validationRunner.run(bpmnArgsForBpGroupingRegistryRegulations(),
+    validationRunner.run(VALIDATE_COMMAND, bpmnArgsForBpGroupingRegistryRegulations(),
         argOf(CommandLineArg.BP_GROUPING,
             testResourcePathOf(
                 "registry-regulation/correct/bp-grouping/bp-grouping-empty-array.yml"))
@@ -364,7 +378,7 @@ class RegulationValidationCommandLineRunnerTest {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
 
-    validationRunner.run(bpmnArgsForBpGroupingRegistryRegulations(),
+    validationRunner.run(VALIDATE_COMMAND, bpmnArgsForBpGroupingRegistryRegulations(),
         argOf(CommandLineArg.BP_GROUPING, testResourcePathOf(bpGroupsFile))
     );
 
@@ -401,7 +415,7 @@ class RegulationValidationCommandLineRunnerTest {
             "registry-regulation/correct/bp-grouping//bpmn/process_for_group_2.bpmn"));
   }
 
-  private RegulationValidationCommandLineRunner newValidationRunner(ResourceLoader resourceLoader,
+  private RegistryRegulationCommandLineRunner newValidationRunner(ResourceLoader resourceLoader,
       CommandLineArgsParser commandLineArgsParser,
       CommandLineOptionsConverter commandLineOptionsConverter,
       SystemExit systemExit) {
@@ -414,9 +428,10 @@ class RegulationValidationCommandLineRunnerTest {
     ReflectionTestUtils.setField(validatorFactory, "elementTemplatePath", elementTemplatePath);
     ReflectionTestUtils.setField(validatorFactory, "defaultRoles", List.of("testRole"));
 
-    return new RegulationValidationCommandLineRunner(
-        validatorFactory, commandLineArgsParser, commandLineOptionsConverter, systemExit
-    );
+    return new RegistryRegulationCommandLineRunner(commandLineArgsParser,
+        commandLineOptionsConverter, systemExit,
+        new CommandManager(validatorFactory, commandLineArgsParser, systemExit, openShiftService,
+            jsonMapper));
   }
 
   private RuleBook<Set<ValidationError>> settingsYamlRuleBook() {
@@ -438,6 +453,7 @@ class RegulationValidationCommandLineRunnerTest {
 
   private List<String> correctRegistryRegulations() {
     return List.of(
+        VALIDATE_COMMAND,
         argOf(CommandLineArg.GLOBAL_VARS,
             testResourcePathOf("registry-regulation/correct/global-vars.yml")),
         argOf(CommandLineArg.BP_AUTH,
@@ -467,12 +483,20 @@ class RegulationValidationCommandLineRunnerTest {
         argOf(CommandLineArg.EXCERPTS,
             testResourcePathOf("registry-regulation/correct/excerpts-docx")),
         argOf(CommandLineArg.MOCK_INTEGRATIONS,
-            testResourcePathOf("registry-regulation/correct/mock-integrations.json"))
+            testResourcePathOf("registry-regulation/correct/mock-integrations.json")),
+        argOf(CommandLineArg.REPORTS,
+            testResourcePathOf("registry-regulation/correct/reports/citizen/laboratory.json"),
+            testResourcePathOf("registry-regulation/correct/reports/citizen/queries/queries.json"),
+            testResourcePathOf("registry-regulation/correct/reports/citizen/registration.json"),
+            testResourcePathOf("registry-regulation/correct/reports/officer/laboratory.json"),
+            testResourcePathOf("registry-regulation/correct/reports/officer/queries/queries.json"),
+            testResourcePathOf("registry-regulation/correct/reports/officer/registration.json"))
     );
   }
 
   private String[] emptyRegistryRegulations() {
     return new String[]{
+        VALIDATE_COMMAND,
         argOf(CommandLineArg.BP_AUTH,
             testResourcePathOf("registry-regulation/empty/bp-auth-empty.yml")),
         argOf(CommandLineArg.BP_TREMBITA,

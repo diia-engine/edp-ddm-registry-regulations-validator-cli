@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 EPAM Systems.
+ * Copyright 2023 EPAM Systems.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,8 @@ public class RegulationFilesValidator implements RegulationValidator<RegulationF
     regulationFiles.getRolesFiles().forEach(file -> errors.addAll(validate(file, RegulationFileType.ROLES)));
 
     errors.addAll(validateBpmnFiles(regulationFiles.getBpmnFiles()));
+
+    errors.addAll(validateReportsFiles(regulationFiles.getReportsFiles()));
 
     regulationFiles.getDmnFiles().forEach(file -> errors.addAll(validate(file, RegulationFileType.DMN)));
 
@@ -117,6 +119,16 @@ public class RegulationFilesValidator implements RegulationValidator<RegulationF
     Set<ValidationError> errors = Sets.newHashSet();
     var groupValidator = groupRegulationTypeValidators.get(RegulationFileType.EXCERPTS);
     errors.addAll(groupValidator.validate(excerptFolders, ValidationContext.of(RegulationFileType.EXCERPTS)));
+    return errors;
+  }
+
+  private Set<ValidationError> validateReportsFiles(Collection<File> reportsFiles) {
+    Set<ValidationError> errors = Sets.newHashSet();
+    reportsFiles.forEach(file -> errors.addAll(validate(file, RegulationFileType.REPORTS)));
+
+    var groupValidator = groupRegulationTypeValidators.get(RegulationFileType.REPORTS);
+    errors.addAll(groupValidator.validate(reportsFiles, ValidationContext.of(RegulationFileType.REPORTS)));
+
     return errors;
   }
 }

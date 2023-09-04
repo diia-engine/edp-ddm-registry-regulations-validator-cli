@@ -1,43 +1,50 @@
-# registry-regulations-validation-cli
+# registry-regulations-cli
 
 ### Overview
 
-* Command-line registry regulation validation utility for Low-code Platform
+* Command-line utility designed for verifying and securely storing the state of files in an
+  OpenShift secret, as well as for validating registry regulation files in accordance with
+  predefined validation rules.
 
 ### Usage
 
 ```bash
-Example: java -jar registry-regulations-validator-cli.jar
-         [--help] 
-         [--bp-auth-files=<arg>] [--bp-trembita-files=<arg>]
-         [--bpmn-files=<arg>] [--dmn-files=<arg>] [--form-files=<arg>]
-         [--global-vars-files=<arg>] [--roles-files=<arg>] 
-         [--datafactory-settings-files=<arg>] [--registry-settings-files=<arg>]
-         [--liquibase-files=<arg>] [--report-folders=<arg>]
+Usage [plan/save] command:
+java -jar registry-regulations-cli.jar -DOPENSHIFT_NAMESPACE=name plan update-bp-grouping --file=/bp-grouping
+java -jar registry-regulations-cli.jar -DOPENSHIFT_NAMESPACE=name save update-bp-grouping --file-detailed=/bp-grouping
 Options:
-    --help                     Help on utility usage
-    --bp-auth-files=<arg>      BP authorization regulation files (accepts
-                               multiple values separated by ',')
-    --bp-trembita-files=<arg>  BP Trembita configuration regulation file
-    --bp-trembita-config=<arg> BP Trembita registries configuration file
-    --bpmn-files=<arg>         Business processes regulation files (accepts multiple values separated by ',')
-    --dmn-files=<arg>          Business rules regulation files (accepts
-                               multiple values separated by ',')
-    --form-files=<arg>         UI forms regulation files (accepts multiple
-                               values separated by ',')
-    --global-vars-files=<arg>   Global variables regulation files (accepts multiple values separated by ',')
-    --roles-files=<arg>        Authorization roles regulation files
-                               (accepts multiple values separated by ',')
-    --datafactory-settings-files=<arg>     Datafactory Settings regulation files with yml, yaml extensions
-    --registry-settings-files=<arg>     Registry Settings regulation files with yml, yaml extensions
-    --liquibase-files=<arg>    Liquibase regulation files introduce Database change set with xml extensions
-    --bp-grouping-files=<arg>  Business process grouping file
-    --mock-integration-files=<arg>         Mock Integration regulation files (accepts multiple
-                               values separated by ',')    
-    --report-folders=<arg>     Folders with report files (accepts multiple values separated by ',')                      
-                               
+    --file=<arg>            List of folders and files (accepts multiple values separated by ',')
+    --file-detailed=<arg>   List of folders and files, provides detailed information (accepts multiple values separated by ',')
+
+Usage [validate] command:
+java -jar registry-regulations-cli.jar validate [--bp-auth-files=<arg>] [--bp-grouping-files=<arg>]
+Options:
+    --bp-auth-files=<arg>                        BP authorization regulation files (accepts multiple values separated by ',')
+    --bp-grouping-files=<arg>                    Business process grouping file
+    --bp-trembita-config=<arg>                   BP Trembita registries configuration
+    --bp-trembita-files=<arg>                    BP Trembita configuration regulation files (accepts multiple values separated by ',')
+    --bpmn-files=<arg>                           Business processes regulation files (accepts multiple values separated by ',')
+    --datafactory-settings-files=<arg>           Datafactory Settings regulation files with yml, yaml extensions
+    --diia-notification-template-folder=<arg>    Diia notification template directory
+    --dmn-files=<arg>                            Business rules regulation files (accepts multiple values separated by ',')
+    --email-notification-template-folder=<arg>   Email notification template directory
+    --excerpt-folders=<arg>                      Folders that contain excerpts in different formats
+    --form-files=<arg>                           UI forms regulation files (accepts multiple values separated by ',')
+    --global-vars-files=<arg>                    Global variables regulation files (accepts multiple values separated by ',')
+    --inbox-notification-template-folder=<arg>   Inbox notification template directory
+    --liquibase-files=<arg>                      Liquibase regulation files introduce Database change set with xml extensions
+    --mock-integration-files=<arg>               Mock integration regulation files (accepts multiple values separated by ',')
+    --registry-settings-files=<arg>              Registry Settings regulation files with yml, yaml extensions
+    --report-folders=<arg>                       Folders with reports files (accepts multiple values separated by ',')
+    --reports-files=<arg>                        Reports files (accepts multiple values separated by ',')
+    --roles-files=<arg>                          Authorization roles regulation files (accepts multiple values separated by ',')
+
+Usage [help] command:
+java -jar registry-regulations-cli.jar help
+
 Exit codes: 0 (success), 1 (system error), 10 (validation failure)
 ```
+
 ### Test execution
 
 * Tests could be run via maven command:

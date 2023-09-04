@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 EPAM Systems.
+ * Copyright 2023 EPAM Systems.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ class RegulationFilesValidatorTest {
     RegulationValidator<File> dmnFileValidator = mock(RegulationValidator.class);
     RegulationValidator<File> excerptFilesValidator = mock(RegulationValidator.class);
     RegulationValidator<Collection<File>> bpmnFilesValidator = mock(RegulationValidator.class);
+    RegulationValidator<Collection<File>> reportFilesValidator = mock(RegulationValidator.class);
     RegulationValidator<Collection<File>> excerptsFilesValidator = mock(RegulationValidator.class);
     RegulationValidator<RegulationFiles> bpAuthToBpmnRegulationValidator = mock(RegulationValidator.class);
     RegulationValidator<RegulationFiles> bpTrembitaToBpmnRegulationValidator = mock(RegulationValidator.class);
@@ -67,7 +68,8 @@ class RegulationFilesValidatorTest {
     );
     var groupValidators = Map.of(
         RegulationFileType.BPMN, bpmnFilesValidator,
-        RegulationFileType.EXCERPTS, excerptsFilesValidator
+        RegulationFileType.EXCERPTS, excerptsFilesValidator,
+        RegulationFileType.REPORTS, reportFilesValidator
     );
 
     var globalRegulationValidators = Map.of(

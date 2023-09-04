@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 EPAM Systems.
+ * Copyright 2023 EPAM Systems.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,38 +18,76 @@ package com.epam.digital.data.platform.registry.regulation.validation.cli.config
 
 import com.deliveredtechnologies.rulebook.model.RuleBook;
 import com.deliveredtechnologies.rulebook.spring.SpringAwareRuleBookRunner;
-import com.epam.digital.data.platform.registry.regulation.validation.cli.RegulationValidationCommandLineRunner;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.RegistryRegulationCommandLineRunner;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.command.CommandManager;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.service.OpenShiftService;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.service.impl.OpenShiftServiceImpl;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.support.CommandLineArgsParser;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.support.CommandLineOptionsConverter;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.support.SystemExit;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.RegulationValidatorFactory;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.ValidationError;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.google.common.collect.Sets;
+import io.fabric8.kubernetes.client.Config;
+import io.fabric8.openshift.client.OpenShiftConfigBuilder;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ResourceLoader;
-
-import java.util.Set;
 
 @Configuration
 public class AppConfig {
 
   @Bean
-  @Autowired
-  public CommandLineRunner commandLineRunner(RegulationValidatorFactory regulationValidatorFactory, SystemExit systemExit) {
-    return new RegulationValidationCommandLineRunner(regulationValidatorFactory, new CommandLineArgsParser(), new CommandLineOptionsConverter(), systemExit);
+  @ConditionalOnProperty(name = "OPENSHIFT_NAMESPACE")
+  public Config config(@Value("${OPENSHIFT_NAMESPACE}") String namespace) {
+    return new OpenShiftConfigBuilder().withNamespace(namespace).build();
+  }
+
+  @Bean
+  @ConditionalOnBean(Config.class)
+  public OpenShiftService openShiftService(Config config) {
+    return new OpenShiftServiceImpl(config);
+  }
+
+  @Bean
+  public JsonMapper jsonMapper() {
+    var jsonMapper = new JsonMapper();
+    jsonMapper.enable(SerializationFeature.INDENT_OUTPUT);
+    return jsonMapper;
   }
 
   @Bean
   @Autowired
-  public RegulationValidatorFactory registryRegulationValidatorFactory(ResourceLoader resourceLoader) {
-    return new RegulationValidatorFactory(resourceLoader, yamlObjectMapper(), jsonObjectMapper(),
-            datafactorySettingsYamlRuleBook(), mainLiquibaseRuleBook());
+  public CommandManager commandManager(RegulationValidatorFactory regulationValidatorFactory,
+      SystemExit systemExit, @Lazy OpenShiftService openShiftService, JsonMapper jsonMapper) {
+    return new CommandManager(regulationValidatorFactory, new CommandLineArgsParser(), systemExit,
+        openShiftService, jsonMapper);
+  }
+
+  @Bean
+  @Autowired
+  public CommandLineRunner commandLineRunner(SystemExit systemExit, CommandManager commandManager) {
+    return new RegistryRegulationCommandLineRunner(new CommandLineArgsParser(),
+        new CommandLineOptionsConverter(), systemExit, commandManager);
+  }
+
+  @Bean
+  @Autowired
+  public RegulationValidatorFactory registryRegulationValidatorFactory(
+      ResourceLoader resourceLoader, JsonMapper jsonMapper) {
+    return new RegulationValidatorFactory(resourceLoader, yamlObjectMapper(), jsonMapper,
+        datafactorySettingsYamlRuleBook(), mainLiquibaseRuleBook());
   }
 
   @Bean
@@ -62,24 +100,20 @@ public class AppConfig {
     return new YAMLMapper();
   }
 
-  private JsonMapper jsonObjectMapper() {
-    return new JsonMapper();
-  }
-
   @Bean
   public RuleBook<Set<ValidationError>> datafactorySettingsYamlRuleBook() {
     return getRuleBookRunner(
-            "com.epam.digital.data.platform.registry.regulation.validation.cli.validator.datasettings.rules");
+        "com.epam.digital.data.platform.registry.regulation.validation.cli.validator.datasettings.rules");
   }
 
   @Bean
   public RuleBook<Set<ValidationError>> mainLiquibaseRuleBook() {
     return getRuleBookRunner(
-            "com.epam.digital.data.platform.registry.regulation.validation.cli.validator.mainliquibase.rules");
+        "com.epam.digital.data.platform.registry.regulation.validation.cli.validator.mainliquibase.rules");
   }
 
   @SuppressWarnings("unchecked")
-  private RuleBook<Set<ValidationError>> getRuleBookRunner(String rulePackage)  {
+  private RuleBook<Set<ValidationError>> getRuleBookRunner(String rulePackage) {
     var springAwareRuleBookRunner = new SpringAwareRuleBookRunner(rulePackage);
 
     springAwareRuleBookRunner.setDefaultResult(Sets.newHashSet());

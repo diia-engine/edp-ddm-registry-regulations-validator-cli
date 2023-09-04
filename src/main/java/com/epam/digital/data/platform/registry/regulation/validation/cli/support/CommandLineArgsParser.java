@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 EPAM Systems.
+ * Copyright 2023 EPAM Systems.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.apache.commons.cli.ParseException;
 
 public class CommandLineArgsParser {
 
-  private static final String JAR_NAME = "registry-regulations-validator-cli";
+  private static final String JAR_NAME = "registry-regulations-cli";
 
   private final CommandLineParser parser;
   private final HelpFormatter helpFormatter;
@@ -53,28 +53,53 @@ public class CommandLineArgsParser {
   }
 
   public void printHelp() {
-    this.helpFormatter.printHelp(
-        String.format("java -jar %s.jar", JAR_NAME),
-        "Options:",
-        commandLineOptions(),
-        "Exit codes: 0 (success), 1 (system error), 10 (validation failure)",
-        true);
+    var usageExamplePlanSaveCommand = new StringBuilder("[plan/save] command:");
+    usageExamplePlanSaveCommand
+        .append(System.lineSeparator())
+        .append(String.format(
+            "java -jar %s.jar -DOPENSHIFT_NAMESPACE=name plan update-bp-grouping --file=/bp-grouping",
+            JAR_NAME))
+        .append(System.lineSeparator())
+        .append(String.format(
+            "java -jar %s.jar -DOPENSHIFT_NAMESPACE=name save update-bp-grouping --file-detailed=/bp-grouping",
+            JAR_NAME));
+    this.helpFormatter.printHelp(usageExamplePlanSaveCommand.toString(), "Options:",
+        saveAndPlanCommandOptions(), null, false);
+
+    var usageExampleValidateCommand = new StringBuilder("[validate] command:");
+    usageExampleValidateCommand
+        .append(System.lineSeparator())
+        .append(String.format(
+            "java -jar %s.jar validate [--bp-auth-files=<arg>] [--bp-grouping-files=<arg>]",
+            JAR_NAME));
+    this.helpFormatter.printHelp(usageExampleValidateCommand.toString(),
+        "Options:", validationOptions(), null, false);
+
+    var usageExampleHelpCommand = new StringBuilder("[help] command:");
+    usageExampleHelpCommand
+        .append(System.lineSeparator())
+        .append(String.format("java -jar %s.jar help", JAR_NAME));
+    this.helpFormatter.printHelp(usageExampleHelpCommand.toString(), null, new Options(),
+        "Exit codes: 0 (success), 1 (system error), 10 (validation failure)", false);
   }
 
   private HelpFormatter newHelpFormatter() {
     var formatter = new HelpFormatter();
-    formatter.setSyntaxPrefix("Usage: ");
+    formatter.setSyntaxPrefix(System.lineSeparator() + "Usage ");
     formatter.setLongOptSeparator("=");
+    formatter.setWidth(150);
     return formatter;
   }
 
   private Options commandLineOptions() {
-    var options = new Options();
+    var allOptions = new Options();
+    validationOptions().getOptions().forEach(allOptions::addOption);
+    saveAndPlanCommandOptions().getOptions().forEach(allOptions::addOption);
+    return allOptions;
+  }
 
-    options.addOption(Option.builder()
-        .longOpt("help")
-        .desc("Help on utility usage")
-        .build());
+  private Options validationOptions() {
+    var options = new Options();
 
     options.addOption(Option.builder()
         .longOpt(CommandLineArg.BP_AUTH.getArgOptionName())
@@ -133,11 +158,11 @@ public class CommandLineArgsParser {
         .build());
 
     options.addOption(Option.builder()
-            .longOpt(CommandLineArg.REGISTRY_SETTINGS.getArgOptionName())
-            .hasArgs()
-            .numberOfArgs(1)
-            .desc("Registry Settings regulation files with yml, yaml extensions")
-            .build());
+        .longOpt(CommandLineArg.REGISTRY_SETTINGS.getArgOptionName())
+        .hasArgs()
+        .numberOfArgs(1)
+        .desc("Registry Settings regulation files with yml, yaml extensions")
+        .build());
 
     options.addOption(Option.builder()
         .longOpt(CommandLineArg.LIQUIBASE.getArgOptionName())
@@ -154,18 +179,18 @@ public class CommandLineArgsParser {
         .build());
 
     options.addOption(Option.builder()
-            .longOpt(CommandLineArg.EMAIL_NOTIFICATION_TEMPLATE.getArgOptionName())
-            .hasArgs()
-            .numberOfArgs(1)
-            .desc("Email notification template directory")
-            .build());
+        .longOpt(CommandLineArg.EMAIL_NOTIFICATION_TEMPLATE.getArgOptionName())
+        .hasArgs()
+        .numberOfArgs(1)
+        .desc("Email notification template directory")
+        .build());
 
     options.addOption(Option.builder()
-            .longOpt(CommandLineArg.INBOX_NOTIFICATION_TEMPLATE.getArgOptionName())
-            .hasArgs()
-            .numberOfArgs(1)
-            .desc("Inbox notification template directory")
-            .build());
+        .longOpt(CommandLineArg.INBOX_NOTIFICATION_TEMPLATE.getArgOptionName())
+        .hasArgs()
+        .numberOfArgs(1)
+        .desc("Inbox notification template directory")
+        .build());
 
     options.addOption(Option.builder()
         .longOpt(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE.getArgOptionName())
@@ -187,17 +212,45 @@ public class CommandLineArgsParser {
         .build());
 
     options.addOption(Option.builder()
-            .longOpt(CommandLineArg.MOCK_INTEGRATIONS.getArgOptionName())
-            .hasArgs()
-            .valueSeparator(',')
-            .desc("Mock integration regulation files (accepts multiple values separated by ',')")
-            .build());
+        .longOpt(CommandLineArg.MOCK_INTEGRATIONS.getArgOptionName())
+        .hasArgs()
+        .valueSeparator(',')
+        .desc("Mock integration regulation files (accepts multiple values separated by ',')")
+        .build());
 
     options.addOption(Option.builder()
         .longOpt(CommandLineArg.REPORTS_FOLDERS.getArgOptionName())
         .hasArgs()
         .valueSeparator(',')
         .desc("Folders with reports files (accepts multiple values separated by ',')")
+        .build());
+
+    options.addOption(Option.builder()
+        .longOpt(CommandLineArg.REPORTS.getArgOptionName())
+        .hasArgs()
+        .valueSeparator(',')
+        .desc("Reports files (accepts multiple values separated by ',')")
+        .build());
+
+    return options;
+  }
+
+  private Options saveAndPlanCommandOptions() {
+    var options = new Options();
+
+    options.addOption(Option.builder()
+        .longOpt(CommandLineArg.FILES.getArgOptionName())
+        .hasArgs()
+        .valueSeparator(',')
+        .desc("List of folders and files (accepts multiple values separated by ',')")
+        .build());
+
+    options.addOption(Option.builder()
+        .longOpt(CommandLineArg.FILES_DETAILED.getArgOptionName())
+        .hasArgs()
+        .valueSeparator(',')
+        .desc(
+            "List of folders and files, provides detailed information (accepts multiple values separated by ',')")
         .build());
 
     return options;

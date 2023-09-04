@@ -17,8 +17,6 @@
 package com.epam.digital.data.platform.registry.regulation.validation.cli.validator;
 
 import com.deliveredtechnologies.rulebook.model.RuleBook;
-import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpmnFileInputsValidator;
-import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.form.FormToSearchConditionExistenceValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.BpAuthConfiguration;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.BpTrembitaConfiguration;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.RegulationFileType;
@@ -30,6 +28,7 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.validat
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpAuthToBpmnRoleExistenceValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpTrembitaToBpmnProcessExistenceValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpmnFileGroupUniqueProcessIdValidator;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpmnFileInputsValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpmnFileValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.channel.NotificationTemplateDirectoryValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.channel.NotificationTemplateValidator;
@@ -44,9 +43,11 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.validat
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.file.GlobalFileValidatorLoggingDecorator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.file.IsNotDirectoryFileValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.file.ValidationSkipOnDependentDecorator;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.form.FormToSearchConditionExistenceValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.json.JsonSchemaFileValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.mainliquibase.MainLiquibaseRulesValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.registrysettings.RegistrySettingsFileValidator;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.report.ReportGroupUniqueNameValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.report.ReportRoleExistenceValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.typed.BpAuthProcessUniquenessValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.typed.BpTrembitaProcessUniquenessValidator;
@@ -135,13 +136,15 @@ public class RegulationValidatorFactory {
         newDiiaNotificationTemplateValidator());
     validators.put(RegulationFileType.BP_GROUPING, newBpGroupValidator());
     validators.put(RegulationFileType.MOCK_INTEGRATIONS, newMockIntegrationsFileValidator());
+    validators.put(RegulationFileType.REPORTS, newReportsFileValidator());
     return validators;
   }
 
   private Map<RegulationFileType, RegulationValidator<Collection<File>>> regulationTypeGroupValidators() {
     return Map.of(
         RegulationFileType.BPMN, newBpmnFileGroupValidator(),
-        RegulationFileType.EXCERPTS, newExcerptGroupValidator()
+        RegulationFileType.EXCERPTS, newExcerptGroupValidator(),
+        RegulationFileType.REPORTS, newReportFileGroupValidator()
     );
   }
 
@@ -206,6 +209,14 @@ public class RegulationValidatorFactory {
         CompositeFileGroupValidator.builder()
             .validator(new ExcerptTemplateUniqueNameValidator())
             .build()
+    );
+  }
+
+  private RegulationValidator<Collection<File>> newReportFileGroupValidator() {
+    return decorateGroupValidator(
+            CompositeFileGroupValidator.builder()
+                    .validator(new ReportGroupUniqueNameValidator(jsonObjectMapper))
+                    .build()
     );
   }
 
@@ -387,6 +398,15 @@ public class RegulationValidatorFactory {
                 new JsonSchemaFileValidator(
                     MOCK_INTEGRATIONS_JSON_SCHEMA, resourceLoader, jsonObjectMapper))
             .build());
+  }
+
+  private RegulationValidator<File> newReportsFileValidator() {
+    return decorate(
+            CompositeFileValidator.builder()
+                    .validator(new FileExistenceValidator())
+                    .validator(new FileExtensionValidator())
+                    .validator(new EmptyFileValidator())
+                    .build());
   }
 
   private RegulationValidator<File> decorate(RegulationValidator<File> validator) {
