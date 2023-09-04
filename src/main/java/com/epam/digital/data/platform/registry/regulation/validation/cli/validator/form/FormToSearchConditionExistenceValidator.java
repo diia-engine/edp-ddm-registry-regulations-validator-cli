@@ -101,7 +101,11 @@ public class FormToSearchConditionExistenceValidator implements
   }
 
   private List<String> getDataUrlsFromForm(JsonNode form) {
-    return Streams.stream(form.findValue("components").elements())
+    var components = form.findValue("components");
+    if (Objects.isNull(components)) {
+      return List.of();
+    }
+    return Streams.stream(components.elements())
         .filter(component -> "selectLatest".equals(component.get("type").asText()))
         .map(component -> component.findValue("url"))
         .filter(url -> Objects.nonNull(url) && !url.asText().isBlank())
