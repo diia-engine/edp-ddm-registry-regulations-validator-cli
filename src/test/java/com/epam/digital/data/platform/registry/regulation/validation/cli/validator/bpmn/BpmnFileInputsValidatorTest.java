@@ -312,6 +312,8 @@ class BpmnFileInputsValidatorTest {
         .getResource("registry-regulation/correct/excerpts-docx")).getPath();
     var notificationTemplate = Objects.requireNonNull(getClass().getClassLoader()
         .getResource("registry-regulation/correct/diia")).getPath();
+    var formFile = Objects.requireNonNull(getClass().getClassLoader()
+        .getResource("registry-regulation/correct/ui-form.json")).getPath();
 
     RegulationFiles regulationFiles = RegulationFiles.builder()
         .bpmnFiles(List.of(new File(correctFile)))
@@ -319,6 +321,7 @@ class BpmnFileInputsValidatorTest {
         .bpTrembitaConfig(List.of(new File(bpTrembitaConfig)))
         .excerptFiles(List.of(new File(excerptsDocx)))
         .diiaNotificationTemplateDirectory(List.of(new File(notificationTemplate)))
+        .formFiles(List.of(new File(formFile)))
         .build();
 
     var result = validator.validate(regulationFiles, ValidationContext.empty());
@@ -344,6 +347,8 @@ class BpmnFileInputsValidatorTest {
         .getResource("registry-regulation/broken/excerpts-docx")).getPath();
     var notificationTemplate = Objects.requireNonNull(getClass().getClassLoader()
         .getResource("registry-regulation/broken/diia")).getPath();
+    var formFile = Objects.requireNonNull(getClass().getClassLoader()
+        .getResource("registry-regulation/broken/ui-form-broken.json")).getPath();
 
     RegulationFiles regulationFiles = RegulationFiles.builder()
         .bpmnFiles(List.of(new File(correctFile)))
@@ -351,11 +356,12 @@ class BpmnFileInputsValidatorTest {
         .bpTrembitaConfig(List.of(new File(bpTrembitaConfig)))
         .excerptFiles(List.of(new File(excerptsDocx)))
         .diiaNotificationTemplateDirectory(List.of(new File(notificationTemplate)))
+        .formFiles(List.of(new File(formFile)))
         .build();
     var result = validator.validate(regulationFiles, ValidationContext.empty());
 
     Assertions.assertThat(result)
-        .hasSize(23);
+        .hasSize(24);
   }
 
   @Test

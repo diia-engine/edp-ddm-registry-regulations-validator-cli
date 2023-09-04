@@ -39,6 +39,11 @@
       <bpmn:incoming>Flow_0dbpmpw</bpmn:incoming>
       <bpmn:outgoing>Flow_1kt05g4</bpmn:outgoing>
     </bpmn:serviceTask>
+    <bpmn:userTask id="Activity_0kw3q4X" name="task" camunda:modelerTemplate="formUserTaskTemplate" camunda:formKey="ui-form">
+       <bpmn:incoming>Flow_1m95zsb33</bpmn:incoming>
+      <bpmn:outgoing>Flow_10ytamg44</bpmn:outgoing>
+    </bpmn:userTask>
+
     <bpmn:serviceTask id="Activity_1sdfobu" name="Correct modeler template" camunda:modelerTemplate="testTemplate" camunda:delegateExpression="sss">
       <bpmn:extensionElements>
         <camunda:in sourceExpression="" target="camundaInWithoutConstraint"/>

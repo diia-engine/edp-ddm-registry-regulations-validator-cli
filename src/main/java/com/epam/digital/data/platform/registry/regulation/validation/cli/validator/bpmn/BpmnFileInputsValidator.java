@@ -89,6 +89,7 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
   private static Set<String> externalSystemNames;
   private static Set<String> externalSystemOperationNames;
   private static Set<String> searchConditionNames;
+  private static Set<String> existingFormFileNames;
 
   private final Map<String, Function<String, Boolean>> INPUT_VALIDATION_FUNCTIONS = Map.ofEntries(
       Map.entry("role.name", (role) -> this.allRoles.contains(role)),
@@ -100,7 +101,8 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
       Map.entry("search-condition.rest-api-name", (scName) -> searchConditionNames.contains(scName)),
       Map.entry("excerpt.name", (excerptName) -> this.excerptNames.contains(excerptName)),
       Map.entry("notification.template.name", (notificationName) -> this.notificationNames.contains(notificationName)),
-      Map.entry("process.id", (processId) -> this.processIds.contains(processId))
+      Map.entry("process.id", (processId) -> this.processIds.contains(processId)),
+      Map.entry("form.name", (formName) -> existingFormFileNames.contains(formName))
   );
 
   private final Map<String, ElementTemplate> elementTemplates;
@@ -142,6 +144,7 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
     processIds = BpmnUtil.getBpmnFilesProcessDefinitionsId(regulationFiles);
     allRoles = getAllRoles(regulationFiles);
     notificationNames = getNotificationNames(regulationFiles);
+    existingFormFileNames = getAllFormName(regulationFiles);
 
     try {
       externalSystems = getExternalSystems(regulationFiles);
@@ -346,6 +349,12 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
     Set<String> roles = BpmnUtil.getRoles(regulationFiles);
     roles.addAll(Objects.requireNonNullElse(defaultRoles, Collections.emptySet()));
     return roles;
+  }
+
+  private Set<String> getAllFormName(RegulationFiles regulationFiles) {
+    return regulationFiles.getFormFiles().stream()
+        .map(file -> FilenameUtils.removeExtension(file.getName()))
+        .collect(Collectors.toSet());
   }
 
   private Set<String> getTableNames(List<Change> changes) {

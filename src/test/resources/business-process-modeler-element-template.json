@@ -188,5 +188,26 @@
         }
       }
     ]
+  },
+  {
+    "name": "Test User Task template",
+    "id": "formUserTaskTemplate",
+    "appliesTo": [
+      "bpmn:UserTask"
+    ],
+    "properties": [
+      {
+        "label": "Form key",
+        "type": "String",
+        "binding": {
+          "type": "property",
+          "name": "camunda:formKey"
+        },
+        "constraints": {
+          "notEmpty": true,
+          "type": "form.name"
+        }
+      }
+    ]
   }
 ]
