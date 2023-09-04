@@ -16,6 +16,9 @@
 
 package com.epam.digital.data.platform.registry.regulation.validation.cli.utils;
 
+import com.epam.digital.data.platform.liquibase.extension.change.core.DdmCreateSearchConditionChange;
+import com.epam.digital.data.platform.liquibase.extension.change.core.DdmDropSearchConditionChange;
+import liquibase.change.Change;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.LiquibaseException;

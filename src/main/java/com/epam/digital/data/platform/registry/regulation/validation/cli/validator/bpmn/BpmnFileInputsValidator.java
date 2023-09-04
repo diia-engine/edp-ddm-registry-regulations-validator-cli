@@ -17,7 +17,9 @@
 package com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn;
 
 import com.epam.digital.data.platform.liquibase.extension.change.core.DdmCreateCompositeEntityChange;
+import com.epam.digital.data.platform.liquibase.extension.change.core.DdmCreateSearchConditionChange;
 import com.epam.digital.data.platform.liquibase.extension.change.core.DdmCreateTableChange;
+import com.epam.digital.data.platform.liquibase.extension.change.core.DdmDropSearchConditionChange;
 import com.epam.digital.data.platform.liquibase.extension.change.core.DdmPartialUpdateChange;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.exception.FileProcessingException;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.BpTrembitaExternalSystemsConfiguration.ExternalSystem;
@@ -31,6 +33,7 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.validat
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
+import java.util.stream.Stream;
 import liquibase.change.Change;
 import liquibase.exception.LiquibaseException;
 import lombok.extern.slf4j.Slf4j;
@@ -62,7 +65,6 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.epam.digital.data.platform.registry.regulation.validation.cli.validator.mainliquibase.util.MainLiquibaseUtil.getAllChanges;
 import static com.epam.digital.data.platform.registry.regulation.validation.cli.validator.mainliquibase.util.MainLiquibaseUtil.getDatabaseChangeLog;
@@ -86,6 +88,8 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
   private static Map<String, ExternalSystem> externalSystems;
   private static Set<String> externalSystemNames;
   private static Set<String> externalSystemOperationNames;
+  private static Set<String> searchConditionNames;
+
   private final Map<String, Function<String, Boolean>> INPUT_VALIDATION_FUNCTIONS = Map.ofEntries(
       Map.entry("role.name", (role) -> this.allRoles.contains(role)),
       Map.entry("table.rest-api-name", (table) -> tableNames.contains(table)),
@@ -93,6 +97,7 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
       Map.entry("partial-update.rest-api-name", (partialUpdate) -> partialUpdateEntityNames.contains(partialUpdate)),
       Map.entry("external-system.name", (externalSystemName) -> externalSystemNames.contains(externalSystemName)),
       Map.entry("external-system.operation.name", (externalSystemOperationName) -> externalSystemOperationNames.contains(externalSystemOperationName)),
+      Map.entry("search-condition.rest-api-name", (scName) -> searchConditionNames.contains(scName)),
       Map.entry("excerpt.name", (excerptName) -> this.excerptNames.contains(excerptName)),
       Map.entry("notification.template.name", (notificationName) -> this.notificationNames.contains(notificationName)),
       Map.entry("process.id", (processId) -> this.processIds.contains(processId))
@@ -151,6 +156,7 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
         tableNames = getTableNames(changes);
         compositeEntityNames = getCompositeEntityNames(changes);
         partialUpdateEntityNames = getPartialUpdateEntityNames(changes);
+        searchConditionNames = getFilteredSearchConditions(changes);
       }
     } catch (FileProcessingException e) {
       errors.add(ValidationError.of(context.getRegulationFileType(), e.getFile(),
@@ -178,7 +184,6 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
       validationErrors.addAll(
           validateElementAgainstElementTemplate(element, elementTemplate, regulationFile, validationContext));
     }
-
     return validationErrors;
   }
 
@@ -229,9 +234,7 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
       } catch (FileProcessingException e) {
         return ValidationError.of(validationContext.getRegulationFileType(), regulationFile, e.getMessage());
       }
-
     }
-
     return null;
   }
 
@@ -350,6 +353,44 @@ public class BpmnFileInputsValidator implements RegulationValidator<RegulationFi
         .filter(change -> DdmCreateTableChange.class.isAssignableFrom(change.getClass()))
         .map(change -> ((DdmCreateTableChange) change).getTableName().replaceAll("_", "-"))
         .collect(Collectors.toSet());
+  }
+
+  private Set<String> getFilteredSearchConditions(List<Change> changes) {
+    Set<String> searchConditionsNames = changes.stream()
+        .filter(Objects::nonNull)
+        .flatMap(change -> {
+          if (change instanceof DdmCreateSearchConditionChange) {
+            return Stream.of(((DdmCreateSearchConditionChange) change).getName());
+          }
+          if (change instanceof DdmDropSearchConditionChange) {
+            return Stream.of(((DdmDropSearchConditionChange) change).getName());
+          } else {
+            return Stream.empty();
+          }
+        })
+        .collect(Collectors.toSet());
+
+    searchConditionsNames.removeIf(name -> getLastCriteriaChangeForName(changes,
+        name) instanceof DdmDropSearchConditionChange);
+
+    return searchConditionsNames.stream()
+        .map(s -> s.replaceAll("_", "-"))
+        .collect(Collectors.toSet());
+  }
+
+  private Change getLastCriteriaChangeForName(List<Change> changes, String name) {
+    return changes.stream()
+        .filter(change -> change instanceof DdmCreateSearchConditionChange ||
+            change instanceof DdmDropSearchConditionChange)
+        .filter(change -> {
+          if (change instanceof DdmCreateSearchConditionChange) {
+            return ((DdmCreateSearchConditionChange) change).getName().equals(name);
+          } else {
+            return ((DdmDropSearchConditionChange) change).getName().equals(name);
+          }
+        })
+        .reduce((first, second) -> second)
+        .orElse(null);
   }
 
   private Set<String> getCompositeEntityNames(List<Change> changes) {

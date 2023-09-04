@@ -20,15 +20,6 @@
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_13f24am</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:userTask id="addLabFormActivity" name="Внести дані про лабораторію" camunda:modelerTemplate="formUserTaskTemplate" camunda:formKey="shared-sign-lab-broken" camunda:assignee="${initiator}">
-      <bpmn:extensionElements>
-        <camunda:properties>
-          <camunda:property name="eSign" value=""/>
-        </camunda:properties>
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_09gp6fy</bpmn:incoming>
-      <bpmn:outgoing>Flow_0di3egb</bpmn:outgoing>
-    </bpmn:userTask>
     <bpmn:sequenceFlow id="Flow_13f24am" sourceRef="StartEvent_1" targetRef="Activity_058k02y" />
     <bpmn:serviceTask id="Activity_058k02y" name="Modeler template with duplicates" camunda:modelerTemplate="testTemplate" camunda:delegateExpression="sss">
       <bpmn:extensionElements>

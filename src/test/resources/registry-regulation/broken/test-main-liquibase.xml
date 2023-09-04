@@ -33,4 +33,26 @@
             </ext:table>
         </ext:partialUpdate>
     </changeSet>
+
+    <changeSet author="registry owner" id="create SC person_profile_equal_last_name">
+        <ext:createSearchCondition name="person_profile_equal_last_name">
+            <ext:table name="person_profile" alias="s">
+                <ext:column name="person_profile_id"/>
+            </ext:table>
+        </ext:createSearchCondition>
+    </changeSet>
+
+    <changeSet id="remove SC person_profile_equal_last_name" author="vc">
+        <comment>DROP search condition person_profile_equal_last_name</comment>
+        <ext:dropSearchCondition name="person_profile_equal_last_name"/>
+    </changeSet>
+
+    <changeSet author="registry owner" id="create SC person_profile_equal_last_name2">
+        <ext:createSearchCondition name="person_profile_equal_last_name">
+            <ext:table name="person_profile" alias="s">
+                <ext:column name="person_profile_id"/>
+            </ext:table>
+        </ext:createSearchCondition>
+    </changeSet>
+
 </databaseChangeLog>
