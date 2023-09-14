@@ -27,6 +27,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class ExcerptTemplateUniqueNameValidator implements RegulationValidator<Collection<File>> {
 
@@ -45,6 +46,7 @@ public class ExcerptTemplateUniqueNameValidator implements RegulationValidator<C
       var files = Arrays.asList(Objects.requireNonNull(dir.listFiles(file -> !file.isHidden())));
       var excerptNames = files.stream()
           .map(this::convertToExcerptName)
+          .filter(StringUtils::isNotBlank)
           .collect(Collectors.toSet());
 
       Collection<String> duplicates = getDuplicates(allExcerptNames, excerptNames);

@@ -19,6 +19,7 @@ package com.epam.digital.data.platform.registry.regulation.validation.cli.valida
 import static org.camunda.bpm.model.bpmn.impl.BpmnModelConstants.CAMUNDA_NS;
 
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.ElementTemplate;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.model.RegulationFiles;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.ValidationContext;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -298,12 +299,32 @@ class BpmnFileInputsValidatorTest {
     var templatePath = Objects.requireNonNull(
             getClass().getClassLoader().getResource("business-process-modeler-element-template.json"))
         .getPath();
-    var validator = new BpmnFileInputsValidator(templatePath);
+    var defaultRoles = List.of("testRole");
+    var validator = new BpmnFileInputsValidator(templatePath, defaultRoles);
 
     var correctFile = Objects.requireNonNull(getClass().getClassLoader()
         .getResource("registry-regulation/correct/process-for-validating-inputs.bpmn")).getPath();
+    var mainLiquibase = Objects.requireNonNull(getClass().getClassLoader()
+        .getResource("registry-regulation/correct/test-main-liquibase.xml")).getPath();
+    var bpTrembitaConfig = Objects.requireNonNull(getClass().getClassLoader()
+        .getResource("registry-regulation/correct/configuration.yml")).getPath();
+    var excerptsDocx = Objects.requireNonNull(getClass().getClassLoader()
+        .getResource("registry-regulation/correct/excerpts-docx")).getPath();
+    var notificationTemplate = Objects.requireNonNull(getClass().getClassLoader()
+        .getResource("registry-regulation/correct/diia")).getPath();
+    var formFile = Objects.requireNonNull(getClass().getClassLoader()
+        .getResource("registry-regulation/correct/ui-form.json")).getPath();
 
-    var result = validator.validate(new File(correctFile), ValidationContext.empty());
+    RegulationFiles regulationFiles = RegulationFiles.builder()
+        .bpmnFiles(List.of(new File(correctFile)))
+        .liquibaseFiles(List.of(new File(mainLiquibase)))
+        .bpTrembitaConfig(List.of(new File(bpTrembitaConfig)))
+        .excerptFiles(List.of(new File(excerptsDocx)))
+        .diiaNotificationTemplateDirectory(List.of(new File(notificationTemplate)))
+        .formFiles(List.of(new File(formFile)))
+        .build();
+
+    var result = validator.validate(regulationFiles, ValidationContext.empty());
 
     Assertions.assertThat(result).isEmpty();
   }
@@ -313,20 +334,40 @@ class BpmnFileInputsValidatorTest {
     var templatePath = Objects.requireNonNull(
             getClass().getClassLoader().getResource("business-process-modeler-element-template.json"))
         .getPath();
-    var validator = new BpmnFileInputsValidator(templatePath);
+    var defaultRoles = List.of("testRole");
+    var validator = new BpmnFileInputsValidator(templatePath, defaultRoles);
 
     var correctFile = Objects.requireNonNull(getClass().getClassLoader()
         .getResource("registry-regulation/broken/process-for-validating-inputs.bpmn")).getPath();
+    var mainLiquibase = Objects.requireNonNull(getClass().getClassLoader()
+        .getResource("registry-regulation/broken/test-main-liquibase.xml")).getPath();
+    var bpTrembitaConfig = Objects.requireNonNull(getClass().getClassLoader()
+        .getResource("registry-regulation/correct/configuration.yml")).getPath();
+    var excerptsDocx = Objects.requireNonNull(getClass().getClassLoader()
+        .getResource("registry-regulation/broken/excerpts-docx")).getPath();
+    var notificationTemplate = Objects.requireNonNull(getClass().getClassLoader()
+        .getResource("registry-regulation/broken/diia")).getPath();
+    var formFile = Objects.requireNonNull(getClass().getClassLoader()
+        .getResource("registry-regulation/broken/ui-form-broken.json")).getPath();
 
-    var result = validator.validate(new File(correctFile), ValidationContext.empty());
+    RegulationFiles regulationFiles = RegulationFiles.builder()
+        .bpmnFiles(List.of(new File(correctFile)))
+        .liquibaseFiles(List.of(new File(mainLiquibase)))
+        .bpTrembitaConfig(List.of(new File(bpTrembitaConfig)))
+        .excerptFiles(List.of(new File(excerptsDocx)))
+        .diiaNotificationTemplateDirectory(List.of(new File(notificationTemplate)))
+        .formFiles(List.of(new File(formFile)))
+        .build();
+    var result = validator.validate(regulationFiles, ValidationContext.empty());
 
     Assertions.assertThat(result)
-        .hasSize(7);
+        .hasSize(24);
   }
 
   @Test
   void validateIllegalStateIfNoTemplatesFound() {
-    Assertions.assertThatThrownBy(() -> new BpmnFileInputsValidator("nonExistedFile"))
+    var defaultRoles = List.of("testRole");
+    Assertions.assertThatThrownBy(() -> new BpmnFileInputsValidator("nonExistedFile", defaultRoles))
         .isInstanceOf(IllegalStateException.class)
         .hasMessage("During reading elementTemplates file occurred error.")
         .hasCauseInstanceOf(FileNotFoundException.class);

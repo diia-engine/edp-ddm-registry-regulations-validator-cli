@@ -16,7 +16,7 @@
   -->
 
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1g6pew6" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.10.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.19.0">
-  <bpmn:process id="Process_1ml462j" isExecutable="true">
+  <bpmn:process id="Process_1ml462j" name="validateInput" isExecutable="true">
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_13f24am</bpmn:outgoing>
     </bpmn:startEvent>
@@ -39,6 +39,11 @@
       <bpmn:incoming>Flow_0dbpmpw</bpmn:incoming>
       <bpmn:outgoing>Flow_1kt05g4</bpmn:outgoing>
     </bpmn:serviceTask>
+    <bpmn:userTask id="Activity_0kw3q4X" name="task" camunda:modelerTemplate="formUserTaskTemplate" camunda:formKey="ui-form">
+       <bpmn:incoming>Flow_1m95zsb33</bpmn:incoming>
+      <bpmn:outgoing>Flow_10ytamg44</bpmn:outgoing>
+    </bpmn:userTask>
+
     <bpmn:serviceTask id="Activity_1sdfobu" name="Correct modeler template" camunda:modelerTemplate="testTemplate" camunda:delegateExpression="sss">
       <bpmn:extensionElements>
         <camunda:in sourceExpression="" target="camundaInWithoutConstraint"/>
@@ -47,13 +52,20 @@
         <camunda:out source="camundaOutWithConstraint" target="someTarget"/>
         <camunda:inputOutput>
           <camunda:inputParameter name="camundaInputParameterWithoutConstraint"></camunda:inputParameter>
-          <camunda:inputParameter name="camundaInputParameterWithConstraint">someInput</camunda:inputParameter>
+          <camunda:inputParameter name="camundaInputParameterWithConstraint">testRole</camunda:inputParameter>
+          <camunda:inputParameter name="table">person</camunda:inputParameter>
+          <camunda:inputParameter name="compositeEntity">composite-entity</camunda:inputParameter>
+          <camunda:inputParameter name="partialUpdateEntity">partial-update-entity</camunda:inputParameter>
+          <camunda:inputParameter name="externalSystemName">system1</camunda:inputParameter>
+          <camunda:inputParameter name="externalSystemOperationName">create-system</camunda:inputParameter>
+          <camunda:inputParameter name="excerptName">template</camunda:inputParameter>
+          <camunda:inputParameter name="notificationName">diia-notification-template</camunda:inputParameter>
           <camunda:outputParameter name="">camundaOutputParameterWithoutConstraint</camunda:outputParameter>
           <camunda:outputParameter name="someName">camundaOutputParameterWithConstraint</camunda:outputParameter>
         </camunda:inputOutput>
         <camunda:properties>
           <camunda:property name="camundaPropertyWithoutConstraint" value="" />
-          <camunda:property name="camundaPropertyWithConstraint" value="someValue" />
+          <camunda:property name="camundaPropertyWithConstraint" value="Process_1ml462j" />
         </camunda:properties>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1kt05g4</bpmn:incoming>

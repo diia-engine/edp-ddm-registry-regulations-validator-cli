@@ -46,6 +46,7 @@ public class CommandLineOptionsConverter {
         .diiaNotificationTemplateDirectory(getFilesIfAny(CommandLineArg.DIIA_NOTIFICATION_TEMPLATE, options))
         .bpGroupingFiles(getFilesIfAny(CommandLineArg.BP_GROUPING, options))
         .mockIntegrationFiles(getFilesIfAny(CommandLineArg.MOCK_INTEGRATIONS, options))
+        .reportsFolders(getFilesIfAny(CommandLineArg.REPORTS_FOLDERS, options))
         .build();
   }
 

@@ -54,6 +54,7 @@ public class ElementTemplate {
     public static class Constraints {
 
       private boolean notEmpty = false;
+      private String type;
     }
 
     @Data

@@ -21,6 +21,7 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.model.R
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.RegulationValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.ValidationContext;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.ValidationError;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.util.BpmnUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -78,7 +79,7 @@ public class BpGroupingProcessDefinitionIdValidator implements
   private Set<ValidationError> validateProcessDefinitionExistence(List<String> groupDefinitionIds,
       File bpGroupFile, RegulationFiles regulationFiles, ValidationContext context) {
 
-    var processDefinitionIds = getBpmnFilesProcessDefinitionIds(regulationFiles);
+    var processDefinitionIds = BpmnUtil.getBpmnFilesProcessDefinitionsId(regulationFiles);
     var nonExistentIds = groupDefinitionIds.stream()
         .filter(id -> !processDefinitionIds.contains(id))
         .collect(Collectors.toSet());
@@ -112,19 +113,5 @@ public class BpGroupingProcessDefinitionIdValidator implements
         .regulationFileType(context.getRegulationFileType())
         .regulationFile(regulationFile)
         .build();
-  }
-
-  private Set<String> getBpmnFilesProcessDefinitionIds(RegulationFiles regulationFiles) {
-    var bpmnProcessDefinitionsId = new HashSet<String>();
-    for (File file : regulationFiles.getBpmnFiles()) {
-      if (file.exists()) {
-        var modelElementsByType = Bpmn.readModelFromFile(file)
-            .getModelElementsByType(Process.class);
-        bpmnProcessDefinitionsId.addAll(
-            modelElementsByType.stream().map(BaseElement::getId).collect(
-                Collectors.toSet()));
-      }
-    }
-    return bpmnProcessDefinitionsId;
   }
 }

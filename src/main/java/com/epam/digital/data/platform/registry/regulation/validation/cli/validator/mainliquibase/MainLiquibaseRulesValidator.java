@@ -20,20 +20,18 @@ import com.deliveredtechnologies.rulebook.Fact;
 import com.deliveredtechnologies.rulebook.FactMap;
 import com.deliveredtechnologies.rulebook.NameValueReferableMap;
 import com.deliveredtechnologies.rulebook.model.RuleBook;
-import com.epam.digital.data.platform.registry.regulation.validation.cli.utils.ChangelogParser;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.FactNames;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.RegulationValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.ValidationContext;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.ValidationError;
-import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.FactNames;
-import liquibase.change.Change;
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.LiquibaseException;
 
 import java.io.File;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+
+import static com.epam.digital.data.platform.registry.regulation.validation.cli.validator.mainliquibase.util.MainLiquibaseUtil.getAllChanges;
+import static com.epam.digital.data.platform.registry.regulation.validation.cli.validator.mainliquibase.util.MainLiquibaseUtil.getDatabaseChangeLog;
 
 public class MainLiquibaseRulesValidator implements RegulationValidator<File> {
 
@@ -63,17 +61,6 @@ public class MainLiquibaseRulesValidator implements RegulationValidator<File> {
         mainLiquibaseFacts.put(new Fact<>(FactNames.REGULATION_FILE, regulationFile));
 
         return mainLiquibaseFacts;
-    }
-
-    private DatabaseChangeLog getDatabaseChangeLog(File regulationFile) throws LiquibaseException {
-        return ChangelogParser.parseChangeLog(regulationFile);
-    }
-
-    private List<Change> getAllChanges(DatabaseChangeLog databaseChangeLog) {
-        return databaseChangeLog.getChangeSets()
-                .stream()
-                .flatMap(x -> x.getChanges().stream())
-                .collect(Collectors.toList());
     }
 
 }

@@ -20,6 +20,10 @@
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_13f24am</bpmn:outgoing>
     </bpmn:startEvent>
+    <bpmn:userTask id="Activity_0kw3q4XF" name="task" camunda:modelerTemplate="formUserTaskTemplate" camunda:formKey="ui-form">
+      <bpmn:incoming>Flow_1m95zsb11</bpmn:incoming>
+      <bpmn:outgoing>Flow_10ytamg22</bpmn:outgoing>
+    </bpmn:userTask>
     <bpmn:sequenceFlow id="Flow_13f24am" sourceRef="StartEvent_1" targetRef="Activity_058k02y" />
     <bpmn:serviceTask id="Activity_058k02y" name="Modeler template with duplicates" camunda:modelerTemplate="testTemplate" camunda:delegateExpression="sss">
       <bpmn:extensionElements>
@@ -31,12 +35,19 @@
         <camunda:inputOutput>
           <camunda:inputParameter name="camundaInputParameterWithoutConstraint" />
           <camunda:inputParameter name="camundaInputParameterWithConstraint">someInput</camunda:inputParameter>
+          <camunda:inputParameter name="table">someInput</camunda:inputParameter>
+          <camunda:inputParameter name="compositeEntity">someInput</camunda:inputParameter>
+          <camunda:inputParameter name="partialUpdateEntity">someInput</camunda:inputParameter>
+          <camunda:inputParameter name="externalSystemName">someInput</camunda:inputParameter>
+          <camunda:inputParameter name="externalSystemOperationName">someInput</camunda:inputParameter>
+          <camunda:inputParameter name="excerptName">someInput</camunda:inputParameter>
+          <camunda:inputParameter name="notificationName">someInput</camunda:inputParameter>
           <camunda:outputParameter name="">camundaOutputParameterWithoutConstraint</camunda:outputParameter>
           <camunda:outputParameter name="someName">camundaOutputParameterWithConstraint</camunda:outputParameter>
         </camunda:inputOutput>
         <camunda:properties>
           <camunda:property name="camundaPropertyWithoutConstraint" value="" />
-          <camunda:property name="camundaPropertyWithConstraint" value="someValue" />
+          <camunda:property name="camundaPropertyWithConstraint" value="NotExistingProcessId" />
         </camunda:properties>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_13f24am</bpmn:incoming>

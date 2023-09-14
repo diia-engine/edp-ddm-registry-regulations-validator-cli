@@ -80,6 +80,14 @@ public class RegulationFilesValidator implements RegulationValidator<RegulationF
 
     errors.addAll(validateGlobalFiles(regulationFiles, RegulationFileType.BP_GROUPING_TO_BPMN));
 
+    errors.addAll(validateGlobalFiles(regulationFiles, RegulationFileType.BPMN));
+
+    errors.addAll(validateGlobalFiles(regulationFiles, RegulationFileType.BP_ROLE_EXISTENCE));
+
+    errors.addAll(validateGlobalFiles(regulationFiles, RegulationFileType.REPORT_ROLE_EXISTENCE));
+
+    errors.addAll(validateGlobalFiles(regulationFiles, RegulationFileType.FORM_TO_SC));
+
     regulationFiles.getBpGroupingFiles().forEach(file -> errors.addAll(validate(file, RegulationFileType.BP_GROUPING)));
 
     return errors;

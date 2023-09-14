@@ -20,6 +20,7 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.model.B
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.RegulationFiles;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.ValidationContext;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.ValidationError;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.util.BpmnUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
@@ -36,7 +37,7 @@ public class BpTrembitaToBpmnProcessExistenceValidator extends AbstractBpToBpmnP
 
   @Override
   public Set<ValidationError> validate(RegulationFiles regulationFiles, ValidationContext context) {
-    Set<String> bpmnFilesProcessDefinitionsIds = getBpmnFilesProcessDefinitionsId(regulationFiles);
+    Set<String> bpmnFilesProcessDefinitionsIds = BpmnUtil.getBpmnFilesProcessDefinitionsId(regulationFiles);
 
     return validateBpFiles(regulationFiles.getBpTrembitaFiles(), bpmnFilesProcessDefinitionsIds, context);
   }

@@ -34,7 +34,8 @@ public enum CommandLineArg {
   INBOX_NOTIFICATION_TEMPLATE("inbox-notification-template-folder"),
   DIIA_NOTIFICATION_TEMPLATE("diia-notification-template-folder"),
   BP_GROUPING("bp-grouping-files"),
-  MOCK_INTEGRATIONS("mock-integration-files");
+  MOCK_INTEGRATIONS("mock-integration-files"),
+  REPORTS_FOLDERS("report-folders");
 
   private final String argOptionName;
 
