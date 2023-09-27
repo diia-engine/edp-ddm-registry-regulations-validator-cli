@@ -38,7 +38,8 @@ public enum CommandLineArg {
   REPORTS_FOLDERS("report-folders"),
   FILES("file"),
   FILES_DETAILED("file-detailed"),
-  REPORTS("reports-files");
+  REPORTS("reports-files"),
+  ASSETS("assets-folder");
 
   private final String argOptionName;
 

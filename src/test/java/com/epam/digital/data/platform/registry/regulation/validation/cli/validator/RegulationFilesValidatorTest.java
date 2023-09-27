@@ -28,6 +28,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 
 class RegulationFilesValidatorTest {
@@ -54,6 +55,7 @@ class RegulationFilesValidatorTest {
     RegulationValidator<RegulationFiles> bpAuthToBpmnRoleExistenceValidator = mock(RegulationValidator.class);
     RegulationValidator<RegulationFiles> reportRoleExistenceValidator = mock(RegulationValidator.class);
     RegulationValidator<RegulationFiles> formToSearchConditionExistenceValidator = mock(RegulationValidator.class);
+    RegulationValidator<RegulationFiles> citizenSignTaskToBpAuthValidator = mock(RegulationValidator.class);
 
     var validators = Map.of(
         RegulationFileType.BP_AUTH, bpAuthFileValidator,
@@ -79,7 +81,8 @@ class RegulationFilesValidatorTest {
             RegulationFileType.BPMN, bpInputValidator,
             RegulationFileType.BP_ROLE_EXISTENCE, bpAuthToBpmnRoleExistenceValidator,
             RegulationFileType.REPORT_ROLE_EXISTENCE, reportRoleExistenceValidator,
-            RegulationFileType.FORM_TO_SC, formToSearchConditionExistenceValidator
+            RegulationFileType.FORM_TO_SC, formToSearchConditionExistenceValidator,
+            RegulationFileType.CITIZEN_SIGN_TASK_TO_BP_ROLES, citizenSignTaskToBpAuthValidator
     );
 
     var regulationFilesValidator = new RegulationFilesValidator(validators, groupValidators, globalRegulationValidators);

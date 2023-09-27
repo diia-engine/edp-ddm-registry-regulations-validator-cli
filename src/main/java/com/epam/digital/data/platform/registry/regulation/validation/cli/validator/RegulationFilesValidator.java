@@ -58,6 +58,8 @@ public class RegulationFilesValidator implements RegulationValidator<RegulationF
 
     errors.addAll(validateReportsFiles(regulationFiles.getReportsFiles()));
 
+    regulationFiles.getAssetsDirectory().forEach(file -> errors.addAll(validate(file, RegulationFileType.ASSETS)));
+
     regulationFiles.getDmnFiles().forEach(file -> errors.addAll(validate(file, RegulationFileType.DMN)));
 
     regulationFiles.getFormFiles().forEach(file -> errors.addAll(validate(file, RegulationFileType.FORMS)));
@@ -89,6 +91,8 @@ public class RegulationFilesValidator implements RegulationValidator<RegulationF
     errors.addAll(validateGlobalFiles(regulationFiles, RegulationFileType.REPORT_ROLE_EXISTENCE));
 
     errors.addAll(validateGlobalFiles(regulationFiles, RegulationFileType.FORM_TO_SC));
+
+    errors.addAll(validateGlobalFiles(regulationFiles, RegulationFileType.CITIZEN_SIGN_TASK_TO_BP_ROLES));
 
     regulationFiles.getBpGroupingFiles().forEach(file -> errors.addAll(validate(file, RegulationFileType.BP_GROUPING)));
 

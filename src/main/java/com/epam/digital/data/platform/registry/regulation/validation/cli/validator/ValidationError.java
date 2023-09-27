@@ -18,6 +18,8 @@ package com.epam.digital.data.platform.registry.regulation.validation.cli.valida
 
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.RegulationFileType;
 import java.io.File;
+import java.util.Objects;
+
 import lombok.Builder;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
@@ -50,8 +52,12 @@ public class ValidationError {
 
   @Override
   public String toString() {
-    var regulationParentDirectory = getParentDirectoryIfAny(regulationFile);
-    var regulationFileName = regulationFile.getName();
+    var regulationParentDirectory = "";
+    var regulationFileName = "";
+    if (Objects.nonNull(regulationFile)) {
+      regulationParentDirectory = getParentDirectoryIfAny(regulationFile);
+      regulationFileName = regulationFile.getName();
+    }
 
     var messageFormatBuilder = new StringBuilder(String.format("[%s]", regulationFileType));
     messageFormatBuilder.append(StringUtils.isBlank(regulationParentDirectory)

@@ -76,7 +76,7 @@ class RegistrySettingsFileValidatorTest {
   @ParameterizedTest
   @ValueSource(strings = {
           "registry-regulation/broken/registry-settings-long-title.yaml",
-          "registry-regulation/broken/registry-settings-non-ua-chars.yaml"
+          "registry-regulation/broken/registry-settings-forbidden-chars.yaml"
   })
   void shouldFailValidation(String registrySettingsFile) {
     var actualErrors =

@@ -6,11 +6,15 @@
       "type": "string",
       "format": "email"
     },
+    "supportChannelUrl": {
+      "type": "string",
+      "format": "uri"
+    },
     "themeFile": {
       "type": "string",
       "enum": [
-        "white-theme.js",
-        "dark-theme.js"
+        "DiiaLight.js",
+        "OSDefaultLight.js"
       ]
     }
   },

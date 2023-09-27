@@ -19,6 +19,7 @@ package com.epam.digital.data.platform.registry.regulation.validation.cli.model;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Getter;
@@ -69,6 +70,8 @@ public class RegulationFiles {
   private Collection<File> filesDetailed = new ArrayList<>();
   @Default
   private Collection<File> reportsFiles = new ArrayList<>();
+  @Default
+  private Collection<File> assetsDirectory = new ArrayList<>();
 
   public boolean isEmpty() {
     return bpTrembitaFiles.isEmpty()
@@ -89,6 +92,7 @@ public class RegulationFiles {
         && bpGroupingFiles.isEmpty()
         && mockIntegrationFiles.isEmpty()
         && reportsFolders.isEmpty()
-        && reportsFiles.isEmpty();
+        && reportsFiles.isEmpty()
+        && assetsDirectory.isEmpty();
   }
 }

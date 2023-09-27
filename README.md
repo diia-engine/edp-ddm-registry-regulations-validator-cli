@@ -38,6 +38,7 @@ Options:
     --report-folders=<arg>                       Folders with reports files (accepts multiple values separated by ',')
     --reports-files=<arg>                        Reports files (accepts multiple values separated by ',')
     --roles-files=<arg>                          Authorization roles regulation files (accepts multiple values separated by ',')
+    --assets-folder=<arg>                        Folder with assets files
 
 Usage [help] command:
 java -jar registry-regulations-cli.jar help

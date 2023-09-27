@@ -124,7 +124,7 @@ public class CommandLineArgsParser {
 
     options.addOption(Option.builder()
         .longOpt(CommandLineArg.ROLES.getArgOptionName())
-        .numberOfArgs(2)
+        .numberOfArgs(3)
         .valueSeparator(',')
         .desc("Authorization roles regulation files (accepts multiple values separated by ',')")
         .build());
@@ -230,6 +230,13 @@ public class CommandLineArgsParser {
         .hasArgs()
         .valueSeparator(',')
         .desc("Reports files (accepts multiple values separated by ',')")
+        .build());
+
+    options.addOption(Option.builder()
+        .longOpt(CommandLineArg.ASSETS.getArgOptionName())
+        .hasArgs()
+        .numberOfArgs(1)
+        .desc("Directory with assets files")
         .build());
 
     return options;

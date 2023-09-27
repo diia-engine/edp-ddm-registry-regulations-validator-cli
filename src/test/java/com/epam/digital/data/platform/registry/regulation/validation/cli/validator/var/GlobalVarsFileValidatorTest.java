@@ -70,7 +70,7 @@ class GlobalVarsFileValidatorTest {
   @SneakyThrows
   void shouldPassGlobalVarsValidationWithMissedNotRequiredEmail() {
     var processFile = tempDir.resolve("missed-email-global-vars.yml");
-    List<String> globalVars = Collections.singletonList("themeFile: white-theme.js");
+    List<String> globalVars = Collections.singletonList("themeFile: DiiaLight.js");
     Files.write(processFile, globalVars);
 
     var errors = validator.validate(processFile.toFile(), ValidationContext.of(RegulationFileType.GLOBAL_VARS));

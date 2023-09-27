@@ -43,7 +43,9 @@ public enum RegulationFileType {
   BP_ROLE_EXISTENCE(),
   REPORT_ROLE_EXISTENCE(),
   FORM_TO_SC("json", "xml"),
-  REPORTS("json");
+  REPORTS("json"),
+  CITIZEN_SIGN_TASK_TO_BP_ROLES("yml", "yaml", "bpmn"),
+  ASSETS("svg", "png");
 
   private final String[] fileExtensions;
 

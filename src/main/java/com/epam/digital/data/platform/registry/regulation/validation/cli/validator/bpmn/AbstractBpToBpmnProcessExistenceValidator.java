@@ -21,16 +21,10 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.validat
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.ValidationContext;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.ValidationError;
 import com.google.common.collect.Sets;
-import org.camunda.bpm.model.bpmn.Bpmn;
-import org.camunda.bpm.model.bpmn.instance.BaseElement;
-import org.camunda.bpm.model.bpmn.instance.Process;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public abstract class AbstractBpToBpmnProcessExistenceValidator implements RegulationValidator<RegulationFiles> {
 

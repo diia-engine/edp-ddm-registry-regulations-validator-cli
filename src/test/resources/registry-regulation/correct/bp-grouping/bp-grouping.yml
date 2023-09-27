@@ -1,5 +1,5 @@
 groups:
-  - name: Тес—то–ве-ім'я № 1/4:(опис);
+  - name: Тес—то–ве-ім'я № 1/4:(description);
     processDefinitions:
       - first-process-group
 ungrouped:

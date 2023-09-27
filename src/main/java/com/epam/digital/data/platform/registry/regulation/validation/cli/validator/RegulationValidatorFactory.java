@@ -22,6 +22,7 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.model.B
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.RegulationFileType;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.model.RegulationFiles;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.support.RegulationConfigurationLoader;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.assets.AssetsDirectoryValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpgrouping.BpGroupingProcessDefinitionIdValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpgrouping.BpGroupingUniqueNameValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpAuthToBpmnProcessExistenceValidator;
@@ -30,6 +31,7 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.validat
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpmnFileGroupUniqueProcessIdValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpmnFileInputsValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.BpmnFileValidator;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.bpmn.CitizenSignTaskToBpAuthValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.channel.NotificationTemplateDirectoryValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.channel.NotificationTemplateValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.datasettings.DatafactorySettingsYamlRulesValidator;
@@ -49,6 +51,7 @@ import com.epam.digital.data.platform.registry.regulation.validation.cli.validat
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.registrysettings.RegistrySettingsFileValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.report.ReportGroupUniqueNameValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.report.ReportRoleExistenceValidator;
+import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.role.RoleUniqueNameValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.typed.BpAuthProcessUniquenessValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.typed.BpTrembitaProcessUniquenessValidator;
 import com.epam.digital.data.platform.registry.regulation.validation.cli.validator.var.GlobalVarsFileValidator;
@@ -137,6 +140,7 @@ public class RegulationValidatorFactory {
     validators.put(RegulationFileType.BP_GROUPING, newBpGroupValidator());
     validators.put(RegulationFileType.MOCK_INTEGRATIONS, newMockIntegrationsFileValidator());
     validators.put(RegulationFileType.REPORTS, newReportsFileValidator());
+    validators.put(RegulationFileType.ASSETS, newAssetsFileValidator());
     return validators;
   }
 
@@ -164,7 +168,9 @@ public class RegulationValidatorFactory {
         RegulationFileType.REPORT_ROLE_EXISTENCE,
         newReportRoleExistenceValidator(),
         RegulationFileType.FORM_TO_SC,
-        newFormToSearchConditionExistenceValidator()
+        newFormToSearchConditionExistenceValidator(),
+        RegulationFileType.CITIZEN_SIGN_TASK_TO_BP_ROLES,
+        newCitizenSignTaskValidator()
     );
   }
 
@@ -214,10 +220,9 @@ public class RegulationValidatorFactory {
 
   private RegulationValidator<Collection<File>> newReportFileGroupValidator() {
     return decorateGroupValidator(
-            CompositeFileGroupValidator.builder()
-                    .validator(new ReportGroupUniqueNameValidator(jsonObjectMapper))
-                    .build()
-    );
+        CompositeFileGroupValidator.builder()
+            .validator(new ReportGroupUniqueNameValidator(jsonObjectMapper))
+            .build());
   }
 
   private RegulationValidator<File> newBpAuthFileValidator() {
@@ -276,6 +281,7 @@ public class RegulationValidatorFactory {
             .validator(new EmptyFileValidator())
             .validator(
                 new JsonSchemaFileValidator(ROLES_JSON_SCHEMA, resourceLoader, yamlObjectMapper))
+            .validator(new RoleUniqueNameValidator(yamlObjectMapper))
             .build()
     );
   }
@@ -409,6 +415,16 @@ public class RegulationValidatorFactory {
                     .build());
   }
 
+  private RegulationValidator<File> newAssetsFileValidator() {
+    var assetsArgumentsValidator =
+        CompositeFileValidator.builder()
+            .validator(new FileExistenceValidator())
+            .validator(new EmptyFileValidator())
+            .validator(new FileExtensionValidator())
+            .build();
+    return decorate(new AssetsDirectoryValidator(assetsArgumentsValidator));
+  }
+
   private RegulationValidator<File> decorate(RegulationValidator<File> validator) {
     return FileValidatorLoggingDecorator.wrap(validator);
   }
@@ -485,6 +501,12 @@ public class RegulationValidatorFactory {
   private RegulationValidator<RegulationFiles> newFormToSearchConditionExistenceValidator() {
     return decorateGlobalValidator(GlobalCompositeRegulationFilesValidator.builder()
         .validator(new FormToSearchConditionExistenceValidator(jsonObjectMapper))
+        .build());
+  }
+
+  private RegulationValidator<RegulationFiles> newCitizenSignTaskValidator() {
+    return decorateGlobalValidator(GlobalCompositeRegulationFilesValidator.builder()
+        .validator(new CitizenSignTaskToBpAuthValidator(yamlObjectMapper, defaultRoles))
         .build());
   }
 }

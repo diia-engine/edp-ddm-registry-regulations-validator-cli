@@ -50,6 +50,7 @@ public class CommandLineOptionsConverter {
         .files(getFilesIfAny(CommandLineArg.FILES, options))
         .filesDetailed(getFilesIfAny(CommandLineArg.FILES_DETAILED, options))
         .reportsFiles(getFilesIfAny(CommandLineArg.REPORTS, options))
+        .assetsDirectory(getFilesIfAny(CommandLineArg.ASSETS, options))
         .build();
   }
 

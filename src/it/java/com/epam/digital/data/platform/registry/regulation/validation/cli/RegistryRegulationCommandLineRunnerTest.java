@@ -261,6 +261,16 @@ class RegistryRegulationCommandLineRunnerTest {
   }
 
   @Test
+  void shouldFailAssetsNameValidations() {
+    validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
+            new CommandLineOptionsConverter(), systemExit);
+    validationRunner.run(VALIDATE_COMMAND, argOf(CommandLineArg.ASSETS,
+            testResourcePathOf("registry-regulation/broken/assets2")));
+
+    verify(systemExit, times(1)).validationFailure();
+  }
+
+  @Test
   void shouldFailMainLiquibaseFileDueToInvalidParams() {
     validationRunner = newValidationRunner(resourceLoader, new CommandLineArgsParser(),
         new CommandLineOptionsConverter(), systemExit);
@@ -490,7 +500,9 @@ class RegistryRegulationCommandLineRunnerTest {
             testResourcePathOf("registry-regulation/correct/reports/citizen/registration.json"),
             testResourcePathOf("registry-regulation/correct/reports/officer/laboratory.json"),
             testResourcePathOf("registry-regulation/correct/reports/officer/queries/queries.json"),
-            testResourcePathOf("registry-regulation/correct/reports/officer/registration.json"))
+            testResourcePathOf("registry-regulation/correct/reports/officer/registration.json")),
+        argOf(CommandLineArg.ASSETS,
+            testResourcePathOf("registry-regulation/correct/assets"))
     );
   }
 
