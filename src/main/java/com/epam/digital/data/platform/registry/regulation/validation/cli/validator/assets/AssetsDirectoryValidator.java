@@ -36,9 +36,12 @@ public class AssetsDirectoryValidator implements RegulationValidator<File> {
   private static final String FILE_IS_MISSING_ERROR_MSG_FORMAT = "Assets file is missing: %s";
   private static final String TOO_BIG_ERROR_MSG =
       "Assets logo files total size is too big, valid size is less than 1MiB";
+  private static final String UNSAFE_SVG_CONTENT_MSG =
+      "SVG file contains potentially unsafe content: %s";
   public static final long ONE_MEGABYTE = 1048576L;
 
   private final RegulationValidator<File> fileValidator;
+  private final SVGValidator svgSanitizer = new SVGValidator();
 
   @Override
   public Set<ValidationError> validate(File directory, ValidationContext context) {
@@ -63,13 +66,27 @@ public class AssetsDirectoryValidator implements RegulationValidator<File> {
     Set<ValidationError> errors = Sets.newHashSet();
     Set<String> existingAssetsNames = new HashSet<>();
     long totalSize = 0L;
-    for (File file : directory.listFiles(File::isFile)) {
-      if (ASSETS_NAMES.contains(file.getName())) {
-        errors.addAll(fileValidator.validate(file, context));
-        existingAssetsNames.add(file.getName());
-        totalSize += file.length();
+
+    File[] files = directory.listFiles(File::isFile);
+    if (files != null) {
+      for (File file : files) {
+        if (ASSETS_NAMES.contains(file.getName())) {
+          errors.addAll(fileValidator.validate(file, context));
+
+          if (file.getName().endsWith(".svg")) {
+            ValidationResult validationResult = svgSanitizer.validateSvg(file);
+            if (!validationResult.isValid()) {
+              errors.add(
+                  createSvgValidationError(validationResult.getErrorMessage(), file, context));
+            }
+          }
+
+          existingAssetsNames.add(file.getName());
+          totalSize += file.length();
+        }
       }
     }
+
     ASSETS_NAMES.stream()
         .filter(asset -> !existingAssetsNames.contains(asset))
         .forEach(
@@ -88,4 +105,14 @@ public class AssetsDirectoryValidator implements RegulationValidator<File> {
     }
     return errors;
   }
+
+  private ValidationError createSvgValidationError(String specifics, File file,
+      ValidationContext context) {
+    return ValidationError.builder()
+        .errorMessage(String.format(UNSAFE_SVG_CONTENT_MSG, specifics))
+        .regulationFileType(context.getRegulationFileType())
+        .regulationFile(file)
+        .build();
+  }
+
 }
